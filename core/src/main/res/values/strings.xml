@@ -1,0 +1,37 @@
+<resources>
+
+	<!-- 常用文字 -->
+
+	<string name="confirm">确定</string>
+	<string name="cancel">取消</string>
+	<string name="enter">进入</string>
+	<string name="exit">退出</string>
+	<string name="input">输入</string>
+
+	<!-- 样本文字 -->
+
+	<string name="core_sample_datetime">2011年12月31日 12:20:11</string>
+	<string name="core_sample_date">2000年01月01日</string>
+	<string name="core_sample_time">昨天 12:12</string>
+	<string name="core_sample_book_name">《蒲公英少女》</string>
+	<string name="core_sample_chapter">第100章 开发者之歌</string>
+	<string name="core_sample_text_chinese_1">
+		那儿，黑色的群山诸峰之上，透过乌云的残骸，山姆看见了一颗白色的星星闪烁了一瞬间。站在这被遗弃的大地之上仰望苍天，冷冽的星光穿透了胸膛，他突然觉得心中又充满了希望。因为他有一个念头，清澈而冰冷，像一只箭矢射入了他的脑海；阴影到头来其实是渺小而转瞬即逝的，在他力所不及之处，永远会有无上的光明和美丽。\n\t\t
+		——《王者归来》
+	</string>
+	<string name="core_sample_text_chinese_2">
+		我们最原始的母亲是那颗已经烟消云散的超新星。我们抬起头，寻找着她百亿年前留在时间隧道中的辉煌的烟火。晴朗的夜晚，你能感受到整个夜空都在为你闪耀，在为一个历经磨难方得以孕育出的生命自豪。这就是仰望星空的意义。
+	</string>
+	<string name="core_sample_text_chinese_3">
+		我见过你们人类无法相信的事情。我目睹过战船在猎户星座的边缘中弹，燃起熊熊火光，我见过C射线划过了汤豪赛之门那幽暗的宇宙空间。然而所有的这些片段，那所有的瞬间，都将湮没于时间的洪流，就像泪水消逝在雨中。
+	</string>
+	<string name="core_sample_text_english_1">There, the black mountains Peaks above the wreckage
+		through the clouds, Sam saw a white flash of an instant star. Standing on top of the
+		abandoned earth look to heaven, the stars through a chest cold, he suddenly felt heart is
+		full of hope. Because he has a thought, clear and cold, like a arrows launched into his
+		mind; shadow end of the day is small and fleeting, and in place beyond his power, will
+		always be a bright and beautiful supreme
+	</string>
+	<string name="loading">正在加载……</string>
+
+</resources>

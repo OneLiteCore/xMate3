@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="core_black">#000000</color>
+    <color name="core_white">#FFFFFF</color>
+    
+    <color name="core_gray_lighter">#DDD</color>
+    <color name="core_gray_darker">#AAA</color>
+    
+    <color name="core_black_alpha">#20000000</color>
+    <color name="core_black_alpha_1">#10000000</color>
+    <color name="core_black_alpha_2">#20000000</color>
+    <color name="core_black_alpha_3">#30000000</color>
+    <color name="core_black_alpha_4">#40000000</color>
+    <color name="core_black_alpha_5">#50000000</color>
+    <color name="core_black_alpha_6">#60000000</color>
+    <color name="core_black_alpha_7">#70000000</color>
+    <color name="core_black_alpha_8">#80000000</color>
+    <color name="core_black_alpha_9">#90000000</color>
+    <color name="core_black_alpha_10">#A0000000</color>
+    <color name="core_black_alpha_11">#B0000000</color>
+    <color name="core_black_alpha_12">#C0000000</color>
+    <color name="core_black_alpha_13">#D0000000</color>
+    <color name="core_black_alpha_14">#E0000000</color>
+    <color name="core_black_alpha_15">#F0000000</color>
+    
+    <color name="core_white_alpha">#20FFFFFF</color>
+    <color name="core_white_alpha_1">#10FFFFFF</color>
+    <color name="core_white_alpha_2">#20FFFFFF</color>
+    <color name="core_white_alpha_3">#30FFFFFF</color>
+    <color name="core_white_alpha_4">#40FFFFFF</color>
+    <color name="core_white_alpha_5">#50FFFFFF</color>
+    <color name="core_white_alpha_6">#60FFFFFF</color>
+    <color name="core_white_alpha_7">#70FFFFFF</color>
+    <color name="core_white_alpha_8">#80FFFFFF</color>
+    <color name="core_white_alpha_9">#90FFFFFF</color>
+    <color name="core_white_alpha_10">#A0FFFFFF</color>
+    <color name="core_white_alpha_11">#B0FFFFFF</color>
+    <color name="core_white_alpha_12">#C0FFFFFF</color>
+    <color name="core_white_alpha_13">#D0FFFFFF</color>
+    <color name="core_white_alpha_14">#E0FFFFFF</color>
+    <color name="core_white_alpha_15">#F0FFFFFF</color>
+    
+    <color name="core_gray_light">#EAEAEA</color>
+
+    <color name="core_holo_blue_light">#ff33b5e5</color>
+    <color name="core_holo_blue_dark">#ff0099cc</color>
+    <color name="core_holo_blue_bright">#ff00ddff</color>
+
+    <color name="core_holo_gray_light">#33999999</color>
+    <color name="core_holo_gray_bright">#33CCCCCC</color>
+    
+    <color name="core_holo_red_light">#ffff4444</color>
+    <color name="core_holo_red_dark">#ffcc0000</color>
+
+    <color name="core_holo_purple">#ffaa66cc</color>
+    
+    <color name="core_holo_green_light">#ff99cc00</color>
+    <color name="core_holo_green_dark">#ff669900</color>
+    
+    <color name="core_holo_orange_light">#ffffbb33</color>
+    <color name="core_holo_orange_dark">#ffff8800</color>
+
+</resources>
