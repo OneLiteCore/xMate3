@@ -45,8 +45,8 @@ public class ImageOptions {
     private Drawable failureDrawable = null;
     private boolean forceLoadingDrawable = true;
 
-    private ImageView.ScaleType placeholderScaleType = ImageView.ScaleType.CENTER_INSIDE;
-    private ImageView.ScaleType imageScaleType = ImageView.ScaleType.CENTER_CROP;
+    private ImageView.ScaleType placeholderScaleType;// = ImageView.ScaleType.CENTER_INSIDE;//默认不处理ScaleType
+    private ImageView.ScaleType imageScaleType;// = ImageView.ScaleType.CENTER_CROP;//默认不处理ScaleType
 
     private boolean fadeIn = false;
     private Animation animation = null;

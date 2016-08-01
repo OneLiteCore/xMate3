@@ -55,23 +55,33 @@ public class LogUtil {
 	/*不带标签*/
 
     public static void v(Object msg) {
-        v(null, toString(msg));
+        if(isLogEnable()){
+            v(null, toString(msg));
+        }
     }
 
     public static void i(Object msg) {
-        i(null, toString(msg));
+        if(isLogEnable()){
+            i(null, toString(msg));
+        }
     }
 
     public static void w(Object msg) {
-        w(null, toString(msg));
+        if(isLogEnable()){
+            w(null, toString(msg));
+        }
     }
 
     public static void e(Object msg) {
-        e(null, toString(msg));
+        if(isLogEnable()){
+            e(null, toString(msg));
+        }
     }
 
     public static void d(Object msg) {
-        d(null, toString(msg));
+        if(isLogEnable()){
+            d(null, toString(msg));
+        }
     }
 
 	/*异常输出*/
@@ -194,7 +204,7 @@ public class LogUtil {
      * @param msg
      * @return
      */
-    private static String toString(Object msg) {
+    public static String toString(Object msg) {
         if (msg == null) {
             return "null";
         } else if (CharSequence.class.isAssignableFrom(msg.getClass())) {

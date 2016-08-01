@@ -238,7 +238,9 @@ import java.util.concurrent.atomic.AtomicLong;
                     ((ProgressCallback) callback).onWaiting();
                 }
                 // hit mem cache
-                view.setScaleType(localOptions.getImageScaleType());
+                if (localOptions.getImageScaleType() != null) {//仅当Option中存在ScaleType时才操作
+                    view.setScaleType(localOptions.getImageScaleType());
+                }
                 view.setImageDrawable(memDrawable);
                 trustMemCache = true;
                 if (callback instanceof CacheCallback) {
@@ -303,7 +305,9 @@ import java.util.concurrent.atomic.AtomicLong;
         Drawable loadingDrawable = null;
         if (options.isForceLoadingDrawable()) {
             loadingDrawable = options.getLoadingDrawable(view);
-            view.setScaleType(options.getPlaceholderScaleType());
+            if (options.getPlaceholderScaleType() != null) {//仅当Option中存在ScaleType时才操作
+                view.setScaleType(options.getPlaceholderScaleType());
+            }
             view.setImageDrawable(new AsyncDrawable(this, loadingDrawable));
         } else {
             loadingDrawable = view.getDrawable();
@@ -524,7 +528,9 @@ import java.util.concurrent.atomic.AtomicLong;
     private void setSuccessDrawable4Callback(final Drawable drawable) {
         final ImageView view = viewRef.get();
         if (view != null) {
-            view.setScaleType(options.getImageScaleType());
+            if (options.getImageScaleType() != null) {//仅当Option中存在ScaleType时才操作
+                view.setScaleType(options.getImageScaleType());
+            }
             if (drawable instanceof GifDrawable) {
                 if (view.getScaleType() == ImageView.ScaleType.CENTER) {
                     view.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
@@ -545,7 +551,9 @@ import java.util.concurrent.atomic.AtomicLong;
         final ImageView view = viewRef.get();
         if (view != null) {
             Drawable drawable = options.getFailureDrawable(view);
-            view.setScaleType(options.getPlaceholderScaleType());
+            if (options.getPlaceholderScaleType() != null) {//仅当Option中存在PlaceHolderScaleType时才操作
+                view.setScaleType(options.getPlaceholderScaleType());
+            }
             view.setImageDrawable(drawable);
         }
     }
@@ -561,7 +569,9 @@ import java.util.concurrent.atomic.AtomicLong;
                         ((ProgressCallback) callback).onWaiting();
                     }
                     if (view != null && options != null) {
-                        view.setScaleType(options.getPlaceholderScaleType());
+                        if (options.getPlaceholderScaleType() != null) {//仅当Option中存在ScaleType时才操作
+                            view.setScaleType(options.getPlaceholderScaleType());
+                        }
                         view.setImageDrawable(options.getFailureDrawable(view));
                     }
                     if (callback != null) {

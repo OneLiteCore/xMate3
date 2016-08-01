@@ -24,6 +24,7 @@ import org.xutils.ViewInjector;
 import org.xutils.common.util.LogUtil;
 import org.xutils.view.annotation.ContentView;
 import org.xutils.view.annotation.Event;
+import org.xutils.view.annotation.MultiEvent;
 import org.xutils.view.annotation.ViewInject;
 import org.xutils.x;
 
@@ -48,7 +49,7 @@ public final class ViewInjectorImpl implements ViewInjector {
     }
 
     private static final Object lock = new Object();
-    private static volatile ViewInjectorImpl instance;
+    private static ViewInjectorImpl instance;
 
     private ViewInjectorImpl() {
     }
@@ -178,37 +179,52 @@ public final class ViewInjectorImpl implements ViewInjector {
         if (methods != null && methods.length > 0) {
             for (Method method : methods) {
 
-                if (Modifier.isStatic(method.getModifiers())
-                        || !Modifier.isPrivate(method.getModifiers())) {
+                if (Modifier.isStatic(method.getModifiers())) {
                     continue;
+                }
+
+                //检查当前方法是否是MultiEvent注解的方法
+                MultiEvent multiEvent = method.getAnnotation(MultiEvent.class);
+                if (multiEvent != null) {
+                    Event[] events = multiEvent.value();
+                    if (events != null && events.length > 0) {
+                        for (Event event : events) {
+                            injectEvent(handler, finder, method, event);
+                        }
+                    }
                 }
 
                 //检查当前方法是否是event注解的方法
                 Event event = method.getAnnotation(Event.class);
                 if (event != null) {
-                    try {
-                        // id参数
-                        int[] values = event.value();
-                        int[] parentIds = event.parentId();
-                        int parentIdsLen = parentIds == null ? 0 : parentIds.length;
-                        //循环所有id，生成ViewInfo并添加代理反射
-                        for (int i = 0; i < values.length; i++) {
-                            int value = values[i];
-                            if (value > 0) {
-                                ViewInfo info = new ViewInfo();
-                                info.value = value;
-                                info.parentId = parentIdsLen > i ? parentIds[i] : 0;
-                                method.setAccessible(true);
-                                EventListenerManager.addEventMethod(finder, info, event, handler, method);
-                            }
-                        }
-                    } catch (Throwable ex) {
-                        LogUtil.e(ex.getMessage(), ex);
-                    }
+                    injectEvent(handler, finder, method, event);
                 }
             }
-        } // end inject event
+        }// end inject event
+    }
 
+    private static void injectEvent(Object handler, ViewFinder finder, Method method, Event event) {
+        try {
+            // id参数
+            int[] values = event.value();
+            int[] parentIds = event.parentId();
+            int parentIdsLen = parentIds == null ? 0 : parentIds.length;
+            //循环所有id，生成ViewInfo并添加代理反射
+            for (int i = 0; i < values.length; i++) {
+                int value = values[i];
+                if (value > 0) {
+                    ViewInfo info = new ViewInfo();
+                    info.value = value;
+                    if (parentIds != null) {
+                        info.parentId = parentIdsLen > i ? parentIds[i] : 0;
+                    }
+                    method.setAccessible(true);
+                    EventListenerManager.addEventMethod(finder, info, event, handler, method);
+                }
+            }
+        } catch (Throwable ex) {
+            LogUtil.e(ex.getMessage(), ex);
+        }
     }
 
 }

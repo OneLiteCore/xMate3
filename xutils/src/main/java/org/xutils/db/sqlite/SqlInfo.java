@@ -28,93 +28,138 @@ import java.util.List;
 
 public final class SqlInfo {
 
-    private String sql;
-    private List<KeyValue> bindArgs;
+	private String sql;
+	private List<KeyValue> bindArgs;
 
-    public SqlInfo() {
-    }
+	public SqlInfo () {
+	}
 
-    public SqlInfo(String sql) {
-        this.sql = sql;
-    }
+	public SqlInfo (String sql) {
+		this.sql = sql;
+	}
 
-    public String getSql() {
-        return sql;
-    }
+	public String getSql () {
+		return sql;
+	}
 
-    public void setSql(String sql) {
-        this.sql = sql;
-    }
+	public SqlInfo setSql (String sql) {
+		this.sql = sql;
+		return this;
+	}
 
-    public void addBindArg(KeyValue kv) {
-        if (bindArgs == null) {
-            bindArgs = new ArrayList<KeyValue>();
-        }
-        bindArgs.add(kv);
-    }
+	public SqlInfo addBindArg (KeyValue kv) {
+		if (bindArgs == null) {
+			bindArgs = new ArrayList<KeyValue>();
+		}
+		bindArgs.add(kv);
+		return this;
+	}
 
-    public void addBindArgs(List<KeyValue> bindArgs) {
-        if (this.bindArgs == null) {
-            this.bindArgs = bindArgs;
-        } else {
-            this.bindArgs.addAll(bindArgs);
-        }
-    }
+	public SqlInfo addBindArgs (List<KeyValue> bindArgs) {
+		if (this.bindArgs == null) {
+			this.bindArgs = bindArgs;
+		} else {
+			this.bindArgs.addAll(bindArgs);
+		}
+		return this;
+	}
 
-    public SQLiteStatement buildStatement(SQLiteDatabase database) {
-        SQLiteStatement result = database.compileStatement(sql);
-        if (bindArgs != null) {
-            for (int i = 1; i < bindArgs.size() + 1; i++) {
-                KeyValue kv = bindArgs.get(i - 1);
-                Object value = ColumnUtils.convert2DbValueIfNeeded(kv.value);
-                if (value == null) {
-                    result.bindNull(i);
-                } else {
-                    ColumnConverter converter = ColumnConverterFactory.getColumnConverter(value.getClass());
-                    ColumnDbType type = converter.getColumnDbType();
-                    switch (type) {
-                        case INTEGER:
-                            result.bindLong(i, ((Number) value).longValue());
-                            break;
-                        case REAL:
-                            result.bindDouble(i, ((Number) value).doubleValue());
-                            break;
-                        case TEXT:
-                            result.bindString(i, value.toString());
-                            break;
-                        case BLOB:
-                            result.bindBlob(i, (byte[]) value);
-                            break;
-                        default:
-                            result.bindNull(i);
-                            break;
-                    } // end switch
-                }
-            }
-        }
-        return result;
-    }
+	/**
+	 * 添加占位符对应的参数。
+	 * 原本xUtils设计的是使用{@link KeyValue}对象来添加参数的，但是如你所见，
+	 * 这里其实并没有用到{@link KeyValue#key}，也就是说本质上其实就是添加Object。
+	 * 这里为了兼容旧有代码添加了该方法。
+	 *
+	 * @param values
+	 * @return
+	 */
+	public SqlInfo addBindArgs (Object... values) {
+		if (this.bindArgs == null) {
+			this.bindArgs = new ArrayList<>(values.length);
+		}
+		for (Object v : values) {
+			this.bindArgs.add(new KeyValue(null, v));
+		}
+		return this;
+	}
 
-    public Object[] getBindArgs() {
-        Object[] result = null;
-        if (bindArgs != null) {
-            result = new Object[bindArgs.size()];
-            for (int i = 0; i < bindArgs.size(); i++) {
-                result[i] = ColumnUtils.convert2DbValueIfNeeded(bindArgs.get(i).value);
-            }
-        }
-        return result;
-    }
+	/**
+	 * 清空数据。
+	 *
+	 * @return
+	 */
+	public SqlInfo clear () {
+		sql = null;
+		clearBindArgs();
+		return this;
+	}
 
-    public String[] getBindArgsAsStrArray() {
-        String[] result = null;
-        if (bindArgs != null) {
-            result = new String[bindArgs.size()];
-            for (int i = 0; i < bindArgs.size(); i++) {
-                Object value = ColumnUtils.convert2DbValueIfNeeded(bindArgs.get(i).value);
-                result[i] = value == null ? null : value.toString();
-            }
-        }
-        return result;
-    }
+	/**
+	 * 清空已绑定的参数。
+	 *
+	 * @return
+	 */
+	public SqlInfo clearBindArgs () {
+		if (bindArgs != null) {
+			bindArgs.clear();
+		}
+		return this;
+	}
+
+	public SQLiteStatement buildStatement (SQLiteDatabase database) {
+		SQLiteStatement result = database.compileStatement(sql);
+		if (bindArgs != null) {
+			for (int i = 1; i < bindArgs.size() + 1; i++) {
+				KeyValue kv = bindArgs.get(i - 1);
+				Object value = ColumnUtils.convert2DbValueIfNeeded(kv.value);
+				if (value == null) {
+					result.bindNull(i);
+				} else {
+					ColumnConverter converter = ColumnConverterFactory.getColumnConverter(value.getClass());
+					ColumnDbType type = converter.getColumnDbType();
+					switch (type) {
+						case INTEGER:
+							result.bindLong(i, ((Number) value).longValue());
+							break;
+						case REAL:
+							result.bindDouble(i, ((Number) value).doubleValue());
+							break;
+						case TEXT:
+							result.bindString(i, value.toString());
+							break;
+						case BLOB:
+							result.bindBlob(i, (byte[]) value);
+							break;
+						default:
+							result.bindNull(i);
+							break;
+					} // end switch
+				}
+			}
+		}
+		return result;
+	}
+
+	public Object[] getBindArgs () {
+		Object[] result = null;
+		if (bindArgs != null) {
+			result = new Object[bindArgs.size()];
+			for (int i = 0; i < bindArgs.size(); i++) {
+				result[i] = ColumnUtils.convert2DbValueIfNeeded(bindArgs.get(i).value);
+			}
+		}
+		return result;
+	}
+
+	public String[] getBindArgsAsStrArray () {
+		String[] result = null;
+		if (bindArgs != null) {
+			result = new String[bindArgs.size()];
+			for (int i = 0; i < bindArgs.size(); i++) {
+				Object value = ColumnUtils.convert2DbValueIfNeeded(bindArgs.get(i).value);
+				result[i] = value == null ? null : value.toString();
+			}
+		}
+		return result;
+	}
 }
