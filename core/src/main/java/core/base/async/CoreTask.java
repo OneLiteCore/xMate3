@@ -73,6 +73,15 @@ public abstract class CoreTask<Params, Progress, Result> extends AsyncTask<Param
     }
 
     @Override
+    protected void onProgressUpdate(Progress... values) {
+        super.onProgressUpdate(values);
+        if (onTaskListener instanceof OnTaskProgressListener) {
+            OnTaskProgressListener<Progress, Result> listener = (OnTaskProgressListener<Progress, Result>) onTaskListener;
+            listener.onUpdateProgress(values != null && values.length > 0 ? values[0] : null);
+        }
+    }
+
+    @Override
     protected final void onPostExecute(ResultHolder<Result> holder) {
         super.onPostExecute(holder);
         if (indicator != null && indicator.isProgressing()) {
@@ -174,6 +183,12 @@ public abstract class CoreTask<Params, Progress, Result> extends AsyncTask<Param
          * 当任务结束时回调该方法
          */
         void onDone();
+    }
+
+    public interface OnTaskProgressListener<Progress, Result> extends OnTaskListener<Result> {
+
+        void onUpdateProgress(Progress progress);
+
     }
 
     private OnTaskListener<Result> onTaskListener;

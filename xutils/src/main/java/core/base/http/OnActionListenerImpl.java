@@ -4,8 +4,6 @@ import android.support.annotation.NonNull;
 
 import org.xutils.common.Callback;
 
-import core.base.exception.IllegalDataFormatException;
-
 /**
  * @author DrkCore
  * @since 2016年1月9日11:09:49
@@ -33,7 +31,7 @@ public abstract class OnActionListenerImpl<Result> implements CoreAction.OnActio
 	}
 
 	@Override
-	public void onError (Throwable ex, IllegalDataFormatException e, boolean isOnCallback) {
+	public void onError (Throwable ex, IllegalDataException e, boolean isOnCallback) {
 
 	}
 
