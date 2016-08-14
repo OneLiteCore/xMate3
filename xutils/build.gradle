@@ -97,6 +97,6 @@ bintray {
     }
 }
 dependencies {
-    compile project(':core')
     compile 'com.alibaba:fastjson:1.1.52.android'
+    compile 'core.mate:core:1.0.0'
 }
