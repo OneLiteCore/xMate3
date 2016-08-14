@@ -1,4 +1,4 @@
-package core.base.http;
+package core.mate.http;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -15,15 +15,16 @@ import org.xutils.x;
 import java.lang.reflect.Type;
 import java.util.List;
 
-import core.base.Core;
-import core.base.common.Clearable;
-import core.base.common.ITaskIndicator;
-import core.base.util.ClassUtil;
-import core.base.util.LogUtil;
+import core.mate.Core;
+import core.mate.common.Clearable;
+import core.mate.common.ITaskIndicator;
+import core.mate.util.ClassUtil;
+import core.mate.util.LogUtil;
 
 /**
  * 基于xUtils的http访问服务器的基类。
- * * <b>注意，当你实现该类的子类时请保留第一个泛型参数为该Action的结果的数据类型。</b>
+ * * <b>注意，当你实现该类的子类时请保留第一个泛型参数为该Action的结果的数据类型。
+ * 以及，该接口并不能用于下载文件。</b>
  *
  * @author DrkCore
  * @since 2015年11月26日20:40:07

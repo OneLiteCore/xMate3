@@ -1,4 +1,4 @@
-package core.base.db.dao;
+package core.mate.db.dao;
 
 import android.support.annotation.NonNull;
 
@@ -11,8 +11,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import core.base.db.CoreDb;
-import core.base.util.ClassUtil;
+import core.mate.db.AbsDao;
+import core.mate.util.ClassUtil;
 
 /**
  * 执行数据库删除的Dao对象。
@@ -21,7 +21,7 @@ import core.base.util.ClassUtil;
  * @author DrkCore
  * @since 2016年2月24日23:06:48
  */
-public abstract class AbsDeleteDao<Table> extends CoreDb.AbsDao<Void> {
+public abstract class AbsDeleteDao<Table> extends AbsDao<Void> {
 
 	/* 继承 */
 

@@ -1,4 +1,4 @@
-package core.base.db.dao;
+package core.mate.db.dao;
 
 import android.support.annotation.NonNull;
 
@@ -10,14 +10,14 @@ import org.xutils.ex.DbException;
 import java.lang.reflect.Type;
 import java.util.List;
 
-import core.base.db.CoreDb;
-import core.base.util.ClassUtil;
+import core.mate.db.AbsDao;
+import core.mate.util.ClassUtil;
 
 /**
  * @author DrkCore
  * @since 2016年1月3日21:24:39
  */
-public abstract class AbsFindDao<Table> extends CoreDb.AbsDao<List<Table>> {
+public abstract class AbsFindDao<Table> extends AbsDao<List<Table>> {
 
 	/* 继承 */
 	

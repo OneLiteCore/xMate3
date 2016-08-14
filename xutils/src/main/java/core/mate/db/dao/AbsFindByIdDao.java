@@ -1,4 +1,4 @@
-package core.base.db.dao;
+package core.mate.db.dao;
 
 import android.support.annotation.NonNull;
 
@@ -7,8 +7,8 @@ import org.xutils.ex.DbException;
 
 import java.lang.reflect.Type;
 
-import core.base.db.CoreDb;
-import core.base.util.ClassUtil;
+import core.mate.db.AbsDao;
+import core.mate.util.ClassUtil;
 
 /**
  * 用于根据id查询数据库的访问基类
@@ -16,7 +16,7 @@ import core.base.util.ClassUtil;
  * @author DrkCore 178456643@qq.com
  * @since 2016年1月3日21:21:03
  */
-public abstract class AbsFindByIdDao<Table> extends CoreDb.AbsDao<Table> {
+public abstract class AbsFindByIdDao<Table> extends AbsDao<Table> {
 
 	/* 继承 */
 

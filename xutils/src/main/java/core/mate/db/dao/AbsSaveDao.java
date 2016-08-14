@@ -1,4 +1,4 @@
-package core.base.db.dao;
+package core.mate.db.dao;
 
 import android.support.annotation.NonNull;
 
@@ -9,13 +9,13 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import core.base.db.CoreDb;
+import core.mate.db.AbsDao;
 
 /**
  * @author DrkCore
  * @since 2016年1月3日21:22:44
  */
-public abstract class AbsSaveDao<Table> extends CoreDb.AbsDao<List<Table>> {
+public abstract class AbsSaveDao<Table> extends AbsDao<List<Table>> {
 
 	/* 继承 */
 

@@ -1,4 +1,4 @@
-package core.base.db.dao;
+package core.mate.db.dao;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -7,44 +7,45 @@ import org.xutils.DbManager;
 import org.xutils.db.sqlite.SqlInfo;
 import org.xutils.db.table.DbModel;
 
-import core.base.db.CoreDb;
+import java.util.List;
+
+import core.mate.db.AbsDao;
 
 /**
- * 用于查找单个数据库模型的dao
+ * 用于查找数据库模型的dao
  *
  * @author DrkCore
- * @since 2016年2月18日10:03:29
+ * @since 2016年2月17日11:39:23
  */
-public final class FindFirstDbModelDao extends CoreDb.AbsDao<DbModel> {
+public final class FindDbModelDao extends AbsDao<List<DbModel>> {
 
-	public FindFirstDbModelDao () {
-	}
+	public FindDbModelDao () {}
 
-	public FindFirstDbModelDao (SqlInfo sqlInfo) {
+	public FindDbModelDao (SqlInfo sqlInfo) {
 		this.sqlInfo = sqlInfo;
 	}
 
-	public FindFirstDbModelDao (String sql) {
+	public FindDbModelDao (String sql) {
 		this.sqlInfo = new SqlInfo(sql);
 	}
 
 	/*继承*/
 
 	@Override
-	public final DbModel access (@NonNull DbManager db) throws Exception {
-		return sqlInfo != null ? db.findDbModelFirst(sqlInfo) : null;
+	public final List<DbModel> access (@NonNull DbManager db) throws Exception {
+		return sqlInfo != null ? db.findDbModelAll(sqlInfo) : null;
 	}
 
 	/*配置*/
 
 	private SqlInfo sqlInfo;
 
-	public FindFirstDbModelDao setSql (SqlInfo sqlInfo) {
+	public FindDbModelDao setSqlInfo (SqlInfo sqlInfo) {
 		this.sqlInfo = sqlInfo;
 		return this;
 	}
 
-	public FindFirstDbModelDao setSql (String sql, @Nullable Object... args) {
+	public FindDbModelDao setSql (String sql, @Nullable Object... args) {
 		if (sqlInfo == null) {
 			sqlInfo = new SqlInfo();
 		}

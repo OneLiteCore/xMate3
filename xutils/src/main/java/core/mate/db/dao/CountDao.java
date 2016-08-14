@@ -1,16 +1,16 @@
-package core.base.db.dao;
+package core.mate.db.dao;
 
 import android.support.annotation.NonNull;
 
 import org.xutils.DbManager;
 
-import core.base.db.CoreDb;
+import core.mate.db.AbsDao;
 
 /**
  * @author 陈锡强 178456643@qq.com
  * @since 2016年1月19日14:30:43
  */
-public final class CountDao extends CoreDb.AbsDao<Long> {
+public final class CountDao extends AbsDao<Long> {
 
 	private Class table;
 

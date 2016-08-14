@@ -1,4 +1,4 @@
-package core.base.http;
+package core.mate.http;
 
 public class IllegalDataException extends Exception {
 

@@ -1,4 +1,4 @@
-package core.base.http;
+package core.mate.http;
 
 import android.support.annotation.NonNull;
 

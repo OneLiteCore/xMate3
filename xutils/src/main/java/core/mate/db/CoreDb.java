@@ -1,6 +1,5 @@
-package core.base.db;
+package core.mate.db;
 
-import android.support.annotation.NonNull;
 import android.support.v4.util.LruCache;
 
 import org.xutils.DbManager;
@@ -15,13 +14,12 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Modifier;
 
-import core.base.async.CoreTask;
-import core.base.async.CoreTask.OnTaskListener;
-import core.base.common.Clearable;
-import core.base.common.ITaskIndicator;
-import core.base.db.dao.ExecNonQuerySqlDao;
-import core.base.db.dao.FindFirstDbModelDao;
-import core.base.util.LogUtil;
+import core.mate.async.CoreTask.OnTaskListener;
+import core.mate.common.Clearable;
+import core.mate.common.ITaskIndicator;
+import core.mate.db.dao.ExecNonQuerySqlDao;
+import core.mate.db.dao.FindFirstDbModelDao;
+import core.mate.util.LogUtil;
 
 /**
  * 基于xUtils的数据库基类。
@@ -55,7 +53,8 @@ public abstract class CoreDb extends DbManager.DaoConfig implements DbManager.Db
      * @return
      * @throws DbException
      */
-    private DbManager getOrCreateDb() throws DbException {
+    /*package*/
+    final DbManager getOrCreateDb() throws DbException {
         if (dbMgr == null) {
             synchronized (this) {
                 if (dbMgr == null && onPrepare()) {// 仅当onPrepare返回true时创建。
@@ -117,20 +116,6 @@ public abstract class CoreDb extends DbManager.DaoConfig implements DbManager.Db
 
 	/* DAO操作 */
 
-    public static abstract class AbsDao<Result> {
-
-        public abstract Result access(@NonNull DbManager db) throws Exception;
-
-    }
-
-    private class DaoTask<Result> extends CoreTask<AbsDao<Result>, Void, Result> {
-
-        @Override
-        public Result doInBack(AbsDao<Result> dao) throws Exception {
-            return dao.access(getOrCreateDb());
-        }
-    }
-
     public final <Result> Clearable access(AbsDao<Result> dao) {
         cacheDao(dao);
         return access(dao, null, null);
@@ -151,7 +136,7 @@ public abstract class CoreDb extends DbManager.DaoConfig implements DbManager.Db
         DaoTask<Result> task = new DaoTask<>();
         task.setIndicator(indicator);
         task.setOnTaskListener(listener);
-        task.execute(dao);
+        task.execute(new DaoTask.Params<>(this, dao));
         return task;
     }
 

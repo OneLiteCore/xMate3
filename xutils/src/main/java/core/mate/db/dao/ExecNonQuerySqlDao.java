@@ -1,4 +1,4 @@
-package core.base.db.dao;
+package core.mate.db.dao;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -6,9 +6,9 @@ import android.support.annotation.Nullable;
 import org.xutils.DbManager;
 import org.xutils.db.sqlite.SqlInfo;
 
-import core.base.db.CoreDb;
+import core.mate.db.AbsDao;
 
-public final class ExecNonQuerySqlDao extends CoreDb.AbsDao<Void> {
+public final class ExecNonQuerySqlDao extends AbsDao<Void> {
 
 	public ExecNonQuerySqlDao () {
 	}
