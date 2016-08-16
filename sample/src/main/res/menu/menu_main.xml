@@ -2,6 +2,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="org.xutils.sample.MainActivity">
+
+    <item
+        android:id="@+id/action_core"
+        android:orderInCategory="100"
+        android:title="@string/xmatedemo"
+        app:showAsAction="always" />
+
     <item
         android:id="@+id/action_settings"
         android:orderInCategory="100"

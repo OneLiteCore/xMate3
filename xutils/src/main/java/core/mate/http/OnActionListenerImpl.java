@@ -26,6 +26,11 @@ public abstract class OnActionListenerImpl<Result> implements CoreAction.OnActio
 	}
 
 	@Override
+	public boolean onCache(Result result) {
+		return false;
+	}
+
+	@Override
 	public void onResultPrepared (@NonNull Result result) {
 
 	}

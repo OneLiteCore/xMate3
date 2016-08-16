@@ -22,14 +22,14 @@ import core.mate.util.ClassUtil;
 import core.mate.util.LogUtil;
 
 /**
- * 基于xUtils的http访问服务器的基类。
- * * <b>注意，当你实现该类的子类时请保留第一个泛型参数为该Action的结果的数据类型。
- * 以及，该接口并不能用于下载文件。</b>
+ * 基于xUtils的http模块访问服务器的基类。
  *
+ * @param <Raw>原始数据类型
+ * @param <Result>    最终业务需要的类型
  * @author DrkCore
  * @since 2015年11月26日20:40:07
  */
-public abstract class CoreAction<Result> implements Clearable {
+public abstract class CoreAction<Raw, Result> implements Clearable {
 
     public static class ClearableWrapper implements Clearable {
 
@@ -68,7 +68,7 @@ public abstract class CoreAction<Result> implements Clearable {
         return request(HttpMethod.GET, params);
     }
 
-    protected final Clearable request(HttpMethod method, RequestParams params) {
+    protected synchronized final Clearable request(HttpMethod method, RequestParams params) {
         if (cleared) {
             throw new IllegalStateException("该Action已经被清理，无法使用");
         }
@@ -95,6 +95,14 @@ public abstract class CoreAction<Result> implements Clearable {
         onPrepareRequestParams(params);
         logSendRequest(method, params.getUri(), params);
 
+        if (innerCallBack == null) {
+            if (cacheEnable) {
+                innerCallBack = new InnerCacheCallback();
+            } else {
+                innerCallBack = new InnerCallback();
+            }
+        }
+
         lastRequestTime = System.currentTimeMillis();
         lastRequestHandler = new ClearableWrapper(x.http().request(method, params, innerCallBack));
         return lastRequestHandler;
@@ -110,16 +118,19 @@ public abstract class CoreAction<Result> implements Clearable {
 
     private class ResultHolder {
 
+        public final Raw raw;
         public final Result result;
         public final IllegalDataException exception;
 
-        public ResultHolder(Result result, IllegalDataException exception) {
+        public ResultHolder(Raw raw, Result result, IllegalDataException exception) {
+            this.raw = raw;
             this.result = result;
             this.exception = exception;
         }
     }
 
-    private class InnerCallback implements Callback.CommonCallback<ResultHolder>, Callback.ProgressCallback<ResultHolder>, Callback.PrepareCallback<String, ResultHolder> {
+    private class InnerCallback implements Callback.CommonCallback<ResultHolder>, Callback.ProgressCallback<ResultHolder>,
+            Callback.PrepareCallback<Raw, ResultHolder>, Callback.TypedCallback<ResultHolder> {
 
         @Override
         public void onWaiting() {
@@ -137,7 +148,12 @@ public abstract class CoreAction<Result> implements Clearable {
         }
 
         @Override
-        public ResultHolder prepare(String rawData) {
+        public Type getLoadType() {
+            return CoreAction.this.getLoadType();
+        }
+
+        @Override
+        public ResultHolder prepare(Raw rawData) {
             Result result = null;
             IllegalDataException exception = null;
             try {
@@ -149,7 +165,7 @@ public abstract class CoreAction<Result> implements Clearable {
             if (result != null) {
                 onResultPrepared(result);
             }
-            return new ResultHolder(result, exception);
+            return new ResultHolder(rawData, result, exception);
         }
 
         @Override
@@ -175,14 +191,41 @@ public abstract class CoreAction<Result> implements Clearable {
         public void onFinished() {
             CoreAction.this.onFinished();
         }
+
+    }
+
+    private class InnerCacheCallback extends InnerCallback implements Callback.CacheCallback<ResultHolder> {
+
+        @Override
+        public boolean onCache(ResultHolder resultHolder) {
+            Result result = resultHolder != null ? resultHolder.result : null;
+            return result != null && CoreAction.this.onCache(result);
+        }
+
     }
 
     private ActionState actionState;
-    private InnerCallback innerCallBack = new InnerCallback();
+    private InnerCallback innerCallBack;
+
+    private boolean cacheEnable;
+
+    public CoreAction setCacheEnable() {
+        if (actionState == null) {
+            this.cacheEnable = true;
+            logEnableCache();
+        } else {
+            throw new IllegalStateException("当且仅当该Action从未发出请求时才允许启用cache");
+        }
+        return this;
+    }
 
     public final ActionState getActionState() {
         return actionState;
     }
+
+    protected abstract Type getLoadType();
+
+    protected abstract Type getResultType();
 
     /**
      * 在请求发送之前配置RequestParams。
@@ -228,39 +271,16 @@ public abstract class CoreAction<Result> implements Clearable {
         }
     }
 
-    /**
-     * 将带有数据的字符串转化为真正需要用的数据类型，如将json的字符串转为object。
-     * <br/>
-     * <br/>
-     * 根据{@link #isAutoConvertEnable()}的结果有以下情况：
-     * <li/>为true，则默认使用{@link #onAutoConvertResult(String)}
-     * 自动转化数据。如果自动转化失败则使用
-     * {@link #onConvertComplexResult(String)}转化；
-     * <li/>为false时，直接使用{@link #onConvertComplexResult(String)}
-     * 转化。
-     *
-     * @param rawData
-     * @return
-     * @throws IllegalDataException
-     */
-    private Result onPrepareResult(String rawData) throws IllegalDataException {
-        logRawData(rawData);
-
-        rawData = onPrepareDataString(rawData);
-        Result result = null;
-        if (autoConvertEnable) {// 自动转化数据
-            result = onAutoConvertResult(rawData);
+    protected boolean onCache(Result result) {
+        boolean trustCache = false;
+        if (listener != null) {
+            trustCache = listener.onCache(result);
         }
-        if (result == null) {// 手动转换
-            result = onConvertComplexResult(rawData);
-        }
-
-        if (getResultType() != Void.class && result == null) {// 我就干了，自动转换和手动转换都不行，简直呵呵哒
-            throw new IllegalStateException("当Result类型不为Void且onAutoConvertResult不可用时，onConvertComplexResult方法不允许返回null。");
-        }
-
-        return result;
+        logCache(result, trustCache);
+        return trustCache;
     }
+
+    protected abstract Result onPrepareResult(Raw rawData) throws IllegalDataException;
 
     /**
      * 从服务器放回数据，并且成功转化成最终对象时回调该方法。
@@ -275,7 +295,7 @@ public abstract class CoreAction<Result> implements Clearable {
     protected void onSuccess(Result result) {
         actionState = ActionState.SUCCESS;
         logActionState();
-        logSuccessResult(result);
+        logSuccess(result);
 
         if (listener != null) {
             listener.onSuccess(result);
@@ -283,6 +303,7 @@ public abstract class CoreAction<Result> implements Clearable {
     }
 
     protected void onError(Throwable thr, IllegalDataException e, boolean isOnCallback) {
+        //TODO 修正信任缓存后回调走入onError的问题
         actionState = ActionState.ERROR;
         logActionState();
 
@@ -346,6 +367,8 @@ public abstract class CoreAction<Result> implements Clearable {
          */
         void onLoading(long total, long current, boolean isDownloading);
 
+        boolean onCache(Result result);
+
         /**
          * 从服务器放回数据，并且成功转化成最终对象时回调该方法。
          * 该方法将在工作线程之中调用，你可以在该方法中通过同步的方法将数据插入数据库或者写入本地文件里。
@@ -378,7 +401,7 @@ public abstract class CoreAction<Result> implements Clearable {
      *
      * @param listener
      */
-    public final CoreAction<Result> setOnActionListener(OnActionListener<Result> listener) {
+    public final CoreAction<Raw, Result> setOnActionListener(OnActionListener<Result> listener) {
         this.listener = listener;
         return this;
     }
@@ -406,78 +429,11 @@ public abstract class CoreAction<Result> implements Clearable {
         return this;
     }
 
-	/* 自动转换 */
-
-    private boolean autoConvertEnable = true;
-
-    protected final boolean isAutoConvertEnable() {
-        return autoConvertEnable;
-    }
-
-    protected final void setAutoConvertEnable(boolean autoConvertEnable) {
-        this.autoConvertEnable = autoConvertEnable;
-    }
-
-    /**
-     * 从文本中提取用于转化成对象的数据字符串，比如你的服务器返回的数据如下：
-     * <b>{"code":OK,"msg":{"name":"小明","age":17} }</b>，其中msg标明的JSON字符串才是最终的数据字符串。
-     * 如果数据不合法，比如数据中的code标明的是OK，设计上而言你应该抛出{@link IllegalDataException}。
-     * 默认情况下直接返回。
-     *
-     * @param dataStr
-     * @return
-     * @throws IllegalDataException
-     */
-    protected String onPrepareDataString(String dataStr) throws IllegalDataException {
-        return dataStr;
-    }
-
-    /**
-     * 获取当前类中的泛型的具体类型，并自动将{@link #onPrepareDataString(String)}
-     * 中返回的数据转为指定的Result对象。
-     *
-     * @param dataStr
-     * @return
-     */
-    private Result onAutoConvertResult(String dataStr) {
-        Type type = getResultType();
-        logAutoConvertType(type);
-
-        //如果适配的是Void类型的话，直接返回null
-        if (type == Void.class) {
-            return null;
-        }
-
-        try {
-            if (type instanceof Class && type == String.class) {
-                return (Result) dataStr;
-            } else {
-                return JSON.parseObject(dataStr, type);
-            }
-        } catch (Exception e) {
-            LogUtil.e(e);
-        }
-        return null;
-    }
-
-    /**
-     * 手动将数据的字符串转为对象。
-     *
-     * @param dataStr
-     * @return
-     * @throws IllegalDataException 当服务器的数据不合法时请抛出该异常。
-     */
-    protected Result onConvertComplexResult(String dataStr) throws IllegalDataException {
-        return null;
-    }
-
-    private Type getResultType() {
-        Type[] types = ClassUtil.getGenericParametersType(getClass());
-        return types[types.length - 1];
-    }
-
 	/* 请求记录 */
 
+    /**
+     * 当上一个请求还未结束时又来了一个请求时的处理方法。
+     */
     public enum ConflictOperation {
 
         /**
@@ -489,7 +445,7 @@ public abstract class CoreAction<Result> implements Clearable {
          */
         ABANDON_CURRENT_REQUEST,
         /**
-         * 不做任何处理，让子弹飞。该操作将会使得当前的请求成为最后一次请求。
+         * 不做任何处理，让子弹飞。
          */
         LET_REQUEST_FLY
 
@@ -500,7 +456,6 @@ public abstract class CoreAction<Result> implements Clearable {
     private ConflictOperation conflictOperation = ConflictOperation.LET_REQUEST_FLY;
 
     /**
-     * 当上一个请求还未结束时又来了一个请求时的处理方法。
      * 默认情况下返回{@link ConflictOperation#LET_REQUEST_FLY}，即不做处理。
      *
      * @return
@@ -509,7 +464,7 @@ public abstract class CoreAction<Result> implements Clearable {
         return conflictOperation;
     }
 
-    public final CoreAction<Result> setConflictOperation(ConflictOperation conflictOperation) {
+    public final CoreAction<Raw, Result> setConflictOperation(ConflictOperation conflictOperation) {
         this.conflictOperation = conflictOperation;
         return this;
     }
@@ -545,7 +500,7 @@ public abstract class CoreAction<Result> implements Clearable {
 
     private ITaskIndicator indicator;
 
-    public final CoreAction<Result> setIndicator(ITaskIndicator indicator) {
+    public final CoreAction<Raw, Result> setIndicator(ITaskIndicator indicator) {
         this.indicator = indicator;
         return this;
     }
@@ -559,26 +514,13 @@ public abstract class CoreAction<Result> implements Clearable {
         }
     }
 
-	/* 标签携带数据 */
-
-    private Object tag;
-
-    public CoreAction<Result> setTag(Object tag) {
-        this.tag = tag;
-        return this;
-    }
-
-    public Object getTag() {
-        return tag;
-    }
-
 	/* 开发模式 */
 
     private int usedCount;
     private Boolean isDevModeEnable;
     private LogUtil.Builder logBuilder;
 
-    private boolean isDevModeEnable() {
+    protected final boolean isDevModeEnable() {
         if (isDevModeEnable == null) {
             //成员变量的速度比其他类的静态变量速度要快一点
             isDevModeEnable = Core.getInstance().isDevModeEnable();
@@ -642,25 +584,33 @@ public abstract class CoreAction<Result> implements Clearable {
         }
     }
 
+    private void logEnableCache() {
+        logDevMsg("已经启动cache缓存，此时onPrepareResult可能会多运行一次以准备缓存结果。");
+    }
+
+    private void logCache(Result result, boolean trustCache) {
+        if (isDevModeEnable()) {
+            logDevMsg("存在缓存");
+            logResult(result);
+            logDevMsg("信赖缓存：", trustCache);
+            logDevMsg("————————————");
+        }
+    }
+
     private void logLoading(long total, long current, boolean isDownloading) {
         if (isDevModeEnable()) {
             logDevMsg("loading：total_", total, " current_", current, " isDownloading_", isDownloading);
         }
     }
 
-    private void logRawData(String rawData) {
+    private void logSuccess(Result result) {
         if (isDevModeEnable()) {
-            logDevMsg("原始数据：", rawData);
+            logDevMsg("成功接收到数据：");
+            logResult(result);
         }
     }
 
-    private void logAutoConvertType(Type type) {
-        if (isDevModeEnable()) {
-            logDevMsg("Result泛型: ", type.toString());
-        }
-    }
-
-    private void logSuccessResult(Result result) {
+    private void logResult(Result result) {
         if (isDevModeEnable()) {
             if (result == null) {
                 logDevMsg("转化后的Result为null");
@@ -668,11 +618,11 @@ public abstract class CoreAction<Result> implements Clearable {
             }
 
             try {
-                Type type = ClassUtil.getGenericParametersType(getClass())[0];
+                Type type = getResultType();
                 if (type instanceof Class) {// Class类型
                     Class<?> clazz = (Class<?>) type;
                     String pkgPath = clazz.getCanonicalName();
-                    if (pkgPath.contains("java.lang")) {// 原始类型
+                    if (pkgPath.contains("java.lang") || pkgPath.contains("java.io")) {// 原始类型或者io包下
                         logDevMsg("转化后的结果: ", result);
                     } else {// 普通的JavaBean
                         String resultJson = JSON.toJSONString(result);
@@ -726,7 +676,7 @@ public abstract class CoreAction<Result> implements Clearable {
         return clearOnFinishedEnable;
     }
 
-    public final CoreAction<Result> setClearOnFinishedEnable(boolean clearOnFinishedEnable) {
+    public final CoreAction<Raw, Result> setClearOnFinishedEnable(boolean clearOnFinishedEnable) {
         this.clearOnFinishedEnable = clearOnFinishedEnable;
         return this;
     }

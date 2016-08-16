@@ -1,5 +1,6 @@
 package org.xutils.sample;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -12,6 +13,8 @@ import android.view.MenuItem;
 
 import org.xutils.view.annotation.ContentView;
 import org.xutils.view.annotation.ViewInject;
+
+import core.demo.activity.DemoActivity;
 
 @ContentView(R.layout.activity_main)
 public class MainActivity extends BaseActivity {
@@ -53,7 +56,9 @@ public class MainActivity extends BaseActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_core) {
+            startActivity(new Intent(this, DemoActivity.class));
+        } else if (id == R.id.action_settings) {
             return true;
         }
 

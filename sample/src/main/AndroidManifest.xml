@@ -28,6 +28,8 @@
         <activity android:name=".BigImageActivity" />
         <activity android:name=".DownloadActivity" />
 
+        <activity android:name="core.demo.activity.DemoActivity"/>
+
     </application>
 
 </manifest>
