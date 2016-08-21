@@ -27,7 +27,7 @@ public class DemoActivity extends BaseActivity {
             weatherAction = new WeatherAction();
             weatherAction.setCacheEnable();
             weatherAction.setConflictOperation(CoreAction.ConflictOperation.ABANDON_NEW_REQUEST);
-            weatherAction.setOnActionListener(new OnActionListenerImpl<WeatherAction.Weather>() {
+            weatherAction.addOnActionListener(new OnActionListenerImpl<WeatherAction.Weather>() {
 
                 @Override
                 public boolean onCache(WeatherAction.Weather weather) {
@@ -52,7 +52,7 @@ public class DemoActivity extends BaseActivity {
         if (downAarAction == null) {
             downAarAction = new DownAarAction();
             downAarAction.setConflictOperation(CoreAction.ConflictOperation.ABANDON_NEW_REQUEST);
-            downAarAction.setOnActionListener(new OnActionListenerImpl<File>() {
+            downAarAction.addOnActionListener(new OnActionListenerImpl<File>() {
 
                 @Override
                 public void onStarted() {

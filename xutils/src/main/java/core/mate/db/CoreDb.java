@@ -135,7 +135,7 @@ public abstract class CoreDb extends DbManager.DaoConfig implements DbManager.Db
         cacheDao(dao);
         DaoTask<Result> task = new DaoTask<>();
         task.setIndicator(indicator);
-        task.setOnTaskListener(listener);
+        task.addOnTaskListener(listener);
         task.execute(new DaoTask.Params<>(this, dao));
         return task;
     }

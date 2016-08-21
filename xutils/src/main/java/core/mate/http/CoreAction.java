@@ -13,6 +13,7 @@ import org.xutils.http.RequestParams;
 import org.xutils.x;
 
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.List;
 
 import core.mate.Core;
@@ -250,8 +251,10 @@ public abstract class CoreAction<Raw, Result> implements Clearable {
         actionState = ActionState.WAITING;
         logActionState();
 
-        if (listener != null) {
-            listener.onWaiting();
+        if (listeners != null) {
+            for (OnActionListener listener : listeners) {
+                listener.onWaiting();
+            }
         }
 
         if (indicator != null && !indicator.isProgressing()) {
@@ -263,23 +266,30 @@ public abstract class CoreAction<Raw, Result> implements Clearable {
         actionState = ActionState.START;
         logActionState();
 
-        if (listener != null) {
-            listener.onStarted();
+        if (listeners != null) {
+            for (OnActionListener listener : listeners) {
+                listener.onStarted();
+            }
         }
     }
 
     protected void onLoading(long total, long current, boolean isDownloading) {
         logLoading(total, current, isDownloading);
 
-        if (listener != null) {
-            listener.onLoading(total, current, isDownloading);
+        if (listeners != null) {
+            for (OnActionListener listener : listeners) {
+                listener.onLoading(total, current, isDownloading);
+            }
         }
     }
 
     protected boolean onCache(Result result) {
         boolean trustCache = false;
-        if (listener != null) {
-            trustCache = listener.onCache(result);
+        if (listeners != null) {
+            for (OnActionListener<Result> listener : listeners) {
+                //只要有一个监听者信任即可
+                trustCache |= listener.onCache(result);
+            }
         }
         logCache(result, trustCache);
 
@@ -307,8 +317,10 @@ public abstract class CoreAction<Raw, Result> implements Clearable {
         logActionState();
         logSuccess(result);
 
-        if (listener != null) {
-            listener.onSuccess(result);
+        if (listeners != null) {
+            for (OnActionListener<Result> listener : listeners) {
+                listener.onSuccess(result);
+            }
         }
     }
 
@@ -316,8 +328,10 @@ public abstract class CoreAction<Raw, Result> implements Clearable {
         actionState = ActionState.ERROR;
         logActionState();
 
-        if (listener != null) {
-            listener.onError(thr, e, isOnCallback);
+        if (listeners != null) {
+            for (OnActionListener listener : listeners) {
+                listener.onError(thr, e, isOnCallback);
+            }
         }
     }
 
@@ -325,8 +339,10 @@ public abstract class CoreAction<Raw, Result> implements Clearable {
         actionState = ActionState.CANCELLED;
         logActionState();
 
-        if (listener != null) {
-            listener.onCancelled(cex);
+        if (listeners != null) {
+            for (OnActionListener listener : listeners) {
+                listener.onCancelled(cex);
+            }
         }
     }
 
@@ -337,8 +353,10 @@ public abstract class CoreAction<Raw, Result> implements Clearable {
 
         lastRequestHandler = null;//清空上一请求的句柄
 
-        if (listener != null) {
-            listener.onFinished();
+        if (listeners != null) {
+            for (OnActionListener listener : listeners) {
+                listener.onFinished();
+            }
         }
         if (indicator != null && indicator.isProgressing()) {
             indicator.hideProgress();
@@ -403,15 +421,18 @@ public abstract class CoreAction<Raw, Result> implements Clearable {
         void onFinished();
     }
 
-    private OnActionListener<Result> listener;
+    private List<OnActionListener<Result>> listeners;
 
     /**
      * 设置http请求的回调。请在发送请求之前调用，否则没有效果。
      *
      * @param listener
      */
-    public final CoreAction<Raw, Result> setOnActionListener(OnActionListener<Result> listener) {
-        this.listener = listener;
+    public final CoreAction<Raw, Result> addOnActionListener(OnActionListener<Result> listener) {
+        if (this.listeners == null) {
+            this.listeners = new ArrayList<>();
+        }
+        this.listeners.add(listener);
         return this;
     }
 
@@ -707,7 +728,10 @@ public abstract class CoreAction<Raw, Result> implements Clearable {
                 cancelLastRequest();
             }
             clearIndicator();
-            listener = null;
+            if (listeners != null) {
+                listeners.clear();
+                listeners = null;
+            }
             onClear();
         }
     }

@@ -1,17 +1,14 @@
 apply plugin: 'com.android.library'
 apply plugin: 'com.github.dcendents.android-maven'
 apply plugin: 'com.jfrog.bintray'
-def siteUrl = 'https://github.com/wyouflf/xUtils3'
-def gitUrl = 'https://github.com/wyouflf/xUtils3.git'
-group = "org.xutils"
-version = "3.3.36"
+
 android {
-    compileSdkVersion 23
-    buildToolsVersion "23.0.2"
+    compileSdkVersion 24
+    buildToolsVersion "24.0.1"
 
     defaultConfig {
         minSdkVersion 14
-        targetSdkVersion 23
+        targetSdkVersion 22
         versionCode 20160613
         versionName version
     }
@@ -27,13 +24,20 @@ android {
         }
     }
 }
+
+def siteUrl = 'https://github.com/DrkCore/xMate'
+def gitUrl = 'https://github.com/DrkCore/xMate.git'
+
+group = "core.mate"
+version = "1.0.0"
+
 install {
     repositories.mavenInstaller {
         // This generates POM.xml with proper parameters
         pom {
             project {
                 packaging 'aar'
-                name 'xUtils'
+                name 'xMate'
                 description 'android orm, bitmap, http, view inject... '
                 // #CONFIG# // project title
                 url siteUrl
@@ -46,12 +50,9 @@ install {
                 }
                 developers {
                     developer {
-                        id 'wyouflf'
-                        // #CONFIG# // your user id (you can write your nickname)
-                        name 'lei.jiao'
-                        // #CONFIG# // your user name
-                        email 'wyouflf@qq.com'
-                        // #CONFIG# // your email
+                        id 'drkcore'
+                        name 'DrkCore'
+                        email '178456643@qq.com'
                     }
                 }
                 scm {
@@ -71,6 +72,7 @@ task javadoc(type: Javadoc) {
     options.encoding = "UTF-8"
     source = android.sourceSets.main.java.srcDirs
     classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+    failOnError false // 忽略注释语法错误
 }
 task javadocJar(type: Jar, dependsOn: javadoc) {
     classifier = 'javadoc'
@@ -85,18 +87,19 @@ properties.load(project.rootProject.file('local.properties').newDataInputStream(
 bintray {
     user = properties.getProperty("bintray.user")
     key = properties.getProperty("bintray.apikey")
+
     configurations = ['archives']
     pkg {
         repo = "maven"
-        name = "xUtils"
-        // #CONFIG# project name in jcenter
+        name = "xMate"
         websiteUrl = siteUrl
         vcsUrl = gitUrl
         licenses = ["Apache-2.0"]
         publish = true
     }
 }
+
 dependencies {
     compile 'com.alibaba:fastjson:1.1.52.android'
-    compile 'core.mate:core:1.0.0'
+    compile 'core.mate:core:1.0.1'
 }
