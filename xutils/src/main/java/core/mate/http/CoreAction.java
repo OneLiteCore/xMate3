@@ -83,7 +83,7 @@ public abstract class CoreAction<Raw, Result> implements Clearable {
                     cancelLastRequest();// 取消上一次的请求
                     break;
 
-                case ABANDON_CURRENT_REQUEST:
+                case ABANDON_NEW_REQUEST:
                     return lastRequestHandler;// 放弃当前请求，并返回上一次的handler
 
                 case LET_REQUEST_FLY:// 默认情况不做处理
@@ -112,7 +112,7 @@ public abstract class CoreAction<Raw, Result> implements Clearable {
 
     public enum ActionState {
 
-        WAITING, START, SUCCESS, ERROR, CANCELLED, CLEARED
+        WAITING, START, SUCCESS, ERROR, CANCELLED, CACHED, CLEARED
 
     }
 
@@ -170,6 +170,11 @@ public abstract class CoreAction<Raw, Result> implements Clearable {
 
         @Override
         public void onSuccess(ResultHolder result) {
+            if (result == null) {//当信任缓存时result永远为null
+                return;
+            }
+
+            //一般请求
             if (result.exception == null) {
                 CoreAction.this.onSuccess(result.result);
             } else {
@@ -277,6 +282,11 @@ public abstract class CoreAction<Raw, Result> implements Clearable {
             trustCache = listener.onCache(result);
         }
         logCache(result, trustCache);
+
+        if (trustCache) {
+            actionState = ActionState.CACHED;
+            logActionState();
+        }
         return trustCache;
     }
 
@@ -303,7 +313,6 @@ public abstract class CoreAction<Raw, Result> implements Clearable {
     }
 
     protected void onError(Throwable thr, IllegalDataException e, boolean isOnCallback) {
-        //TODO 修正信任缓存后回调走入onError的问题
         actionState = ActionState.ERROR;
         logActionState();
 
@@ -443,7 +452,7 @@ public abstract class CoreAction<Raw, Result> implements Clearable {
         /**
          * 废弃当前的请求，并返回上一次的handler
          */
-        ABANDON_CURRENT_REQUEST,
+        ABANDON_NEW_REQUEST,
         /**
          * 不做任何处理，让子弹飞。
          */
@@ -566,7 +575,7 @@ public abstract class CoreAction<Raw, Result> implements Clearable {
             operation = operation != null ? operation : null;
             if (operation != null) {
                 switch (operation) {
-                    case ABANDON_CURRENT_REQUEST:
+                    case ABANDON_NEW_REQUEST:
                         logDevMsg("两个请求同时存在，抛弃新的请求");
                         break;
 
