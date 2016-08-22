@@ -423,16 +423,22 @@ public abstract class CoreAction<Raw, Result> implements Clearable {
 
     private List<OnActionListener<Result>> listeners;
 
+    public final OnActionListener<Result> removeOnActionListener(OnActionListener<Result> listener) {
+        return listeners != null && listeners.remove(listener) ? listener : null;
+    }
+
     /**
      * 设置http请求的回调。请在发送请求之前调用，否则没有效果。
      *
      * @param listener
      */
     public final CoreAction<Raw, Result> addOnActionListener(OnActionListener<Result> listener) {
-        if (this.listeners == null) {
-            this.listeners = new ArrayList<>();
+        if (listener != null) {
+            if (this.listeners == null) {
+                this.listeners = new ArrayList<>();
+            }
+            this.listeners.add(listener);
         }
-        this.listeners.add(listener);
         return this;
     }
 
