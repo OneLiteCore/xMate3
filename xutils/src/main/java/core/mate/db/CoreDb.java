@@ -139,7 +139,7 @@ public abstract class CoreDb extends DbManager.DaoConfig implements DbManager.Db
 
     public final <Result> Clearable access(AbsDao<Result> dao, ITaskIndicator indicator, OnTaskListener<Result> listener) {
         DaoTask<Result> task = new DaoTask<>();
-        task.setIndicator(indicator);
+        task.addIndicator(indicator);
         task.addOnTaskListener(listener);
         task.execute(dao);
         return task;
