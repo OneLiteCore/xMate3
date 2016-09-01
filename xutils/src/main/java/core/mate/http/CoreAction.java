@@ -257,8 +257,12 @@ public abstract class CoreAction<Raw, Result> implements Clearable {
             }
         }
 
-        if (indicator != null && !indicator.isProgressing()) {
-            indicator.showProgress();
+        if (indicators != null) {
+            for (ITaskIndicator indicator : indicators) {
+                if (indicator != null && !indicator.isProgressing()) {
+                    indicator.showProgress();
+                }
+            }
         }
     }
 
@@ -358,8 +362,12 @@ public abstract class CoreAction<Raw, Result> implements Clearable {
                 listener.onFinished();
             }
         }
-        if (indicator != null && indicator.isProgressing()) {
-            indicator.hideProgress();
+        if (indicators != null) {
+            for (ITaskIndicator indicator : indicators) {
+                if (indicator.isProgressing()) {
+                    indicator.hideProgress();
+                }
+            }
         }
         if (clearOnFinishedEnable) {
             clear();
@@ -534,19 +542,26 @@ public abstract class CoreAction<Raw, Result> implements Clearable {
 
 	/* 用户指示 */
 
-    private ITaskIndicator indicator;
+    private List<ITaskIndicator> indicators;
 
     public final CoreAction<Raw, Result> setIndicator(ITaskIndicator indicator) {
-        this.indicator = indicator;
+        if (indicator != null) {
+            if (this.indicators == null) {
+                this.indicators = new ArrayList<>();
+            }
+            this.indicators.add(indicator);
+        }
         return this;
     }
 
     public final void clearIndicator() {
-        if (indicator != null) {
-            if (indicator.isProgressing()) {
-                indicator.hideProgress();
+        if (indicators != null) {
+            for (ITaskIndicator indicator : indicators) {
+                if (indicator.isProgressing()) {
+                    indicator.hideProgress();
+                }
             }
-            indicator = null;
+            indicators.clear();
         }
     }
 

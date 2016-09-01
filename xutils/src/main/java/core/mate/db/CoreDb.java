@@ -1,7 +1,5 @@
 package core.mate.db;
 
-import android.support.v4.util.LruCache;
-
 import org.xutils.DbManager;
 import org.xutils.db.sqlite.SqlInfo;
 import org.xutils.db.table.DbModel;
@@ -13,7 +11,10 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Modifier;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
+import core.mate.async.CoreTask;
 import core.mate.async.CoreTask.OnTaskListener;
 import core.mate.common.Clearable;
 import core.mate.common.ITaskIndicator;
@@ -116,27 +117,31 @@ public abstract class CoreDb extends DbManager.DaoConfig implements DbManager.Db
 
 	/* DAO操作 */
 
+    private class DaoTask<Result> extends CoreTask<AbsDao<Result>, Void, Result> {
+
+        @Override
+        public Result doInBack(AbsDao<Result> dao) throws Exception {
+            return accessSync(dao);
+        }
+    }
+
     public final <Result> Clearable access(AbsDao<Result> dao) {
-        cacheDao(dao);
         return access(dao, null, null);
     }
 
     public final <Result> Clearable access(AbsDao<Result> dao, ITaskIndicator indicator) {
-        cacheDao(dao);
         return access(dao, indicator, null);
     }
 
     public final <Result> Clearable access(AbsDao<Result> dao, OnTaskListener<Result> listener) {
-        cacheDao(dao);
         return access(dao, null, listener);
     }
 
     public final <Result> Clearable access(AbsDao<Result> dao, ITaskIndicator indicator, OnTaskListener<Result> listener) {
-        cacheDao(dao);
         DaoTask<Result> task = new DaoTask<>();
         task.setIndicator(indicator);
         task.addOnTaskListener(listener);
-        task.execute(new DaoTask.Params<>(this, dao));
+        task.execute(dao);
         return task;
     }
 
@@ -149,25 +154,28 @@ public abstract class CoreDb extends DbManager.DaoConfig implements DbManager.Db
      * @throws Exception
      */
     public final <Result> Result accessSync(AbsDao<Result> dao) throws Exception {
+        Result result = dao.access(getOrCreateDb());
         cacheDao(dao);
-        return dao.access(getOrCreateDb());
+        return result;
     }
 
 	/*Dao缓存*/
 
-    private static final int CACHE_SIZE = 8;
+    public static final int DEFAULT_DAO_CACHE_SIZE = 8;
+    private int daoCacheSize;
 
     private boolean cacheDaoEnable;
+
     /**
      * LrcCache是线程安全的
      */
-    private volatile LruCache<Class, WeakReference<AbsDao>> daoCache;
+    private volatile ConcurrentMap<Class, WeakReference<AbsDao>> daoCache;
 
-    private LruCache<Class, WeakReference<AbsDao>> getDaoCache() {
+    private ConcurrentMap<Class, WeakReference<AbsDao>> getDaoCache() {
         if (daoCache == null) {
             synchronized (this) {
                 if (daoCache == null) {
-                    daoCache = new LruCache<>(CACHE_SIZE);
+                    daoCache = new ConcurrentHashMap<>(daoCacheSize);
                 }
             }
         }
@@ -179,26 +187,38 @@ public abstract class CoreDb extends DbManager.DaoConfig implements DbManager.Db
     }
 
     public final CoreDb setCacheDaoEnable() {
-        this.cacheDaoEnable = true;
+        return setCacheDaoEnable(DEFAULT_DAO_CACHE_SIZE);
+    }
+
+    public final CoreDb setCacheDaoEnable(int cacheSize) {
+        if (!cacheDaoEnable) {
+            this.daoCacheSize = cacheSize;
+            this.cacheDaoEnable = true;
+
+            if (cacheSize <= 0) {
+                throw new IllegalArgumentException();
+            }
+        }
         return this;
     }
 
+    private final Object daoCacheLock = new Object();
+
     /**
-     * 缓存dao实例。通过{@link #setCacheDaoEnable()}启用了缓存之后每次访问数据库都会缓存dao对象。
+     * 缓存dao实例。通过{@link #setCacheDaoEnable()}启用了缓存之后每次访问数据库完成后都会缓存dao对象。
      * 需要注意的是，为了避免内存泄露<b>匿名类的dao实例会被过滤</b>。
      *
      * @param absDao
      * @return
      */
-    private synchronized boolean cacheDao(AbsDao absDao) {
+    private boolean cacheDao(AbsDao absDao) {
         Class clz = cacheDaoEnable && absDao != null ? absDao.getClass() : null;
         if (clz != null) {
             // 不缓存可能会带有外部类的强引用（很多时候都是Activity或者Fragment）的Dao类型
             if (Modifier.isStatic(clz.getModifiers())/*允许静态的内部类*/
                     || (!clz.isMemberClass() && !clz.isLocalClass() && !clz.isAnonymousClass())/*非静态非成员非局部非匿名，也就是单独定义在一个java文件的类型*/) {
-                getDaoCache();
-                if (daoCache.get(clz) == null) {
-                    daoCache.put(clz, new WeakReference<>(absDao));
+                synchronized (daoCacheLock) {
+                    getDaoCache().put(clz, new WeakReference<>(absDao));
                 }
                 return true;
             }
@@ -209,16 +229,29 @@ public abstract class CoreDb extends DbManager.DaoConfig implements DbManager.Db
     public synchronized final <T extends AbsDao> T getCachedDao(Class<T> clazz) {
         AbsDao dao = null;
         if (cacheDaoEnable) {
-            getDaoCache();
-            WeakReference<AbsDao> ref = daoCache.get(clazz);
-            if (ref != null) {
-                dao = ref.get();
-                //获取引用之后就清空缓存中的引用，避免一个dao同时被两个地方使用
-                ref.clear();
-                daoCache.remove(clazz);
+            synchronized (daoCacheLock) {
+                WeakReference<AbsDao> ref = getDaoCache().get(clazz);
+                if (ref != null) {
+                    dao = ref.get();
+                    //获取引用之后就清空缓存中的引用
+                    ref.clear();
+                    daoCache.remove(clazz);
+                }
             }
         }
         return (T) dao;
+    }
+
+    public final <T extends AbsDao> T getCachedDaoOrNewInstance(Class<T> clazz) {
+        T dao = getCachedDao(clazz);
+        if (dao == null) {
+            try {
+                dao = clazz.newInstance();
+            } catch (Exception e) {
+                LogUtil.e(e);
+            }
+        }
+        return dao;
     }
 
 	/*SQL语法操作*/
