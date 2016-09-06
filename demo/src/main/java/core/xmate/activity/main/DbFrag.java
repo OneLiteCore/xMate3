@@ -1,0 +1,79 @@
+package core.xmate.activity.main;
+
+import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.view.View;
+import android.widget.ListView;
+import android.widget.TextView;
+
+import org.xutils.view.annotation.ContentView;
+import org.xutils.view.annotation.Event;
+import org.xutils.view.annotation.ViewInject;
+
+import java.util.List;
+
+import core.mate.adapter.SimpleAdapter;
+import core.mate.adapter.SimpleViewHolder;
+import core.mate.app.ListFrag;
+import core.mate.app.ProgressDlgFrag;
+import core.mate.async.OnTaskListenerImpl;
+import core.mate.util.ToastUtil;
+import core.xmate.R;
+import core.xmate.activity.base.BaseFrag;
+import core.xmate.db.RegionDb;
+import core.xmate.db.region.FindProvinceDao;
+import core.xmate.db.region.Province;
+
+/**
+ * @author DrkCore
+ * @since 2016-09-06
+ */
+@ContentView(R.layout.frag_db)
+public class DbFrag extends BaseFrag {
+
+    /*继承*/
+
+    @ViewInject(R.id.listView_frag_db)
+    private ListView listView;
+
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        //使用由CoreMate框架提供的万能Adapter一句话搞定适配器
+        listView.setAdapter(new SimpleAdapter<Province>(android.R.layout.simple_list_item_1) {
+            @Override
+            protected void bindViewData(SimpleViewHolder<Province> holder, int position, Province data, int viewType) {
+                TextView textView = holder.getCastView();
+                textView.setText(data.getName());
+            }
+        });
+    }
+
+    @Event(R.id.button_frag_db_refresh)
+    @Override
+    public void refresh() {
+        super.refresh();
+        RegionDb regionDb = RegionDb.getInstance();
+
+        //获取已经缓存的dao对象，或者用反射通过默认构造方法创建一个
+        //FindProvinceDao dao = regionDb.getCachedDaoOrNewInstance(FindProvinceDao.class);
+
+        //如果你不喜欢反射或者没有默认构造函数的话，可以使用下方的逻辑来获取缓存的dao
+        FindProvinceDao dao = regionDb.getCachedDao(FindProvinceDao.class);
+        if (dao == null) {
+            dao = new FindProvinceDao();
+        }
+
+        //访问数据库
+        ToastUtil.toastShort("使用的dao.hashCode() = " + dao.hashCode());
+        regionDb.access(dao, new ProgressDlgFrag().setFragmentManager(this), new OnTaskListenerImpl<List<Province>>() {
+            @Override
+            public void onSuccess(List<Province> provinces) {
+                //刷新数据
+                SimpleAdapter<Province> adapter = (SimpleAdapter<Province>) listView.getAdapter();
+                adapter.display(provinces);
+            }
+        });
+
+    }
+}

@@ -58,7 +58,17 @@ public abstract class CoreDb extends DbManager.DaoConfig implements DbManager.Db
     final DbManager getOrCreateDb() throws DbException {
         if (dbMgr == null) {
             synchronized (this) {
-                if (dbMgr == null && onPrepare()) {// 仅当onPrepare返回true时创建。
+                if (dbMgr == null) {
+                    try {//准备数据库
+                        onPrepare();
+                    } catch (Exception e) {
+                        LogUtil.e(e);
+                        if (e instanceof RuntimeException) {
+                            throw (RuntimeException) e;
+                        } else {
+                            throw new DbException("onPrepare抛出异常，无法创建数据库");
+                        }
+                    }
                     // 避免出现onCreate抛出异常却仍然创建了DbManager实例
                     DbManager tmpDbManager = x.getDb(this);
                     onCreate(tmpDbManager);
@@ -75,13 +85,12 @@ public abstract class CoreDb extends DbManager.DaoConfig implements DbManager.Db
      * 准备数据库的回调，将在创建DbManager之前回调。
      * 该方法将在异步线程中执行，你可以在这个方法中做耗时的准备操作，
      * 比如将assets中携带的数据库导出或者清空旧的数据库文件等。
-     * 其返回值用于标志数据库是否可用，默认为true。
-     * <b>返回false将无法创建{@link DbManager}的实例。</b>
+     * <p>
+     * 如果该方法抛出异常则认定数据库无法创建。
      *
      * @return
      */
-    protected boolean onPrepare() {
-        return true;
+    protected void onPrepare() throws Exception {
     }
 
     /**
