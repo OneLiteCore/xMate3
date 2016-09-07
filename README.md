@@ -199,6 +199,11 @@ public class FindProvinceDao extends AbsDao<List<Province>>{
 
     @Override
     public List<Province >access(@NonNull DbManager db) throws Exception {
+        //在这里定义对数据库的操作
+        //如果逻辑比较复杂的话你可以将之分拆成几个dao并在
+        //这里组合调用其access()方法整理出结果
+        //对于外部的业务逻辑而言也只是一次异步任务而已
+
         //一个类只干一件事情，但是所谓的封装就是这么一回事
         return db.findAll(Province.class);
     }
@@ -247,13 +252,13 @@ public class FindProvinceDao extends AbsDao<List<Province>>{
   * [FindDbModelDao](https://github.com/DrkCore/xMate/tree/master/xutils/src/main/java/core/mate/db/dao/FindDbModelDao.java)
   * [FindFirstDbModelDao](https://github.com/DrkCore/xMate/tree/master/xutils/src/main/java/core/mate/db/dao/FindFirstDbModelDao.java)
 
-
+你可以根据需求继承这些类。
 
 ## 该库与原版的xUtils的差异
 该库虽然基于xUtils3开发但修改了部分源代码，主要如下：
 
 ### 视图注入模块
-  * 允许@Event注解绑定到public的方法
+   * 允许@Event注解绑定到public的方法
   * 允许@Event注解绑定到无参数的方法
   * 添加能将多种事件绑定到无参数方法的注解@MultiEvent（这个其实用处不大）
 
@@ -263,7 +268,7 @@ public class FindProvinceDao extends AbsDao<List<Province>>{
 
 ### 数据库模块
     * 开放DbManager.createTableInFotExists()方法
-    * 添加DbManager.findModelAll()方法
+    * 添加DbManager.findModelAll()、DbManager.findModeFirst()方法
 
 数据库的逻辑其实还是比较简单的，参阅我的博客：
 
