@@ -232,15 +232,33 @@ public class FindProvinceDao extends AbsDao<List<Province>>{
 
 ```
 
+在CoreDb中封装了对Dao的缓存，具体逻辑请查看[源码](https://github.com/DrkCore/xMate/blob/master/xutils/src/main/java/core/mate/db/CoreDb.java)。
+
+由于Db是静态单例的，为了避免内存泄漏不会缓存定义为非静态内部类的dao实例。同时当且仅当Dao的access(DbManager)方法操作完毕后才会将之缓存起来，外部逻辑获取到缓存后就会将之从中删除，因而无需担心缓存的dao参数冲突的问题。
+
+为了简化数据库的操作本库一并提供了很多常用的dao的抽象基类，都在[core.mate.db.dao](https://github.com/DrkCore/xMate/tree/master/xutils/src/main/java/core/mate/db/dao)包下：
+
+  * [AbsDeleteDao](https://github.com/DrkCore/xMate/tree/master/xutils/src/main/java/core/mate/db/dao/AbsDeleteDao.java)
+  * [AbsFindByIdDao](https://github.com/DrkCore/xMate/tree/master/xutils/src/main/java/core/mate/db/dao/AbsFindByIdDao.java)
+  * [AbsFindDao](https://github.com/DrkCore/xMate/tree/master/xutils/src/main/java/core/mate/db/dao/AbsFindDao.java)
+  * [AbsSaveDao](https://github.com/DrkCore/xMate/tree/master/xutils/src/main/java/core/mate/db/dao/AbsSaveDao.java)
+  * [AbsSaveOrUpdateDao](https://github.com/DrkCore/xMate/tree/master/xutils/src/main/java/core/mate/db/dao/AbsSaveOrUpdateDao.java)
+  * [ExecNonQuerySqlDao](https://github.com/DrkCore/xMate/tree/master/xutils/src/main/java/core/mate/db/dao/ExecNonQuerySqlDao.java)
+  * [FindDbModelDao](https://github.com/DrkCore/xMate/tree/master/xutils/src/main/java/core/mate/db/dao/FindDbModelDao.java)
+  * [FindFirstDbModelDao](https://github.com/DrkCore/xMate/tree/master/xutils/src/main/java/core/mate/db/dao/FindFirstDbModelDao.java)
+
+
+
 ## 该库与原版的xUtils的差异
 该库虽然基于xUtils3开发但修改了部分源代码，主要如下：
 
 ### 视图注入模块
   * 允许@Event注解绑定到public的方法
   * 允许@Event注解绑定到无参数的方法
-  * 添加能将多种事件绑定到无参数方法的注解@MultiEvent（这个其实）
+  * 添加能将多种事件绑定到无参数方法的注解@MultiEvent（这个其实用处不大）
 
 关于该模块的逻辑和修改可以看看我的博客：
+
 [Android：xUtils3拆解笔记——视图模块详解及拓展](http://blog.csdn.net/drkcore/article/details/50922448)
 
 ### 数据库模块
@@ -248,8 +266,10 @@ public class FindProvinceDao extends AbsDao<List<Province>>{
     * 添加DbManager.findModelAll()方法
 
 数据库的逻辑其实还是比较简单的，参阅我的博客：
+
 [Android：xUtils3拆解笔记——数据库模块解析](http://blog.csdn.net/drkcore/article/details/51866495)
 
 ## 联系作者
 QQ：178456643
+
 邮箱：178456643@qq.com
