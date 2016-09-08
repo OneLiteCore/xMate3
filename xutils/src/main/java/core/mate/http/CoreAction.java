@@ -544,7 +544,7 @@ public abstract class CoreAction<Raw, Result> implements Clearable {
 
     private List<ITaskIndicator> indicators;
 
-    public final CoreAction<Raw, Result> setIndicator(ITaskIndicator indicator) {
+    public final CoreAction<Raw, Result> addIndicator(ITaskIndicator indicator) {
         if (indicator != null) {
             if (this.indicators == null) {
                 this.indicators = new ArrayList<>();

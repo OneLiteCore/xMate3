@@ -31,7 +31,7 @@ public class HttpFrag extends BaseFrag {
             //设置当上一个请求未结束却又打算发出新的请求时，抛弃新的请求
             weatherAction.setConflictOperation(CoreAction.ConflictOperation.ABANDON_NEW_REQUEST);
             //添加转菊花的用户指示，阻塞用户的操作
-            weatherAction.setIndicator(new ProgressDlgFrag().setFragmentManager(this));
+            weatherAction.addIndicator(new ProgressDlgFrag().setFragmentManager(this));
             //设置回调
             weatherAction.addOnActionListener(new OnActionListenerImpl<Weather>() {
 

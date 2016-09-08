@@ -15,8 +15,8 @@
 Android Studio用户可有在模块的build.gradle中于dependencies下添加如下依赖：
 
 ```
-compile 'core.mate:core:1.0.3'
-compile 'core.mate:xutils:1.0.3'
+compile 'core.mate:core:1.0.4'
+compile 'core.mate:xutils:1.0.4'
 ```
 
 之后在你的Application中进行初始化：
@@ -95,7 +95,7 @@ public class WeatherAction extends ApiAction<Weather> {
             //设置当上一个请求未结束却又打算发出新的请求时，抛弃新的请求
             weatherAction.setConflictOperation(CoreAction.ConflictOperation.ABANDON_NEW_REQUEST);
             //添加转菊花的用户指示，阻塞用户的操作
-            weatherAction.setIndicator(new ProgressDlgFrag().setFragmentManager(this));
+            weatherAction.addIndicator(new ProgressDlgFrag().setFragmentManager(this));
             //设置回调
             weatherAction.addOnActionListener(new OnActionListenerImpl<Weather>() {
 

@@ -4,12 +4,12 @@ apply plugin: 'com.jfrog.bintray'
 
 android {
     compileSdkVersion 24
-    buildToolsVersion "24.0.1"
+    buildToolsVersion "24.0.2"
 
     defaultConfig {
         minSdkVersion 14
-        targetSdkVersion 22
-        versionCode 20160901
+        targetSdkVersion 24
+        versionCode 20160908
         versionName version
     }
     buildTypes {
@@ -29,7 +29,7 @@ def siteUrl = 'https://github.com/DrkCore/xMate'
 def gitUrl = 'https://github.com/DrkCore/xMate.git'
 
 group = "core.mate"
-version = "1.0.3"
+version = "1.0.4"
 
 install {
     repositories.mavenInstaller {
@@ -101,5 +101,5 @@ bintray {
 
 dependencies {
     compile 'com.alibaba:fastjson:1.1.54.android'
-    compile 'core.mate:core:1.0.3'
+    compile 'core.mate:core:1.0.4'
 }

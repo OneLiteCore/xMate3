@@ -37,5 +37,5 @@ dependencies {
     compile 'com.android.support:recyclerview-v7:24.1.1'
     compile 'com.android.support:design:24.1.1'
     compile project(':xutils')
-    compile 'core.mate:core:1.0.3'
+    compile 'core.mate:core:1.0.4'
 }
