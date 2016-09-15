@@ -25,89 +25,90 @@ public abstract class AbsDeleteDao<Table> extends AbsDao<Void> {
 
 	/* 继承 */
 
-	@Override
-	public final Void access (@NonNull DbManager db) throws Exception {
-		Type type = ClassUtil.getGenericParametersType(getClass())[0];
-		if (type instanceof Class) {
-			@SuppressWarnings("unchecked")
-			Class<Table> clazz = (Class<Table>) type;
+    @Override
+    public final Void access(@NonNull DbManager db) throws Exception {
+        Type type = ClassUtil.getGenericParametersType(getClass())[0];
+        if (type instanceof Class) {
+            @SuppressWarnings("unchecked")
+            Class<Table> clazz = (Class<Table>) type;
 
-			WhereBuilder createdWhere = onCreateWhereBuilder(clazz);
-			if (createdWhere != null) {
-				db.delete(clazz, createdWhere);
-			}
-			if (whereBuilder != null) {
-				db.delete(clazz, whereBuilder);
-			}
-			if (idValue != null) {
-				db.deleteById(clazz, idValue);
-			}
-			if (delList != null && !delList.isEmpty()) {
-				db.delete(delList);
-			}
-			return null;// 返回null表示成功
-		}
-		throw new IllegalStateException("指定泛型" + type.toString() + "不可用");
-	}
+            WhereBuilder createdWhere = onCreateWhereBuilder(clazz);
+            if (createdWhere != null) {
+                db.delete(clazz, createdWhere);
+            }
+            if (whereBuilder != null) {
+                db.delete(clazz, whereBuilder);
+            }
+            if (idValue != null) {
+                db.deleteById(clazz, idValue);
+            }
+            if (delList != null && !delList.isEmpty()) {
+                db.delete(delList);
+            }
+            return null;// 返回null表示成功
+        }
+        throw new IllegalStateException("指定泛型" + type.toString() + "不可用");
+    }
+
+    @Override
+    public void clear() {
+        super.clear();
+        whereBuilder = null;
+        idValue = null;
+        if (delList != null) {
+            delList.clear();
+        }
+    }
 
 	/* 内部回调 */
 
-	/**
-	 * 配置用于删除数据的whereBuilder。
-	 * 如果该方法返回null，则默认使用{@link #where(WhereBuilder)}、{@link #byId(Object)}
-	 * 和{@link #add(Collection)}等方法配置的执行删除操作。
-	 */
-	protected WhereBuilder onCreateWhereBuilder (Class<Table> clazz) {
-		return null;
-	}
+    /**
+     * 配置用于删除数据的whereBuilder。
+     * 如果该方法返回null，则默认使用{@link #where(WhereBuilder)}、{@link #byId(Object)}
+     * 和{@link #add(Collection)}等方法配置的执行删除操作。
+     */
+    protected WhereBuilder onCreateWhereBuilder(Class<Table> clazz) {
+        return null;
+    }
 
 	/* where */
 
-	private WhereBuilder whereBuilder;
+    private WhereBuilder whereBuilder;
 
-	public final AbsDeleteDao<Table> where (WhereBuilder where) {
-		this.whereBuilder = where;
-		return this;
-	}
+    public final AbsDeleteDao<Table> where(WhereBuilder where) {
+        this.whereBuilder = where;
+        return this;
+    }
 
 	/* byId */
 
-	private Object idValue;
+    private Object idValue;
 
-	public final AbsDeleteDao<Table> byId (Object idValue) {
-		this.idValue = idValue;
-		return this;
-	}
+    public final AbsDeleteDao<Table> byId(Object idValue) {
+        this.idValue = idValue;
+        return this;
+    }
 
 	/* byObjects */
 
-	private List<Table> delList;
+    private List<Table> delList;
 
-	public final AbsDeleteDao<Table> add (Collection<Table> items) {
-		if (delList == null) {
-			delList = new ArrayList<>(items.size());
-		}
-		delList.addAll(items);
-		return this;
-	}
+    public final AbsDeleteDao<Table> add(Collection<Table> items) {
+        if (delList == null) {
+            delList = new ArrayList<>(items.size());
+        }
+        delList.addAll(items);
+        return this;
+    }
 
-	@SafeVarargs
-	public final AbsDeleteDao<Table> add (Table... items) {
-		if (delList == null) {
-			delList = new ArrayList<>(items.length);
-		}
-		Collections.addAll(delList, items);
-		return this;
-	}
+    @SafeVarargs
+    public final AbsDeleteDao<Table> add(Table... items) {
+        if (delList == null) {
+            delList = new ArrayList<>(items.length);
+        }
+        Collections.addAll(delList, items);
+        return this;
+    }
 
-	/*清空*/
 
-	public final AbsDeleteDao<Table> clear () {
-		whereBuilder = null;
-		idValue = null;
-		if (delList != null) {
-			delList.clear();
-		}
-		return this;
-	}
 }

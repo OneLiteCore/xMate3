@@ -19,42 +19,34 @@ import core.mate.db.AbsDao;
  */
 public final class FindDbModelDao extends AbsDao<List<DbModel>> {
 
-	public FindDbModelDao () {}
 
-	public FindDbModelDao (SqlInfo sqlInfo) {
-		this.sqlInfo = sqlInfo;
-	}
+    private SqlInfo sqlInfo;
 
-	public FindDbModelDao (String sql) {
-		this.sqlInfo = new SqlInfo(sql);
-	}
+    public FindDbModelDao setSqlInfo(SqlInfo sqlInfo) {
+        this.sqlInfo = sqlInfo;
+        return this;
+    }
 
-	/*继承*/
+    public FindDbModelDao setSql(String sql, @Nullable Object... args) {
+        if (sqlInfo == null) {
+            sqlInfo = new SqlInfo();
+        }
+        sqlInfo.clear();
+        sqlInfo.setSql(sql);
+        if (args != null && args.length > 0) {
+            sqlInfo.addBindArgs(args);
+        }
+        return this;
+    }
 
-	@Override
-	public final List<DbModel> access (@NonNull DbManager db) throws Exception {
-		return sqlInfo != null ? db.findDbModelAll(sqlInfo) : null;
-	}
+    @Override
+    public final List<DbModel> access(@NonNull DbManager db) throws Exception {
+        return sqlInfo != null ? db.findDbModelAll(sqlInfo) : null;
+    }
 
-	/*配置*/
-
-	private SqlInfo sqlInfo;
-
-	public FindDbModelDao setSqlInfo (SqlInfo sqlInfo) {
-		this.sqlInfo = sqlInfo;
-		return this;
-	}
-
-	public FindDbModelDao setSql (String sql, @Nullable Object... args) {
-		if (sqlInfo == null) {
-			sqlInfo = new SqlInfo();
-		}
-		sqlInfo.clear();
-		sqlInfo.setSql(sql);
-		if (args != null && args.length > 0) {
-			sqlInfo.addBindArgs(args);
-		}
-		return this;
-	}
-
+    @Override
+    public void clear() {
+        super.clear();
+        sqlInfo = null;
+    }
 }

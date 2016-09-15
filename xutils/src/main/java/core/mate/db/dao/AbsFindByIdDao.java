@@ -31,6 +31,12 @@ public abstract class AbsFindByIdDao<Table> extends AbsDao<Table> {
 		throw new IllegalStateException("指定泛型" + type.toString() + "不可用");
 	}
 
+	@Override
+	public void clear() {
+		super.clear();
+		idValue = null;
+	}
+
 	/* 拓展 */
 
 	private Object idValue;

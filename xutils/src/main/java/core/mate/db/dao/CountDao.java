@@ -12,21 +12,21 @@ import core.mate.db.AbsDao;
  */
 public final class CountDao extends AbsDao<Long> {
 
-	private Class table;
+    private Class table;
 
-	public CountDao (Class table) {
-		this.table = table;
-	}
+    public CountDao setTable(Class table) {
+        this.table = table;
+        return this;
+    }
 
-	/*继承*/
+    @Override
+    public Long access(@NonNull DbManager db) throws Exception {
+        return table != null ? db.selector(table).count() : -1;
+    }
 
-	@Override
-	public Long access (@NonNull DbManager db) throws Exception {
-		return table != null ? db.selector(table).count() : -1;
-	}
-
-	public CountDao setTable (Class table) {
-		this.table = table;
-		return this;
-	}
+    @Override
+    public void clear() {
+        super.clear();
+        table = null;
+    }
 }

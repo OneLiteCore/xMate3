@@ -242,6 +242,9 @@ public abstract class CoreDb extends DbManager.DaoConfig implements DbManager.Db
                 WeakReference<AbsDao> ref = getDaoCache().get(clazz);
                 if (ref != null) {
                     dao = ref.get();
+                    if (dao != null) {
+                        dao.clear();
+                    }
                     //获取引用之后就清空缓存中的引用
                     ref.clear();
                     daoCache.remove(clazz);

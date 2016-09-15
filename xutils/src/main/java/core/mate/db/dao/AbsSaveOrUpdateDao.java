@@ -19,41 +19,41 @@ public abstract class AbsSaveOrUpdateDao<Table> extends AbsDao<Void> {
 
 	/*继承*/
 
-	@Override
-	public final Void access (@NonNull DbManager db) throws Exception {
-		if (saveOrUpdateList != null && !saveOrUpdateList.isEmpty()) {
-			db.saveOrUpdate(saveOrUpdateList);
-		}
-		return null;
-	}
+    @Override
+    public final Void access(@NonNull DbManager db) throws Exception {
+        if (saveOrUpdateList != null && !saveOrUpdateList.isEmpty()) {
+            db.saveOrUpdate(saveOrUpdateList);
+        }
+        return null;
+    }
+
+    @Override
+    public void clear() {
+        super.clear();
+        if (saveOrUpdateList != null) {
+            saveOrUpdateList.clear();
+        }
+    }
 
 	/*数据*/
 
-	private List<Table> saveOrUpdateList;
+    private List<Table> saveOrUpdateList;
 
-	@SafeVarargs
-	public final AbsSaveOrUpdateDao<Table> add (Table... items) {
-		if (saveOrUpdateList == null) {
-			saveOrUpdateList = new ArrayList<>(items.length);
-		}
-		Collections.addAll(saveOrUpdateList, items);
-		return this;
-	}
+    @SafeVarargs
+    public final AbsSaveOrUpdateDao<Table> add(Table... items) {
+        if (saveOrUpdateList == null) {
+            saveOrUpdateList = new ArrayList<>(items.length);
+        }
+        Collections.addAll(saveOrUpdateList, items);
+        return this;
+    }
 
-	public final AbsSaveOrUpdateDao<Table> add (Collection<Table> items) {
-		if (saveOrUpdateList == null) {
-			saveOrUpdateList = new ArrayList<>(items.size());
-		}
-		saveOrUpdateList.addAll(items);
-		return this;
-	}
+    public final AbsSaveOrUpdateDao<Table> add(Collection<Table> items) {
+        if (saveOrUpdateList == null) {
+            saveOrUpdateList = new ArrayList<>(items.size());
+        }
+        saveOrUpdateList.addAll(items);
+        return this;
+    }
 
-	/*拓展*/
-
-	public final AbsSaveOrUpdateDao<Table> clear () {
-		if (saveOrUpdateList != null) {
-			saveOrUpdateList.clear();
-		}
-		return this;
-	}
 }
