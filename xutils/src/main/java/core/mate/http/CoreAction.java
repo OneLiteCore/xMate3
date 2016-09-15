@@ -15,6 +15,7 @@ import org.xutils.x;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 import core.mate.Core;
 import core.mate.common.Clearable;
@@ -245,6 +246,9 @@ public abstract class CoreAction<Raw, Result> implements Clearable {
         if (retryTime > 0) {
             params.setMaxRetryCount(retryTime);
         }
+        if (executor != null) {
+            params.setExecutor(executor);
+        }
     }
 
     protected void onWaiting() {
@@ -454,6 +458,7 @@ public abstract class CoreAction<Raw, Result> implements Clearable {
 
     private int timeOut = 0;
     private int retryTime = 3;
+    private Executor executor;
 
     public final int getRetryTime() {
         return retryTime;
@@ -461,6 +466,10 @@ public abstract class CoreAction<Raw, Result> implements Clearable {
 
     public final int getTimeOut() {
         return timeOut;
+    }
+
+    public Executor getExecutor() {
+        return executor;
     }
 
     public final CoreAction setTimeOut(int timeOut) {
@@ -473,7 +482,12 @@ public abstract class CoreAction<Raw, Result> implements Clearable {
         return this;
     }
 
-	/* 请求记录 */
+    public CoreAction setExecutor(Executor executor) {
+        this.executor = executor;
+        return this;
+    }
+
+    /* 请求记录 */
 
     /**
      * 当上一个请求还未结束时又来了一个请求时的处理方法。
@@ -583,7 +597,7 @@ public abstract class CoreAction<Raw, Result> implements Clearable {
         if (isDevModeEnable()) {
             if (logBuilder == null) {
                 logBuilder = LogUtil.newBuilder();
-                logBuilder.setTag(ClassUtil.getTypeName(getClass()));
+                logBuilder.setTag(ClassUtil.getTypeName(getClass()) + "@" + hashCode());
             }
 
             logBuilder.append(msgs).log();
