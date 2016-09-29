@@ -1,6 +1,5 @@
 package core.xmate.activity.main;
 
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
@@ -17,10 +16,8 @@ import java.util.List;
 
 import core.mate.adapter.SimpleAdapter;
 import core.mate.adapter.SimpleViewHolder;
-import core.mate.app.ListFrag;
 import core.mate.app.ProgressDlgFrag;
 import core.mate.async.OnTaskListenerImpl;
-import core.mate.db.dao.AbsFindByIdDao;
 import core.mate.db.dao.AbsFindDao;
 import core.mate.util.ToastUtil;
 import core.xmate.R;

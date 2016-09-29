@@ -2,7 +2,7 @@ package core.xmate.http;
 
 import com.alibaba.fastjson.JSON;
 
-import core.mate.common.Clearable;
+import core.mate.async.Clearable;
 import core.mate.http.ApiAction;
 import core.mate.http.IllegalDataException;
 import core.mate.util.TextUtil;

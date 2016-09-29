@@ -4,27 +4,15 @@ import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 
-import com.alibaba.fastjson.JSON;
-
 import org.xutils.view.annotation.ContentView;
-import org.xutils.view.annotation.Event;
 import org.xutils.view.annotation.ViewInject;
 
-import java.io.File;
 import java.util.List;
 
 import core.mate.app.CoreFrag;
-import core.mate.app.ProgressDlgFrag;
 import core.mate.util.ClassUtil;
 import core.xmate.R;
 import core.xmate.activity.base.BaseActivity;
-import core.xmate.http.DownAarAction;
-import core.xmate.http.WeatherAction;
-import core.mate.http.CoreAction;
-import core.mate.http.OnActionListenerImpl;
-import core.mate.util.LogUtil;
-import core.mate.util.ToastUtil;
-import core.xmate.model.Weather;
 
 @ContentView(R.layout.activity_main)
 public class MainActivity extends BaseActivity {

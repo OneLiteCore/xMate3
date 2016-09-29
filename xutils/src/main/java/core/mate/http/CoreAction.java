@@ -17,9 +17,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executor;
 
-import core.mate.Core;
-import core.mate.common.Clearable;
-import core.mate.common.ITaskIndicator;
+import core.mate.async.Clearable;
+import core.mate.view.ITaskIndicator;
 import core.mate.util.ClassUtil;
 import core.mate.util.LogUtil;
 
@@ -588,7 +587,7 @@ public abstract class CoreAction<Raw, Result> implements Clearable {
     protected final boolean isDevModeEnable() {
         if (isDevModeEnable == null) {
             //成员变量的速度比其他类的静态变量速度要快一点
-            isDevModeEnable = Core.getInstance().isDevModeEnable();
+            isDevModeEnable = x.isDebug();
         }
         return isDevModeEnable;
     }

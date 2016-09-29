@@ -5,7 +5,7 @@ import org.xutils.http.RequestParams;
 import java.io.File;
 import java.lang.reflect.Type;
 
-import core.mate.common.Clearable;
+import core.mate.async.Clearable;
 
 public abstract class DownloadAction extends CoreAction<File, File> {
 

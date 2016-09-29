@@ -16,8 +16,8 @@ import java.util.concurrent.ConcurrentMap;
 
 import core.mate.async.CoreTask;
 import core.mate.async.CoreTask.OnTaskListener;
-import core.mate.common.Clearable;
-import core.mate.common.ITaskIndicator;
+import core.mate.async.Clearable;
+import core.mate.view.ITaskIndicator;
 import core.mate.db.dao.ExecNonQuerySqlDao;
 import core.mate.db.dao.FindFirstDbModelDao;
 import core.mate.util.LogUtil;
