@@ -18,9 +18,9 @@ import java.util.List;
 import java.util.concurrent.Executor;
 
 import core.mate.async.Clearable;
-import core.mate.view.ITaskIndicator;
 import core.mate.util.ClassUtil;
 import core.mate.util.LogUtil;
+import core.mate.view.ITaskIndicator;
 
 /**
  * 基于xUtils的http模块访问服务器的基类。
@@ -32,26 +32,7 @@ import core.mate.util.LogUtil;
  */
 public abstract class CoreAction<Raw, Result> implements Clearable {
 
-    public static class ClearableWrapper implements Clearable {
-
-        private final Callback.Cancelable cancelable;
-
-        public ClearableWrapper(Callback.Cancelable cancelable) {
-            this.cancelable = cancelable;
-        }
-
-        @Override
-        public boolean isCleared() {
-            return cancelable.isCancelled();
-        }
-
-        @Override
-        public void clear() {
-            cancelable.cancel();
-        }
-    }
-
-	/* 发送请求 */
+    /* 发送请求 */
 
     protected final Clearable requestPost(String url) {
         return requestPost(new RequestParams(url));
@@ -76,24 +57,16 @@ public abstract class CoreAction<Raw, Result> implements Clearable {
 
         logUsedCount();
 
-        if (isLastRequestWorking()) {// 上一个请求还在工作
-            conflictOperation = conflictOperation != null ? conflictOperation : ConflictOperation.LET_REQUEST_FLY;
-            logConflict(conflictOperation);
-            switch (conflictOperation) {
-                case CANCEL_LAST_REQUEST:
-                    cancelLastRequest();// 取消上一次的请求
-                    break;
-
-                case ABANDON_NEW_REQUEST:
-                    return lastRequestHandler;// 放弃当前请求，并返回上一次的handler
-
-                case LET_REQUEST_FLY:// 默认情况不做处理
-                default:
-                    break;
-            }
+        if (timeOut > 0) {
+            params.setConnectTimeout(timeOut);
+        }
+        if (retryTime > 0) {
+            params.setMaxRetryCount(retryTime);
+        }
+        if (executor != null) {
+            params.setExecutor(executor);
         }
 
-        onPrepareRequestParams(params);
         logSendRequest(method, params.getUri(), params);
 
         if (innerCallBack == null) {
@@ -107,6 +80,55 @@ public abstract class CoreAction<Raw, Result> implements Clearable {
         lastRequestTime = System.currentTimeMillis();
         lastRequestHandler = new ClearableWrapper(x.http().request(method, params, innerCallBack));
         return lastRequestHandler;
+    }
+
+    @WorkerThread
+    protected final Result requestGetSync(String url) throws Throwable {
+        return requestGetSync(new RequestParams(url));
+    }
+
+    protected final Result requestPostSync(String url) throws Throwable {
+        return requestPostSync(new RequestParams(url));
+    }
+
+    @WorkerThread
+    protected final Result requestGetSync(RequestParams params) throws Throwable {
+        return requestSync(HttpMethod.GET, params);
+    }
+
+    @WorkerThread
+    protected final Result requestPostSync(RequestParams params) throws Throwable {
+        return requestSync(HttpMethod.POST, params);
+    }
+
+    @WorkerThread
+    protected synchronized final Result requestSync(HttpMethod method, RequestParams params) throws Throwable {
+        if (cleared) {
+            throw new IllegalStateException("该Action已经被清理，无法使用");
+        }
+
+        logSendRequest(method, params.getUri(), params, true);
+
+        if (innerCallBack == null) {
+            if (cacheEnable) {
+                innerCallBack = new InnerCacheCallback();
+            } else {
+                innerCallBack = new InnerCallback();
+            }
+        }
+
+        logDevMsg("同步发起请求");
+
+        lastRequestTime = System.currentTimeMillis();
+        onPrepareParams(params);
+        ResultHolder result = x.http().requestSync(method, params, innerCallBack);
+        if (result.exception != null) {
+            throw result.exception;
+        }
+
+        logSuccess(result.result);
+
+        return result.result;
     }
 
 	/* 内部回调 */
@@ -151,6 +173,12 @@ public abstract class CoreAction<Raw, Result> implements Clearable {
         @Override
         public Type getLoadType() {
             return CoreAction.this.getLoadType();
+        }
+
+        @WorkerThread
+        @Override
+        public void prepare(RequestParams params) {
+            CoreAction.this.onPrepareParams(params);
         }
 
         @Override
@@ -233,23 +261,6 @@ public abstract class CoreAction<Raw, Result> implements Clearable {
 
     protected abstract Type getResultType();
 
-    /**
-     * 在请求发送之前配置RequestParams。
-     *
-     * @param params
-     */
-    protected void onPrepareRequestParams(RequestParams params) {
-        if (timeOut > 0) {
-            params.setConnectTimeout(timeOut);
-        }
-        if (retryTime > 0) {
-            params.setMaxRetryCount(retryTime);
-        }
-        if (executor != null) {
-            params.setExecutor(executor);
-        }
-    }
-
     protected void onWaiting() {
         actionState = ActionState.WAITING;
         logActionState();
@@ -278,6 +289,15 @@ public abstract class CoreAction<Raw, Result> implements Clearable {
                 listener.onStarted();
             }
         }
+    }
+
+    /**
+     * 配置{@link RequestParams}，该方法将在异步线程中执行。
+     *
+     * @param params
+     */
+    @WorkerThread
+    protected void onPrepareParams(RequestParams params) {
     }
 
     protected void onLoading(long total, long current, boolean isDownloading) {
@@ -488,43 +508,8 @@ public abstract class CoreAction<Raw, Result> implements Clearable {
 
     /* 请求记录 */
 
-    /**
-     * 当上一个请求还未结束时又来了一个请求时的处理方法。
-     */
-    public enum ConflictOperation {
-
-        /**
-         * 取消上一个请求后发起新的请求
-         */
-        CANCEL_LAST_REQUEST,
-        /**
-         * 废弃当前的请求，并返回上一次的handler
-         */
-        ABANDON_NEW_REQUEST,
-        /**
-         * 不做任何处理，让子弹飞。
-         */
-        LET_REQUEST_FLY
-
-    }
-
     private Clearable lastRequestHandler;
     private long lastRequestTime;
-    private ConflictOperation conflictOperation = ConflictOperation.LET_REQUEST_FLY;
-
-    /**
-     * 默认情况下返回{@link ConflictOperation#LET_REQUEST_FLY}，即不做处理。
-     *
-     * @return
-     */
-    public final ConflictOperation getConflictOperation() {
-        return conflictOperation;
-    }
-
-    public final CoreAction<Raw, Result> setConflictOperation(ConflictOperation conflictOperation) {
-        this.conflictOperation = conflictOperation;
-        return this;
-    }
 
     /**
      * 判断最后一次请求是否正在工作。
@@ -608,6 +593,10 @@ public abstract class CoreAction<Raw, Result> implements Clearable {
     }
 
     private void logSendRequest(HttpMethod method, String url, RequestParams params) {
+        logSendRequest(method, url, params, false);
+    }
+
+    private void logSendRequest(HttpMethod method, String url, RequestParams params, boolean sync) {
         if (isDevModeEnable()) {// 开发模式
             logDevMsg("HttpMethod: ", method);
             logDevMsg("URL: ", url);
@@ -622,29 +611,6 @@ public abstract class CoreAction<Raw, Result> implements Clearable {
                 logDevMsg("该Action没有Params参数");
             }
 
-        }
-    }
-
-    private void logConflict(ConflictOperation operation) {
-        if (isDevModeEnable()) {// 开发模式
-            operation = operation != null ? operation : null;
-            if (operation != null) {
-                switch (operation) {
-                    case ABANDON_NEW_REQUEST:
-                        logDevMsg("两个请求同时存在，抛弃新的请求");
-                        break;
-
-                    case CANCEL_LAST_REQUEST:
-                        logDevMsg("两个请求同时存在，取消上一请求");
-                        break;
-
-                    case LET_REQUEST_FLY:
-                        logDevMsg("两个请求同时存在，让它们飞一会");
-                        break;
-                }
-            } else {
-                logDevMsg("两个请求同时存在，然而ConflictOperation为null");
-            }
         }
     }
 

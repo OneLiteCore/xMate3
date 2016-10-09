@@ -367,6 +367,11 @@ import java.util.concurrent.atomic.AtomicLong;
     }
 
     @Override
+    public void prepare(RequestParams params) {
+
+    }
+
+    @Override
     public Drawable prepare(File rawData) {
         if (!validView4Callback(true)) return null;
 

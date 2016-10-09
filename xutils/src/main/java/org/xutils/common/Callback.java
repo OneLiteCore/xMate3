@@ -1,5 +1,9 @@
 package org.xutils.common;
 
+import android.support.annotation.WorkerThread;
+
+import org.xutils.http.RequestParams;
+
 import java.lang.reflect.Type;
 
 /**
@@ -31,6 +35,10 @@ public interface Callback {
     }
 
     public interface PrepareCallback<PrepareType, ResultType> extends CommonCallback<ResultType> {
+
+        @WorkerThread
+        void prepare(RequestParams params);
+
         ResultType prepare(PrepareType rawData);
     }
 
