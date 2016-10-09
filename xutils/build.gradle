@@ -9,7 +9,7 @@ android {
     defaultConfig {
         minSdkVersion 14
         targetSdkVersion 24
-        versionCode 20160908
+        versionCode 20161009
         versionName version
     }
     buildTypes {
@@ -29,7 +29,7 @@ def siteUrl = 'https://github.com/DrkCore/xMate'
 def gitUrl = 'https://github.com/DrkCore/xMate.git'
 
 group = "core.mate"
-version = "1.0.4"
+version = "1.0.7"
 
 install {
     repositories.mavenInstaller {
@@ -101,5 +101,5 @@ bintray {
 
 dependencies {
     compile 'com.alibaba:fastjson:1.1.54.android'
-    compile 'core.mate:core:1.0.6'
+    compile 'core.mate:core:1.0.7'
 }
