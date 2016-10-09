@@ -1,4 +1,4 @@
-package core.xmate.activity.base;
+package core.xmate.ui.base;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;

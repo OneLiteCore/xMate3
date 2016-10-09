@@ -1,4 +1,4 @@
-package core.xmate.activity.main;
+package core.xmate.ui.main;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -21,7 +21,7 @@ import core.mate.async.OnTaskListenerImpl;
 import core.mate.db.dao.AbsFindDao;
 import core.mate.util.ToastUtil;
 import core.xmate.R;
-import core.xmate.activity.base.BaseFrag;
+import core.xmate.ui.base.BaseFrag;
 import core.xmate.db.RegionDb;
 import core.xmate.db.region.City;
 import core.xmate.db.region.FindProvinceDao;

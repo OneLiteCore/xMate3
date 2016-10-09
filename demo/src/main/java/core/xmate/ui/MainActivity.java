@@ -1,4 +1,4 @@
-package core.xmate.activity;
+package core.xmate.ui;
 
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
@@ -12,7 +12,7 @@ import java.util.List;
 import core.mate.app.CoreFrag;
 import core.mate.util.ClassUtil;
 import core.xmate.R;
-import core.xmate.activity.base.BaseActivity;
+import core.xmate.ui.base.BaseActivity;
 
 @ContentView(R.layout.activity_main)
 public class MainActivity extends BaseActivity {
@@ -27,7 +27,7 @@ public class MainActivity extends BaseActivity {
         //反射获取指定包下的子类
         List<Class> frags = null;
         try {
-            frags = ClassUtil.getSubClassUnderPackage(CoreFrag.class, "core.xmate.activity.main");
+            frags = ClassUtil.getSubClassUnderPackage(CoreFrag.class, "core.xmate.ui.main");
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -1,6 +1,10 @@
 package core.xmate.http;
 
+import android.support.annotation.WorkerThread;
+
 import com.alibaba.fastjson.JSON;
+
+import org.xutils.http.RequestParams;
 
 import core.mate.async.Clearable;
 import core.mate.http.ApiAction;
@@ -30,6 +34,20 @@ public class WeatherAction extends ApiAction<Weather> {
      */
     public Clearable request(String cityId) {
         return requestGet(TextUtil.buildString(BASE_URL, cityId, ".html"));
+    }
+
+    public static final BaiduAction BAIDU_ACTION = new BaiduAction();
+
+    @WorkerThread
+    @Override
+    protected void onPrepareParams(RequestParams params) {
+        super.onPrepareParams(params);
+//        try {该方法将在异步线程中执行，你可以在这里同步执行其他的请求
+//            String baidu = BAIDU_ACTION.requestSync();
+//            logDevMsg("同步获取百度", baidu);
+//        } catch (Throwable throwable) {
+//            throwable.printStackTrace();
+//        }
     }
 
     /**
