@@ -337,6 +337,11 @@ public abstract class CoreAction<Raw, Result> implements Clearable {
      */
     @WorkerThread
     protected void onResultPrepared(@NonNull Result result) {
+        if (listeners != null) {
+            for (OnActionListener<Result> listener : listeners) {
+                listener.onResultPrepared(result);
+            }
+        }
     }
 
     protected void onSuccess(Result result) {
