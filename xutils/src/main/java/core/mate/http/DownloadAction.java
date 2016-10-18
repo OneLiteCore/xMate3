@@ -7,7 +7,7 @@ import java.lang.reflect.Type;
 
 import core.mate.async.Clearable;
 
-public abstract class DownloadAction extends CoreAction<File, File> {
+public class DownloadAction extends CoreAction<File, File> {
 
     /*继承*/
 
@@ -33,14 +33,29 @@ public abstract class DownloadAction extends CoreAction<File, File> {
 
     /*拓展*/
 
-    protected Clearable download(String url, File file) {
+    public Clearable download(String url, File file) {
         return download(url, file.getAbsolutePath());
     }
 
-    protected Clearable download(String url, String file) {
+    public Clearable download(String url, String file) {
         RequestParams params = new RequestParams(url);
         params.setSaveFilePath(file);
         params.setCancelFast(true);
+        params.setAutoResume(true);
+        params.setAutoRename(true);
         return requestGet(params);
+    }
+
+    public File downloadSync(String url, File file) throws Throwable {
+        return downloadSync(url, file.getAbsolutePath());
+    }
+
+    public File downloadSync(String url, String file) throws Throwable {
+        RequestParams params = new RequestParams(url);
+        params.setSaveFilePath(file);
+        params.setCancelFast(true);
+        params.setAutoResume(true);
+        params.setAutoRename(true);
+        return requestGetSync(params);
     }
 }
