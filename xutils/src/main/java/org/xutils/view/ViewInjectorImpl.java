@@ -24,7 +24,6 @@ import org.xutils.ViewInjector;
 import org.xutils.common.util.LogUtil;
 import org.xutils.view.annotation.ContentView;
 import org.xutils.view.annotation.Event;
-import org.xutils.view.annotation.MultiEvent;
 import org.xutils.view.annotation.ViewInject;
 import org.xutils.x;
 
@@ -181,17 +180,6 @@ public final class ViewInjectorImpl implements ViewInjector {
 
                 if (Modifier.isStatic(method.getModifiers())) {
                     continue;
-                }
-
-                //检查当前方法是否是MultiEvent注解的方法
-                MultiEvent multiEvent = method.getAnnotation(MultiEvent.class);
-                if (multiEvent != null) {
-                    Event[] events = multiEvent.value();
-                    if (events != null && events.length > 0) {
-                        for (Event event : events) {
-                            injectEvent(handler, finder, method, event);
-                        }
-                    }
                 }
 
                 //检查当前方法是否是event注解的方法
