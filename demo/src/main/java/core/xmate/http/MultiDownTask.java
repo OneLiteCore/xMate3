@@ -6,6 +6,7 @@ import org.xutils.common.task.AbsTask;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import core.mate.async.CoreTask;
@@ -51,6 +52,18 @@ public class MultiDownTask extends CoreTask<MultiDownTask.Params, Void, List<Fil
             throw new IllegalArgumentException();
         }
 
+        DownloadAction action = new DownloadAction();
+
+        if (len == 1) {//要下载的文件只有一个，直接同步下载即可
+            String url = params.urls[0];
+            try {
+                File file = action.downloadSync(url, getSavePath(params.dir, url));
+                return Collections.singletonList(file);
+            } catch (Throwable throwable) {//重抛出异常
+                throw new Exception(throwable);
+            }
+        }
+
         //count用于同步当前线程和回调，其中唯一的元素表示剩余回调数量
         //当其为0时表示所有异步都已经回调结束
         final int[] count = {len};
@@ -76,17 +89,10 @@ public class MultiDownTask extends CoreTask<MultiDownTask.Params, Void, List<Fil
         };
 
         //配置下载任务
-        DownloadAction action = new DownloadAction();
         action.addOnActionListener(listener);
-        TextBuilder builder = new TextBuilder().setEmptyAsNullEnable(true);
-        String ext, name, path;
         for (String url : params.urls) {
-            ext = FileUtil.getFileExtName(url);
-            name = FileUtil.getAbsoluteFileName(url);
-            path = builder.clear().append(params.dir).append(File.separator)
-                    .append(name).append(".").append(ext).removeEnd(".").toString();
             //发起异步下载请求，xUtils内部会维护下载的多个线程
-            action.download(url, path);
+            action.download(url, getSavePath(params.dir, url));
         }
 
         //阻塞当前线程10秒，用于测试在wait之前异步回调都已结束的情况
@@ -100,6 +106,15 @@ public class MultiDownTask extends CoreTask<MultiDownTask.Params, Void, List<Fil
         }
 
         return files;
+    }
+
+    private TextBuilder builder = new TextBuilder().setEmptyAsNullEnable(true);
+
+    private String getSavePath(File dir, String url) {
+        String ext = FileUtil.getFileExtName(url);
+        String name = FileUtil.getAbsoluteFileName(url);
+        return builder.clear().append(dir).append(File.separator)
+                .append(name).append(".").append(ext).removeEnd(".").toString();
     }
 
 }
