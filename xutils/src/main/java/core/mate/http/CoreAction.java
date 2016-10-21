@@ -253,7 +253,7 @@ public abstract class CoreAction<Raw, Result> implements Clearable {
         return this;
     }
 
-    public final ActionState getActionState() {
+    public ActionState getActionState() {
         return actionState;
     }
 
@@ -459,7 +459,7 @@ public abstract class CoreAction<Raw, Result> implements Clearable {
 
     private List<OnActionListener<Result>> listeners;
 
-    public final OnActionListener<Result> removeOnActionListener(OnActionListener<Result> listener) {
+    public OnActionListener<Result> removeOnActionListener(OnActionListener<Result> listener) {
         return listeners != null && listeners.remove(listener) ? listener : null;
     }
 
@@ -468,7 +468,7 @@ public abstract class CoreAction<Raw, Result> implements Clearable {
      *
      * @param listener
      */
-    public final CoreAction<Raw, Result> addOnActionListener(OnActionListener<Result> listener) {
+    public CoreAction<Raw, Result> addOnActionListener(OnActionListener<Result> listener) {
         if (listener != null) {
             if (this.listeners == null) {
                 this.listeners = new ArrayList<>();
@@ -484,11 +484,11 @@ public abstract class CoreAction<Raw, Result> implements Clearable {
     private int retryTime = 3;
     private Executor executor;
 
-    public final int getRetryTime() {
+    public int getRetryTime() {
         return retryTime;
     }
 
-    public final int getTimeOut() {
+    public int getTimeOut() {
         return timeOut;
     }
 
@@ -496,12 +496,12 @@ public abstract class CoreAction<Raw, Result> implements Clearable {
         return executor;
     }
 
-    public final CoreAction setTimeOut(int timeOut) {
+    public CoreAction setTimeOut(int timeOut) {
         this.timeOut = timeOut;
         return this;
     }
 
-    public final CoreAction setRetryTime(int retryTime) {
+    public CoreAction setRetryTime(int retryTime) {
         this.retryTime = retryTime;
         return this;
     }
@@ -521,7 +521,7 @@ public abstract class CoreAction<Raw, Result> implements Clearable {
      *
      * @return
      */
-    public final boolean isLastRequestWorking() {
+    public boolean isLastRequestWorking() {
         return lastRequestHandler != null;
     }
 
@@ -530,14 +530,14 @@ public abstract class CoreAction<Raw, Result> implements Clearable {
      *
      * @return
      */
-    public final long getLastRequestTime() {
+    public long getLastRequestTime() {
         return lastRequestTime;
     }
 
     /**
      * 取消最后一次的请求，当且仅当{@link #isLastRequestWorking()}成立时取消。
      */
-    public final void cancelLastRequest() {
+    public void cancelLastRequest() {
         if (isLastRequestWorking()) {
             lastRequestHandler.clear();
         }
@@ -547,7 +547,7 @@ public abstract class CoreAction<Raw, Result> implements Clearable {
 
     private List<ITaskIndicator> indicators;
 
-    public final CoreAction<Raw, Result> addIndicator(ITaskIndicator indicator) {
+    public CoreAction<Raw, Result> addIndicator(ITaskIndicator indicator) {
         if (indicator != null) {
             if (this.indicators == null) {
                 this.indicators = new ArrayList<>();
@@ -557,7 +557,7 @@ public abstract class CoreAction<Raw, Result> implements Clearable {
         return this;
     }
 
-    public final void clearIndicator() {
+    public void clearIndicator() {
         if (indicators != null) {
             for (ITaskIndicator indicator : indicators) {
                 if (indicator.isProgressing()) {
@@ -707,17 +707,17 @@ public abstract class CoreAction<Raw, Result> implements Clearable {
      *
      * @return
      */
-    public final boolean isClearOnFinishedEnable() {
+    public boolean isClearOnFinishedEnable() {
         return clearOnFinishedEnable;
     }
 
-    public final CoreAction<Raw, Result> setClearOnFinishedEnable(boolean clearOnFinishedEnable) {
+    public CoreAction<Raw, Result> setClearOnFinishedEnable(boolean clearOnFinishedEnable) {
         this.clearOnFinishedEnable = clearOnFinishedEnable;
         return this;
     }
 
     @Override
-    public final boolean isCleared() {
+    public boolean isCleared() {
         return cleared;
     }
 
@@ -726,7 +726,7 @@ public abstract class CoreAction<Raw, Result> implements Clearable {
      * 该方法同样会清空ProgressIndicator。
      */
     @Override
-    public final void clear() {
+    public void clear() {
         if (!cleared) {
             cleared = true;
             if (isLastRequestWorking()) {
