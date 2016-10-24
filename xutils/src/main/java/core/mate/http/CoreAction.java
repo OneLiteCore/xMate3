@@ -3,6 +3,7 @@ package core.mate.http;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.WorkerThread;
+import android.text.TextUtils;
 
 import com.alibaba.fastjson.JSON;
 
@@ -67,8 +68,6 @@ public abstract class CoreAction<Raw, Result> implements Clearable {
             params.setExecutor(executor);
         }
 
-        logSendRequest(method, params.getUri(), params);
-
         if (innerCallBack == null) {
             if (cacheEnable) {
                 innerCallBack = new InnerCacheCallback();
@@ -107,8 +106,6 @@ public abstract class CoreAction<Raw, Result> implements Clearable {
             throw new IllegalStateException("该Action已经被清理，无法使用");
         }
 
-        logSendRequest(method, params.getUri(), params, true);
-
         if (innerCallBack == null) {
             if (cacheEnable) {
                 innerCallBack = new InnerCacheCallback();
@@ -120,7 +117,6 @@ public abstract class CoreAction<Raw, Result> implements Clearable {
         logDevMsg("同步发起请求");
 
         lastRequestTime = System.currentTimeMillis();
-        onPrepareParams(params);
         ResultHolder result = x.http().requestSync(method, params, innerCallBack);
         if (result.exception != null) {
             throw result.exception;
@@ -179,6 +175,7 @@ public abstract class CoreAction<Raw, Result> implements Clearable {
         @Override
         public void prepare(RequestParams params) {
             CoreAction.this.onPrepareParams(params);
+            logSendRequest(params);
         }
 
         @Override
@@ -359,6 +356,12 @@ public abstract class CoreAction<Raw, Result> implements Clearable {
     protected void onError(Throwable thr, IllegalDataException e, boolean isOnCallback) {
         actionState = ActionState.ERROR;
         logActionState();
+        if (thr != null) {
+            logError(thr);
+        }
+        if (e != null) {
+            logError(e);
+        }
 
         if (listeners != null) {
             for (OnActionListener listener : listeners) {
@@ -597,23 +600,24 @@ public abstract class CoreAction<Raw, Result> implements Clearable {
         logDevMsg("接口调用次数 = ", ++usedCount);
     }
 
-    private void logSendRequest(HttpMethod method, String url, RequestParams params) {
-        logSendRequest(method, url, params, false);
-    }
-
-    private void logSendRequest(HttpMethod method, String url, RequestParams params, boolean sync) {
+    private void logSendRequest(RequestParams params) {
         if (isDevModeEnable()) {// 开发模式
-            logDevMsg("HttpMethod: ", method);
-            logDevMsg("URL: ", url);
+            logDevMsg("HttpMethod: ", params.getMethod());
+            logDevMsg("URL: ", params.getUri());
 
             // log输出参数
-            List<KeyValue> kvs = params != null ? params.getAllParams() : null;
+            List<KeyValue> kvs = params.getAllParams();
             if (kvs != null && !kvs.isEmpty()) {
                 for (KeyValue kv : kvs) {
                     logDevMsg("Params: ", kv.key, " : ", kv.value);
                 }
             } else {
                 logDevMsg("该Action没有Params参数");
+            }
+
+            String content = params.isAsJsonContent() ? params.getBodyContent() : null;
+            if (!TextUtils.isEmpty(content)) {
+                logDevMsg("Raw参数：", content);
             }
 
         }
@@ -635,6 +639,12 @@ public abstract class CoreAction<Raw, Result> implements Clearable {
     private void logLoading(long total, long current, boolean isDownloading) {
         if (isDevModeEnable()) {
             logDevMsg("loading：total_", total, " current_", current, " isDownloading_", isDownloading);
+        }
+    }
+
+    private void logError(Throwable e) {
+        if (isDevModeEnable()) {
+            logDevMsg("发生异常：", e.getMessage());
         }
     }
 
