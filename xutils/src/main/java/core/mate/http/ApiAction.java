@@ -1,5 +1,7 @@
 package core.mate.http;
 
+import android.support.annotation.CallSuper;
+
 import com.alibaba.fastjson.JSON;
 
 import java.lang.reflect.Type;
@@ -21,12 +23,12 @@ public abstract class ApiAction<Result> extends CoreAction<String, Result> {
     /*继承*/
 
     @Override
-    protected final Type getLoadType() {
+    protected Type getLoadType() {
         return String.class;
     }
 
     @Override
-    protected final Type getResultType() {
+    protected Type getResultType() {
         Type[] types = ClassUtil.getGenericParametersType(getClass());
         return types[types.length - 1];
     }
@@ -46,8 +48,9 @@ public abstract class ApiAction<Result> extends CoreAction<String, Result> {
      * @return
      * @throws IllegalDataException
      */
+    @CallSuper
     @Override
-    protected final Result onPrepareResult(String rawData) throws IllegalDataException {
+    protected Result onPrepareResult(String rawData) throws IllegalDataException {
         logRawData(rawData);
 
         rawData = onPrepareDataString(rawData);
@@ -70,11 +73,11 @@ public abstract class ApiAction<Result> extends CoreAction<String, Result> {
 
     private boolean autoConvertEnable = true;
 
-    protected final boolean isAutoConvertEnable() {
+    protected boolean isAutoConvertEnable() {
         return autoConvertEnable;
     }
 
-    protected final void setAutoConvertEnable(boolean autoConvertEnable) {
+    protected void setAutoConvertEnable(boolean autoConvertEnable) {
         this.autoConvertEnable = autoConvertEnable;
     }
 

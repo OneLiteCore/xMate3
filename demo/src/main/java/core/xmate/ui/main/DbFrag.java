@@ -77,7 +77,6 @@ public class DbFrag extends BaseFrag {
         }
 
         //访问数据库
-        ToastUtil.toastShort("使用的dao.hashCode() = " + dao.hashCode());
         regionDb.access(dao, new ProgressDlgFrag().setFragmentManager(this), new OnTaskListenerImpl<List<Province>>() {
             @Override
             public void onSuccess(List<Province> provinces) {

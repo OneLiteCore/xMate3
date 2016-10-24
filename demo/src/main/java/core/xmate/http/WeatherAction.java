@@ -10,7 +10,7 @@ import core.mate.async.Clearable;
 import core.mate.http.ApiAction;
 import core.mate.http.IllegalDataException;
 import core.mate.util.TextUtil;
-import core.xmate.model.Weather;
+import core.xmate.bean.Weather;
 
 /**
  * 访问天气接口。

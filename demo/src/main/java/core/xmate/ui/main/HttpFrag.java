@@ -4,14 +4,17 @@ import org.xutils.view.annotation.ContentView;
 import org.xutils.view.annotation.Event;
 
 import java.io.File;
+import java.util.List;
 
 import core.mate.app.ProgressDlgFrag;
+import core.mate.async.OnTaskListenerImpl;
 import core.mate.http.OnActionListenerImpl;
 import core.mate.util.ToastUtil;
 import core.xmate.R;
+import core.xmate.bean.Weather;
 import core.xmate.http.DownAarAction;
+import core.xmate.http.MultiDownTask;
 import core.xmate.http.WeatherAction;
-import core.xmate.model.Weather;
 import core.xmate.ui.base.BaseFrag;
 
 @ContentView(R.layout.frag_http)
@@ -74,4 +77,20 @@ public class HttpFrag extends BaseFrag {
         downAarAction.start();
     }
 
+    @Event(R.id.button_frag_multiDown)
+    private void startMultiDown() {
+        String[] urls = {
+                "https://raw.githubusercontent.com/DrkCore/xMate/master/README.md",
+                "https://raw.githubusercontent.com/DrkCore/xMate/master/LICENSE"
+        };
+        File dir = getContext().getFilesDir();
+        new MultiDownTask().addIndicator(new ProgressDlgFrag().setFragmentManager(this)).addOnTaskListener(new OnTaskListenerImpl<List<File>>() {
+            @Override
+            public void onSuccess(List<File> files) {
+                for (File file : files) {
+                    ToastUtil.toastShort(file + " length = " + file.length());
+                }
+            }
+        }).execute(new MultiDownTask.Params(urls, dir));
+    }
 }

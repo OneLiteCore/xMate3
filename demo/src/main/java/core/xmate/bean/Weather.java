@@ -1,6 +1,4 @@
-package core.xmate.model;
-
-import core.xmate.http.WeatherAction;
+package core.xmate.bean;
 
 /**
  * @author DrkCore

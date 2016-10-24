@@ -18,9 +18,6 @@ public class FindProvinceDao extends AbsDao<List<Province>> {
 
     @Override
     public List<Province> access(@NonNull DbManager db) throws Exception {
-        //这里为了看效果线程休眠一会
-        Thread.sleep(2000L);
-
         //在这里定义对数据库的操作
         //如果逻辑比较复杂的话你可以将之分拆成几个dao并在
         //这里组合调用其access()方法整理出结果
