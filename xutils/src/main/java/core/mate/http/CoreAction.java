@@ -121,9 +121,6 @@ public abstract class CoreAction<Raw, Result> implements Clearable {
         if (result.exception != null) {
             throw result.exception;
         }
-
-        logSuccess(result.result);
-
         return result.result;
     }
 
