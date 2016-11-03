@@ -116,6 +116,13 @@ public abstract class CoreAction<Raw, Result> implements Clearable {
 
         logDevMsg("同步发起请求");
 
+        if (timeOut > 0) {
+            params.setConnectTimeout(timeOut);
+        }
+        if (retryTime > 0) {
+            params.setMaxRetryCount(retryTime);
+        }
+
         lastRequestTime = System.currentTimeMillis();
         ResultHolder result = x.http().requestSync(method, params, innerCallBack);
         if (result.exception != null) {
@@ -292,6 +299,11 @@ public abstract class CoreAction<Raw, Result> implements Clearable {
      */
     @WorkerThread
     protected void onPrepareParams(RequestParams params) {
+        if (listeners != null) {
+            for (OnActionListener<Result> listener : listeners) {
+                listener.onPrepareParams(params);
+            }
+        }
     }
 
     protected void onLoading(long total, long current, boolean isDownloading) {
@@ -431,6 +443,9 @@ public abstract class CoreAction<Raw, Result> implements Clearable {
         void onLoading(long total, long current, boolean isDownloading);
 
         boolean onCache(Result result);
+
+        @WorkerThread
+        void onPrepareParams(@NonNull RequestParams params);
 
         /**
          * 从服务器放回数据，并且成功转化成最终对象时回调该方法。
