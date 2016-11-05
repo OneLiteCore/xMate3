@@ -35,23 +35,23 @@ public abstract class CoreAction<Raw, Result> implements Clearable {
 
     /* 发送请求 */
 
-    protected final Clearable requestPost(String url) {
+    public final Clearable requestPost(String url) {
         return requestPost(new RequestParams(url));
     }
 
-    protected final Clearable requestGet(String url) {
+    public final Clearable requestGet(String url) {
         return requestGet(new RequestParams(url));
     }
 
-    protected final Clearable requestPost(RequestParams params) {
+    public final Clearable requestPost(RequestParams params) {
         return request(HttpMethod.POST, params);
     }
 
-    protected final Clearable requestGet(RequestParams params) {
+    public final Clearable requestGet(RequestParams params) {
         return request(HttpMethod.GET, params);
     }
 
-    protected synchronized final Clearable request(HttpMethod method, RequestParams params) {
+    public synchronized final Clearable request(HttpMethod method, RequestParams params) {
         if (cleared) {
             throw new IllegalStateException("该Action已经被清理，无法使用");
         }
@@ -82,26 +82,26 @@ public abstract class CoreAction<Raw, Result> implements Clearable {
     }
 
     @WorkerThread
-    protected final Result requestGetSync(String url) throws Throwable {
+    public final Result requestGetSync(String url) throws Throwable {
         return requestGetSync(new RequestParams(url));
     }
 
-    protected final Result requestPostSync(String url) throws Throwable {
+    public final Result requestPostSync(String url) throws Throwable {
         return requestPostSync(new RequestParams(url));
     }
 
     @WorkerThread
-    protected final Result requestGetSync(RequestParams params) throws Throwable {
+    public final Result requestGetSync(RequestParams params) throws Throwable {
         return requestSync(HttpMethod.GET, params);
     }
 
     @WorkerThread
-    protected final Result requestPostSync(RequestParams params) throws Throwable {
+    public final Result requestPostSync(RequestParams params) throws Throwable {
         return requestSync(HttpMethod.POST, params);
     }
 
     @WorkerThread
-    protected synchronized final Result requestSync(HttpMethod method, RequestParams params) throws Throwable {
+    public synchronized final Result requestSync(HttpMethod method, RequestParams params) throws Throwable {
         if (cleared) {
             throw new IllegalStateException("该Action已经被清理，无法使用");
         }
