@@ -3,6 +3,7 @@ package core.mate.http;
 import android.support.annotation.NonNull;
 
 import org.xutils.common.Callback;
+import org.xutils.http.RequestParams;
 
 /**
  * @author DrkCore
@@ -10,43 +11,48 @@ import org.xutils.common.Callback;
  */
 public abstract class OnActionListenerImpl<Result> implements CoreAction.OnActionListener<Result> {
 
-	@Override
-	public void onWaiting () {
+    @Override
+    public void onWaiting() {
 
-	}
+    }
 
-	@Override
-	public void onStarted () {
+    @Override
+    public void onStarted() {
 
-	}
+    }
 
-	@Override
-	public void onLoading (long total, long current, boolean isDownloading) {
+    @Override
+    public void onLoading(long total, long current, boolean isDownloading) {
 
-	}
+    }
 
-	@Override
-	public boolean onCache(Result result) {
-		return false;
-	}
+    @Override
+    public boolean onCache(Result result) {
+        return false;
+    }
 
-	@Override
-	public void onResultPrepared (@NonNull Result result) {
+    @Override
+    public void onPrepareParams(@NonNull RequestParams params) {
 
-	}
+    }
 
-	@Override
-	public void onError (Throwable ex, IllegalDataException e, boolean isOnCallback) {
+    @Override
+    public void onResultPrepared(@NonNull Result result) {
 
-	}
+    }
 
-	@Override
-	public void onCancelled (Callback.CancelledException cex) {
+    @Override
+    public void onError(Throwable ex, IllegalDataException e, boolean isOnCallback) {
 
-	}
+    }
 
-	@Override
-	public void onFinished () {
+    @Override
+    public void onCancelled(Callback.CancelledException cex) {
 
-	}
+    }
+
+    @Override
+    public void onFinished() {
+
+    }
 }
