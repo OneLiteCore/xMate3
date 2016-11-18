@@ -8,11 +8,11 @@ import core.mate.async.Clearable;
  * @author DrkCore
  * @since 2016-10-09
  */
-class ClearableWrapper implements Clearable {
+public class ClearableWrapper implements Clearable {
 
     private final Callback.Cancelable cancelable;
 
-    ClearableWrapper(Callback.Cancelable cancelable) {
+    public ClearableWrapper(Callback.Cancelable cancelable) {
         this.cancelable = cancelable;
     }
 
