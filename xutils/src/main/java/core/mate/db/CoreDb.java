@@ -14,13 +14,13 @@ import java.lang.reflect.Modifier;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import core.mate.async.Clearable;
 import core.mate.async.CoreTask;
 import core.mate.async.CoreTask.OnTaskListener;
-import core.mate.async.Clearable;
-import core.mate.view.ITaskIndicator;
 import core.mate.db.dao.ExecNonQuerySqlDao;
 import core.mate.db.dao.FindFirstDbModelDao;
 import core.mate.util.LogUtil;
+import core.mate.view.ITaskIndicator;
 
 /**
  * 基于xUtils的数据库基类。
@@ -29,11 +29,11 @@ import core.mate.util.LogUtil;
  * @since 2015年11月12日00:33:19
  */
 public abstract class CoreDb extends DbManager.DaoConfig implements DbManager.DbUpgradeListener, DbManager.DbOpenListener, DbManager.TableCreateListener {
-
+    
     public CoreDb(String dbName, int dbVersion) {
         this(null, dbName, dbVersion);
     }
-
+    
     public CoreDb(File inDir, String dbName, int dbVersion) {
         super();
         setDbDir(inDir);
@@ -45,17 +45,18 @@ public abstract class CoreDb extends DbManager.DaoConfig implements DbManager.Db
     }
 
 	/* 初始化数据库工具 */
-
+    
     private volatile DbManager dbMgr;
-
+    
     /**
      * 获取该db对应的{@link DbManager}。首次获取后的实例会被缓存到成员变量中。
+     * 该方法中可能执行部分耗时操作，如无必要，请通过{@link AbsDao#access(DbManager)}
+     * 方法来获得实例。
      *
      * @return
      * @throws DbException
      */
-    /*package*/
-    final DbManager getOrCreateDb() throws DbException {
+    public DbManager getOrCreateDb() throws DbException {
         if (dbMgr == null) {
             synchronized (this) {
                 if (dbMgr == null) {
@@ -80,7 +81,7 @@ public abstract class CoreDb extends DbManager.DaoConfig implements DbManager.Db
     }
 
 	/* 内部回调 */
-
+    
     /**
      * 准备数据库的回调，将在创建DbManager之前回调。
      * 该方法将在异步线程中执行，你可以在这个方法中做耗时的准备操作，
@@ -92,7 +93,7 @@ public abstract class CoreDb extends DbManager.DaoConfig implements DbManager.Db
      */
     protected void onPrepare() throws Exception {
     }
-
+    
     /**
      * 第一次从该DaoConfig中创建{@link DbManager}时回调该方法。
      * 你可以在该方法中创建数据表等操作。
@@ -103,15 +104,15 @@ public abstract class CoreDb extends DbManager.DaoConfig implements DbManager.Db
      */
     protected void onCreate(DbManager db) throws DbException {
     }
-
+    
     @Override
     public void onDbOpened(DbManager db) {
     }
-
+    
     @Override
     public void onTableCreated(DbManager db, TableEntity<?> table) {
     }
-
+    
     /**
      * 从该DaoConfig中创建DbManager时，当已存在的数据库的version和DaoConfig中指定的version<b>不一致</b>
      * 时回调该方法。<b>该方法将在异步线程之中执行</b>。
@@ -125,35 +126,35 @@ public abstract class CoreDb extends DbManager.DaoConfig implements DbManager.Db
     }
 
 	/* DAO操作 */
-
+    
     private class DaoTask<Result> extends CoreTask<AbsDao<Result>, Void, Result> {
-
+        
         @Override
         public Result doInBack(AbsDao<Result> dao) throws Exception {
             return accessSync(dao);
         }
     }
-
-    public final <Result> Clearable access(AbsDao<Result> dao) {
+    
+    public <Result> Clearable access(AbsDao<Result> dao) {
         return access(dao, null, null);
     }
-
-    public final <Result> Clearable access(AbsDao<Result> dao, ITaskIndicator indicator) {
+    
+    public <Result> Clearable access(AbsDao<Result> dao, ITaskIndicator indicator) {
         return access(dao, indicator, null);
     }
-
-    public final <Result> Clearable access(AbsDao<Result> dao, OnTaskListener<Result> listener) {
+    
+    public <Result> Clearable access(AbsDao<Result> dao, OnTaskListener<Result> listener) {
         return access(dao, null, listener);
     }
-
-    public final <Result> Clearable access(AbsDao<Result> dao, ITaskIndicator indicator, OnTaskListener<Result> listener) {
+    
+    public <Result> Clearable access(AbsDao<Result> dao, ITaskIndicator indicator, OnTaskListener<Result> listener) {
         DaoTask<Result> task = new DaoTask<>();
         task.addIndicator(indicator);
         task.addOnTaskListener(listener);
         task.execute(dao);
         return task;
     }
-
+    
     /**
      * 同步访问数据库。
      *
@@ -162,24 +163,24 @@ public abstract class CoreDb extends DbManager.DaoConfig implements DbManager.Db
      * @return
      * @throws Exception
      */
-    public final <Result> Result accessSync(AbsDao<Result> dao) throws Exception {
+    public <Result> Result accessSync(AbsDao<Result> dao) throws Exception {
         Result result = dao.access(getOrCreateDb());
         cacheDao(dao);
         return result;
     }
 
 	/*Dao缓存*/
-
+    
     public static final int DEFAULT_DAO_CACHE_SIZE = 8;
     private int daoCacheSize;
-
+    
     private boolean cacheDaoEnable;
-
+    
     /**
      * LrcCache是线程安全的
      */
     private volatile ConcurrentMap<Class, WeakReference<AbsDao>> daoCache;
-
+    
     private ConcurrentMap<Class, WeakReference<AbsDao>> getDaoCache() {
         if (daoCache == null) {
             synchronized (this) {
@@ -190,29 +191,29 @@ public abstract class CoreDb extends DbManager.DaoConfig implements DbManager.Db
         }
         return daoCache;
     }
-
-    public final boolean isCacheDaoEnable() {
+    
+    public boolean isCacheDaoEnable() {
         return cacheDaoEnable;
     }
-
-    public final CoreDb setCacheDaoEnable() {
+    
+    public CoreDb setCacheDaoEnable() {
         return setCacheDaoEnable(DEFAULT_DAO_CACHE_SIZE);
     }
-
-    public final CoreDb setCacheDaoEnable(int cacheSize) {
+    
+    public CoreDb setCacheDaoEnable(int cacheSize) {
         if (!cacheDaoEnable) {
             this.daoCacheSize = cacheSize;
             this.cacheDaoEnable = true;
-
+            
             if (cacheSize <= 0) {
                 throw new IllegalArgumentException();
             }
         }
         return this;
     }
-
+    
     private final Object daoCacheLock = new Object();
-
+    
     /**
      * 缓存dao实例。通过{@link #setCacheDaoEnable()}启用了缓存之后每次访问数据库完成后都会缓存dao对象。
      * 需要注意的是，为了避免内存泄露<b>匿名类的dao实例会被过滤</b>。
@@ -234,8 +235,8 @@ public abstract class CoreDb extends DbManager.DaoConfig implements DbManager.Db
         }
         return false;
     }
-
-    public synchronized final <T extends AbsDao> T getCachedDao(Class<T> clazz) {
+    
+    public synchronized <T extends AbsDao> T getCachedDao(Class<T> clazz) {
         AbsDao dao = null;
         if (cacheDaoEnable) {
             synchronized (daoCacheLock) {
@@ -253,8 +254,8 @@ public abstract class CoreDb extends DbManager.DaoConfig implements DbManager.Db
         }
         return (T) dao;
     }
-
-    public final <T extends AbsDao> T getCachedDaoOrNewInstance(Class<T> clazz) {
+    
+    public <T extends AbsDao> T getCachedDaoOrNewInstance(Class<T> clazz) {
         T dao = getCachedDao(clazz);
         if (dao == null) {
             try {
@@ -267,12 +268,12 @@ public abstract class CoreDb extends DbManager.DaoConfig implements DbManager.Db
     }
 
 	/*SQL语法操作*/
-
-    public final void execNonQuery(String sql, Object... args) {
+    
+    public void execNonQuery(String sql, Object... args) {
         execNonQuery(new SqlInfo(sql).addBindArgs(args));
     }
-
-    public final void execNonQuery(SqlInfo sql) {
+    
+    public void execNonQuery(SqlInfo sql) {
         ExecNonQuerySqlDao dao = getCachedDao(ExecNonQuerySqlDao.class);
         if (dao == null) {
             dao = new ExecNonQuerySqlDao();
@@ -280,12 +281,12 @@ public abstract class CoreDb extends DbManager.DaoConfig implements DbManager.Db
         dao.setSql(sql);
         access(dao);
     }
-
-    public final DbModel execQuerySync(String sql, Object... args) throws Exception {
+    
+    public DbModel execQuerySync(String sql, Object... args) throws Exception {
         return execQuerySync(new SqlInfo(sql).addBindArgs(args));
     }
-
-    public final DbModel execQuerySync(SqlInfo sql) throws Exception {
+    
+    public DbModel execQuerySync(SqlInfo sql) throws Exception {
         FindFirstDbModelDao dao = getCachedDao(FindFirstDbModelDao.class);
         if (dao == null) {
             dao = new FindFirstDbModelDao();
@@ -295,11 +296,11 @@ public abstract class CoreDb extends DbManager.DaoConfig implements DbManager.Db
     }
 
 	/*拓展*/
-
+    
     /**
      * 按照xUtils3的注释（{@link DbManager#close()}），通常不需要关闭数据库。
      */
-    public final void close() {
+    public void close() {
         if (dbMgr != null) {
             try {
                 dbMgr.close();
