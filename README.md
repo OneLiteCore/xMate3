@@ -15,8 +15,8 @@
 Android Studio用户可有在模块的build.gradle中于dependencies下添加如下依赖：
 
 ```
-compile 'core.mate:core:1.0.7'
-compile 'core.mate:xutils:1.0.7'
+compile 'core.mate:core:1.0.9'
+compile 'core.mate:xutils:1.0.9'
 ```
 
 之后在你的Application中进行初始化：
