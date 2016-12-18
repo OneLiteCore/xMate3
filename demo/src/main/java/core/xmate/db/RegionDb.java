@@ -6,7 +6,7 @@ import org.xutils.ex.DbException;
 import java.io.File;
 
 import core.mate.db.CoreDb;
-import core.mate.util.ResUtil;
+import core.mate.util.ContextUtil;
 import core.xmate.App;
 import core.xmate.db.region.Area;
 import core.xmate.db.region.City;
@@ -56,7 +56,7 @@ public class RegionDb extends CoreDb {
         //该方法将在子线程中执行，因而这里可以同步处理耗时的操作
         //比如从assets中导出数据库文件
         File dbFile = App.getInstance().getDatabasePath(DB_NAME);
-        ResUtil.exportAssetFile(DB_NAME, dbFile.getParentFile());
+        ContextUtil.exportAssetFile(DB_NAME, dbFile.getParentFile());
     }
 
     @Override

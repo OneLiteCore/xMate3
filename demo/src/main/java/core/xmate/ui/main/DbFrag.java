@@ -19,13 +19,12 @@ import core.mate.adapter.SimpleViewHolder;
 import core.mate.app.ProgressDlgFrag;
 import core.mate.async.OnTaskListenerImpl;
 import core.mate.db.dao.AbsFindDao;
-import core.mate.util.ToastUtil;
 import core.xmate.R;
-import core.xmate.ui.base.BaseFrag;
 import core.xmate.db.RegionDb;
 import core.xmate.db.region.City;
 import core.xmate.db.region.FindProvinceDao;
 import core.xmate.db.region.Province;
+import core.xmate.ui.base.BaseFrag;
 
 /**
  * @author DrkCore
@@ -45,7 +44,7 @@ public class DbFrag extends BaseFrag {
         //使用由CoreMate框架提供的万能Adapter一句话搞定适配器
         listView.setAdapter(new SimpleAdapter<Province>(android.R.layout.simple_list_item_1) {
             @Override
-            protected void bindViewData(SimpleViewHolder<Province> holder, int position, Province data, int viewType) {
+            protected void bindViewData(SimpleViewHolder holder, int position, Province data, int viewType) {
                 TextView textView = holder.getCastView();
                 textView.setText(data.getName());
             }

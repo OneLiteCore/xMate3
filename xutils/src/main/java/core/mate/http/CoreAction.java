@@ -34,7 +34,7 @@ import core.mate.view.ITaskIndicator;
 public abstract class CoreAction<Raw, Result> implements Clearable {
 
     /* 发送请求 */
-    
+
     protected Clearable requestPost(String url) {
         return requestPost(new RequestParams(url));
     }
@@ -52,7 +52,7 @@ public abstract class CoreAction<Raw, Result> implements Clearable {
     }
     
     protected synchronized Clearable request(HttpMethod method, RequestParams params) {
-        if (cleared) {
+        if (isCleared()) {
             throw new IllegalStateException("该Action已经被清理，无法使用");
         }
         
@@ -77,8 +77,12 @@ public abstract class CoreAction<Raw, Result> implements Clearable {
         }
         
         lastRequestTime = System.currentTimeMillis();
-        lastRequestHandler = new ClearableWrapper(x.http().request(method, params, innerCallBack));
-        return lastRequestHandler;
+        if (clearables == null) {
+            clearables = new ArrayList<>();
+        }
+        Clearable clearable = new ClearableWrapper(x.http().request(method, params, innerCallBack));
+        clearables.add(clearable);
+        return clearable;
     }
     
     @WorkerThread
@@ -102,7 +106,7 @@ public abstract class CoreAction<Raw, Result> implements Clearable {
     
     @WorkerThread
     protected synchronized Result requestSync(HttpMethod method, RequestParams params) throws Throwable {
-        if (cleared) {
+        if (isCleared()) {
             throw new IllegalStateException("该Action已经被清理，无法使用");
         }
         
@@ -395,8 +399,6 @@ public abstract class CoreAction<Raw, Result> implements Clearable {
         logTime();
         logDevMsg("___________________________________");
         
-        lastRequestHandler = null;//清空上一请求的句柄
-        
         if (listeners != null) {
             for (OnActionListener listener : listeners) {
                 listener.onFinished();
@@ -528,17 +530,8 @@ public abstract class CoreAction<Raw, Result> implements Clearable {
 
     /* 请求记录 */
     
-    private Clearable lastRequestHandler;
+    private List<Clearable> requests;
     private long lastRequestTime;
-    
-    /**
-     * 判断最后一次请求是否正在工作。
-     *
-     * @return
-     */
-    public boolean isLastRequestWorking() {
-        return lastRequestHandler != null;
-    }
     
     /**
      * 获取上一次请求发出的时间戳。如果从未发出过请求则返回0。
@@ -549,15 +542,6 @@ public abstract class CoreAction<Raw, Result> implements Clearable {
         return lastRequestTime;
     }
     
-    /**
-     * 取消最后一次的请求，当且仅当{@link #isLastRequestWorking()}成立时取消。
-     */
-    public void cancelLastRequest() {
-        if (isLastRequestWorking()) {
-            lastRequestHandler.clear();
-        }
-    }
-
 	/* 用户指示 */
     
     private List<ITaskIndicator> indicators;
@@ -720,7 +704,8 @@ public abstract class CoreAction<Raw, Result> implements Clearable {
     }
 
 	/* 清理数据 */
-    
+
+    private List<Clearable> clearables;
     private boolean cleared;
     private boolean clearOnFinishedEnable;
     
@@ -748,12 +733,18 @@ public abstract class CoreAction<Raw, Result> implements Clearable {
      * 该方法同样会清空ProgressIndicator。
      */
     @Override
-    public void clear() {
-        if (!cleared) {
+    public synchronized void clear() {
+        if (!isCleared()) {
             cleared = true;
-            if (isLastRequestWorking()) {
-                cancelLastRequest();
+
+            if (clearables != null) {
+                for (Clearable clearable : clearables) {
+                    clearable.clear();
+                }
+                clearables.clear();
+                clearables = null;
             }
+
             clearIndicator();
             if (listeners != null) {
                 listeners.clear();

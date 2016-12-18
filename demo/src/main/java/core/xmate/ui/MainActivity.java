@@ -1,6 +1,7 @@
 package core.xmate.ui;
 
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 
@@ -20,10 +21,10 @@ public class MainActivity extends BaseActivity {
     @ViewInject(R.id.tabLayout_main_tabs)
     private TabLayout tabLayout;
     private Fragment curFrag;
-
+    
     @Override
-    protected void initView(Bundle savedInstanceState) {
-        super.initView(savedInstanceState);
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
         //反射获取指定包下的子类
         List<Class> frags = null;
         try {
@@ -43,7 +44,7 @@ public class MainActivity extends BaseActivity {
                 //使用FragHelper快速切换Fragment
                 //CoreFrag已经处理了重建Activity后Frag重叠的问题
                 Class clz = (Class) tab.getTag();
-                curFrag = getFragHelper().switchFragment(R.id.frameLayout_main_fragContaienr, curFrag, clz);
+                curFrag = getFragHelper().switchFrag(R.id.frameLayout_main_fragContaienr, curFrag, clz);
             }
 
             @Override

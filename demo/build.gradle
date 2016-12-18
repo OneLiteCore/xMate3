@@ -1,8 +1,9 @@
 apply plugin: 'com.android.application'
+apply plugin: 'me.tatarka.retrolambda'
 
 android {
     compileSdkVersion 24
-    buildToolsVersion "24.0.1"
+    buildToolsVersion '25.0.0'
 
     defaultConfig {
         applicationId "org.xutils.sample"
@@ -28,6 +29,13 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    compileOptions {
+        targetCompatibility 1.8
+        sourceCompatibility 1.8
+    }
+    lintOptions {
+        abortOnError false
+    }
 }
 
 dependencies {
@@ -36,6 +44,7 @@ dependencies {
     compile 'com.android.support:support-v4:24.2.1'
     compile 'com.android.support:recyclerview-v7:24.2.1'
     compile 'com.android.support:design:24.2.1'
+    compile 'com.alibaba:fastjson:1.1.54.android'
     compile project(':xutils')
-    compile 'core.mate:core:1.0.7'
+    compile 'core.mate:core:1.0.9'
 }

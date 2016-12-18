@@ -1,15 +1,16 @@
 apply plugin: 'com.android.library'
 apply plugin: 'com.github.dcendents.android-maven'
 apply plugin: 'com.jfrog.bintray'
+apply plugin: 'me.tatarka.retrolambda'
 
 android {
     compileSdkVersion 24
-    buildToolsVersion "24.0.2"
+    buildToolsVersion '25.0.0'
 
     defaultConfig {
         minSdkVersion 14
         targetSdkVersion 24
-        versionCode 20161009
+        versionCode 20161129
         versionName version
     }
     buildTypes {
@@ -23,13 +24,21 @@ android {
             java.srcDirs = ['src/main/java', 'src/main/java_compat']
         }
     }
+    compileOptions {
+        targetCompatibility 1.8
+        sourceCompatibility 1.8
+    }
+    lintOptions {
+        abortOnError false
+    }
+
 }
 
 def siteUrl = 'https://github.com/DrkCore/xMate'
 def gitUrl = 'https://github.com/DrkCore/xMate.git'
 
 group = "core.mate"
-version = "1.0.7"
+version = "1.0.8"
 
 install {
     repositories.mavenInstaller {
@@ -100,6 +109,7 @@ bintray {
 }
 
 dependencies {
-    compile 'com.alibaba:fastjson:1.1.54.android'
-    compile 'core.mate:core:1.0.7'
+    provided 'com.android.support:appcompat-v7:24.2.0'
+    provided 'com.alibaba:fastjson:1.1.54.android'
+    provided 'core.mate:core:1.0.9'
 }
