@@ -111,5 +111,5 @@ bintray {
 dependencies {
     provided 'com.android.support:appcompat-v7:24.2.0'
     provided 'com.alibaba:fastjson:1.1.54.android'
-    provided 'core.mate:core:1.0.9'
+    provided 'core.mate:core:1.0.10'
 }
