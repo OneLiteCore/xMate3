@@ -16,7 +16,6 @@
 package org.xutils.db.table;
 
 import android.database.Cursor;
-import android.text.TextUtils;
 
 import org.xutils.DbManager;
 import org.xutils.common.util.IOUtil;
@@ -31,11 +30,7 @@ public final class TableEntity<T> {
 
     private final DbManager db;
     private final String name;
-    private final String[] onCreated;
-    private final boolean virtual;
-    private final String using;
-    private final String tokenizer;
-
+    private final String onCreated;
     private ColumnEntity id;
     private Class<T> entityType;
     private Constructor<T> constructor;
@@ -54,10 +49,6 @@ public final class TableEntity<T> {
         Table table = entityType.getAnnotation(Table.class);
         this.name = table.name();
         this.onCreated = table.onCreated();
-        this.using = table.using();
-        this.virtual = !TextUtils.isEmpty(using) || table.virtual();
-        this.tokenizer = table.tokenizer();
-
         this.columnMap = TableUtils.findColumnMap(entityType);
 
         for (ColumnEntity column : columnMap.values()) {
@@ -109,20 +100,8 @@ public final class TableEntity<T> {
         return entityType;
     }
 
-    public String[] getOnCreated() {
+    public String getOnCreated() {
         return onCreated;
-    }
-
-    public boolean isVirtual() {
-        return virtual;
-    }
-
-    public String getUsing() {
-        return using;
-    }
-
-    public String getTokenizer() {
-        return tokenizer;
     }
 
     public ColumnEntity getId() {

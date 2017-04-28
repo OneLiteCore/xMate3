@@ -19,7 +19,6 @@ import android.database.Cursor;
 
 import org.xutils.db.table.ColumnEntity;
 import org.xutils.db.table.DbModel;
-import org.xutils.db.table.ModelEntity;
 import org.xutils.db.table.TableEntity;
 
 import java.util.HashMap;
@@ -47,19 +46,5 @@ import java.util.HashMap;
             result.add(cursor.getColumnName(i), cursor.getString(i));
         }
         return result;
-    }
-
-    public static <T> T getModel(ModelEntity<T> modelEntity, final Cursor cursor) throws Throwable {
-        T entity = modelEntity.createEntity();
-        HashMap<String, ColumnEntity> columnMap = modelEntity.getColumnMap();
-        int columnCount = cursor.getColumnCount();
-        for (int i = 0; i < columnCount; i++) {
-            String columnName = cursor.getColumnName(i);
-            ColumnEntity column = columnMap.get(columnName);
-            if (column != null) {
-                column.setValueFromCursor(entity, cursor, i);
-            }
-        }
-        return entity;
     }
 }

@@ -15,8 +15,6 @@
 
 package org.xutils.db.sqlite;
 
-import android.text.TextUtils;
-
 import org.xutils.common.util.KeyValue;
 import org.xutils.db.table.ColumnEntity;
 import org.xutils.db.table.TableEntity;
@@ -230,11 +228,8 @@ public final class SqlInfoBuilder {
         ColumnEntity id = table.getId();
 
         StringBuilder builder = new StringBuilder();
-        builder.append("CREATE ").append(table.isVirtual() ? "VIRTUAL " : "").append("TABLE IF NOT EXISTS ");
-        builder.append("\"").append(table.getName()).append("\" ");
-        if (!TextUtils.isEmpty(table.getUsing())) {
-            builder.append("USING ").append(table.getUsing());
-        }
+        builder.append("CREATE TABLE IF NOT EXISTS ");
+        builder.append("\"").append(table.getName()).append("\"");
         builder.append(" ( ");
 
         if (id.isAutoId()) {
@@ -250,10 +245,6 @@ public final class SqlInfoBuilder {
             builder.append(' ').append(column.getColumnDbType());
             builder.append(' ').append(column.getProperty());
             builder.append(',');
-        }
-
-        if (!TextUtils.isEmpty(table.getUsing())) {
-            builder.append("tokenize = ").append(table.getTokenizer()).append(",");
         }
 
         builder.deleteCharAt(builder.length() - 1);

@@ -22,71 +22,66 @@ import java.util.HashMap;
 
 public final class DbModel {
 
-	/**
-	 * key: columnName
-	 * value: valueStr
-	 */
-	private HashMap<String,String> dataMap = new HashMap<String,String>();
+    /**
+     * key: columnName
+     * value: valueStr
+     */
+    private HashMap<String, String> dataMap = new HashMap<String, String>();
 
-	public String getString (String columnName) {
-		return dataMap.get(columnName);
-	}
+    public String getString(String columnName) {
+        return dataMap.get(columnName);
+    }
 
-	public int getInt (String columnName) {
-		String str = dataMap.get(columnName);
-		return str != null ? Integer.parseInt(str) : 0;
-	}
+    public int getInt(String columnName) {
+        return Integer.valueOf(dataMap.get(columnName));
+    }
 
-	public boolean getBoolean (String columnName) {
-		String value = dataMap.get(columnName);
-		if (value != null) {
-			return value.length() == 1 ? "1".equals(value) : Boolean.parseBoolean(value);
-		}
-		return false;
-	}
+    public boolean getBoolean(String columnName) {
+        String value = dataMap.get(columnName);
+        if (value != null) {
+            return value.length() == 1 ? "1".equals(value) : Boolean.valueOf(value);
+        }
+        return false;
+    }
 
-	public double getDouble (String columnName) {
-		String str = dataMap.get(columnName);
-		return str != null ? Double.parseDouble(dataMap.get(columnName)) : 0;
-	}
+    public double getDouble(String columnName) {
+        return Double.valueOf(dataMap.get(columnName));
+    }
 
-	public float getFloat (String columnName) {
-		String str = dataMap.get(columnName);
-		return str != null ? Float.parseFloat(dataMap.get(columnName)) : 0;
-	}
+    public float getFloat(String columnName) {
+        return Float.valueOf(dataMap.get(columnName));
+    }
 
-	public long getLong (String columnName) {
-		String str = dataMap.get(columnName);
-		return str != null ? Long.parseLong(dataMap.get(columnName)) : 0;
-	}
+    public long getLong(String columnName) {
+        return Long.valueOf(dataMap.get(columnName));
+    }
 
-	public Date getDate (String columnName) {
-		long date = getLong(columnName);
-		return date > 0 ? new Date(date) : null;
-	}
+    public Date getDate(String columnName) {
+        long date = Long.valueOf(dataMap.get(columnName));
+        return new Date(date);
+    }
 
-	public java.sql.Date getSqlDate (String columnName) {
-		long date = getLong(columnName);
-		return date > 0 ? new java.sql.Date(date) : null;
-	}
+    public java.sql.Date getSqlDate(String columnName) {
+        long date = Long.valueOf(dataMap.get(columnName));
+        return new java.sql.Date(date);
+    }
 
-	public void add (String columnName, String valueStr) {
-		dataMap.put(columnName, valueStr);
-	}
+    public void add(String columnName, String valueStr) {
+        dataMap.put(columnName, valueStr);
+    }
 
-	/**
-	 * @return key: columnName
-	 */
-	public HashMap<String,String> getDataMap () {
-		return dataMap;
-	}
+    /**
+     * @return key: columnName
+     */
+    public HashMap<String, String> getDataMap() {
+        return dataMap;
+    }
 
-	/**
-	 * @param columnName
-	 *
-	 * @return
-	 */
-	public boolean isEmpty (String columnName) {
-		return TextUtils.isEmpty(dataMap.get(columnName));
-	}
+    /**
+     * @param columnName
+     * @return
+     */
+    public boolean isEmpty(String columnName) {
+        return TextUtils.isEmpty(dataMap.get(columnName));
+    }
 }

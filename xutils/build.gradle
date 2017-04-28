@@ -1,44 +1,43 @@
 apply plugin: 'com.android.library'
 apply plugin: 'com.github.dcendents.android-maven'
 apply plugin: 'com.jfrog.bintray'
-apply plugin: 'me.tatarka.retrolambda'
+
+def siteUrl = 'https://github.com/wyouflf/xUtils3'
+def gitUrl = 'https://github.com/wyouflf/xUtils3.git'
+group = "org.xutils"
+version = "3.5.0"
 
 android {
-    compileSdkVersion 24
+    compileSdkVersion 25
     buildToolsVersion '25.0.0'
 
     defaultConfig {
         minSdkVersion 14
-        targetSdkVersion 24
-        versionCode 20161218
+        targetSdkVersion 25
+        versionCode 20170405
         versionName version
     }
     buildTypes {
+        debug {
+            minifyEnabled false
+            debuggable true
+        }
         release {
             minifyEnabled false
+            debuggable true
         }
     }
     sourceSets {
         main {
             jniLibs.srcDirs = ['libs']
-            java.srcDirs = ['src/main/java', 'src/main/java_compat']
+            java.srcDirs = ['src/main/java']
         }
     }
     compileOptions {
-        targetCompatibility 1.8
-        sourceCompatibility 1.8
+        sourceCompatibility JavaVersion.VERSION_1_6
+        targetCompatibility JavaVersion.VERSION_1_6
     }
-    lintOptions {
-        abortOnError false
-    }
-
 }
-
-def siteUrl = 'https://github.com/DrkCore/xMate'
-def gitUrl = 'https://github.com/DrkCore/xMate.git'
-
-group = "core.mate"
-version = "1.0.9"
 
 install {
     repositories.mavenInstaller {
@@ -46,7 +45,7 @@ install {
         pom {
             project {
                 packaging 'aar'
-                name 'xMate'
+                name 'xUtils'
                 description 'android orm, bitmap, http, view inject... '
                 // #CONFIG# // project title
                 url siteUrl
@@ -59,9 +58,12 @@ install {
                 }
                 developers {
                     developer {
-                        id 'drkcore'
-                        name 'DrkCore'
-                        email '178456643@qq.com'
+                        id 'wyouflf'
+                        // #CONFIG# // your user id (you can write your nickname)
+                        name 'lei.jiao'
+                        // #CONFIG# // your user name
+                        email 'wyouflf@qq.com'
+                        // #CONFIG# // your email
                     }
                 }
                 scm {
@@ -81,7 +83,6 @@ task javadoc(type: Javadoc) {
     options.encoding = "UTF-8"
     source = android.sourceSets.main.java.srcDirs
     classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
-    failOnError false // 忽略注释语法错误
 }
 task javadocJar(type: Jar, dependsOn: javadoc) {
     classifier = 'javadoc'
@@ -96,20 +97,14 @@ properties.load(project.rootProject.file('local.properties').newDataInputStream(
 bintray {
     user = properties.getProperty("bintray.user")
     key = properties.getProperty("bintray.apikey")
-
     configurations = ['archives']
     pkg {
         repo = "maven"
-        name = "xMate"
+        name = "xUtils"
+        // #CONFIG# project name in jcenter
         websiteUrl = siteUrl
         vcsUrl = gitUrl
         licenses = ["Apache-2.0"]
         publish = true
     }
-}
-
-dependencies {
-    provided 'com.android.support:appcompat-v7:24.2.0'
-    provided 'com.alibaba:fastjson:1.1.54.android'
-    provided 'core.mate:core:1.0.10'
 }

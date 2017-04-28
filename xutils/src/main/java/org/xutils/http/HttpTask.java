@@ -38,9 +38,10 @@ public class HttpTask<ResultType> extends AbsTask<ResultType> implements Progres
     // 请求相关
     private RequestParams params;
     private UriRequest request;
-    private Executor executor;
+    private RequestWorker requestWorker;
+    private final Executor executor;
     private volatile boolean hasException = false;
-    private Callback.CommonCallback<ResultType> callback;
+    private final Callback.CommonCallback<ResultType> callback;
 
     // 缓存控制
     private Object rawResult = null;
@@ -63,33 +64,20 @@ public class HttpTask<ResultType> extends AbsTask<ResultType> implements Progres
 
     // 文件下载任务
     private static final HashMap<String, WeakReference<HttpTask<?>>>
-            DOWNLOAD_TASK = new HashMap<>(1);
+            DOWNLOAD_TASK = new HashMap<String, WeakReference<HttpTask<?>>>(1);
 
     private static final PriorityExecutor HTTP_EXECUTOR = new PriorityExecutor(5, true);
     private static final PriorityExecutor CACHE_EXECUTOR = new PriorityExecutor(5, true);
 
-    public HttpTask() {
-        super(null);
-    }
 
-    public HttpTask(RequestParams params, Callback.CommonCallback<ResultType> callback) {
-        super(null);
-        setup(params, callback);
-    }
-
-    public HttpTask(RequestParams params, Callback.Cancelable cancelHandler, Callback.CommonCallback<ResultType> callback) {
+    public HttpTask(RequestParams params, Callback.Cancelable cancelHandler,
+                    Callback.CommonCallback<ResultType> callback) {
         super(cancelHandler);
-        setup(params, callback);
-    }
-
-    protected final void setup(RequestParams params, Callback.CommonCallback<ResultType> callback) {
-        assert this.params == null;
-        assert this.callback == null;
 
         assert params != null;
         assert callback != null;
 
-        // set params & callback & executor
+        // set params & callback
         this.params = params;
         this.callback = callback;
         if (callback instanceof Callback.CacheCallback) {
@@ -105,6 +93,21 @@ public class HttpTask<ResultType> extends AbsTask<ResultType> implements Progres
             this.requestInterceptListener = (RequestInterceptListener) callback;
         }
 
+        // init tracker
+        {
+            RequestTracker customTracker = params.getRequestTracker();
+            if (customTracker == null) {
+                if (callback instanceof RequestTracker) {
+                    customTracker = (RequestTracker) callback;
+                } else {
+                    customTracker = UriRequestFactory.getDefaultTracker();
+                }
+            }
+            if (customTracker != null) {
+                tracker = new RequestTrackerWrapper(customTracker);
+            }
+        }
+
         // init executor
         if (params.getExecutor() != null) {
             this.executor = params.getExecutor();
@@ -114,19 +117,6 @@ public class HttpTask<ResultType> extends AbsTask<ResultType> implements Progres
             } else {
                 this.executor = HTTP_EXECUTOR;
             }
-        }
-
-        // init tracker
-        RequestTracker customTracker = params.getRequestTracker();
-        if (customTracker == null) {
-            if (callback instanceof RequestTracker) {
-                customTracker = (RequestTracker) callback;
-            } else {
-                customTracker = UriRequestFactory.getDefaultTracker();
-            }
-        }
-        if (customTracker != null) {
-            tracker = new RequestTrackerWrapper(customTracker);
         }
     }
 
@@ -204,13 +194,6 @@ public class HttpTask<ResultType> extends AbsTask<ResultType> implements Progres
         }
 
         // 初始化请求参数
-        if(prepareCallback != null){
-            try {
-                prepareCallback.prepare(this.params);
-            }catch (Throwable e){
-                LogUtil.e("调用prepare失败",e);
-            }
-        }
         ResultType result = null;
         resolveLoadType();
         request = createNewRequest();
@@ -267,8 +250,8 @@ public class HttpTask<ResultType> extends AbsTask<ResultType> implements Progres
                 if (cacheResult != null) {
                     // 同步等待是否信任缓存
                     this.update(FLAG_CACHE, cacheResult);
-                    while (trustCache == null) {
-                        synchronized (cacheLock) {
+                    synchronized (cacheLock) {
+                        while (trustCache == null) {
                             try {
                                 cacheLock.wait();
                             } catch (InterruptedException iex) {
@@ -318,7 +301,7 @@ public class HttpTask<ResultType> extends AbsTask<ResultType> implements Progres
                     clearRawResult();
                     // 开始请求工作
                     LogUtil.d("load: " + this.request.getRequestUri());
-                    RequestWorker requestWorker = new RequestWorker();
+                    requestWorker = new RequestWorker();
                     requestWorker.request();
                     if (requestWorker.ex != null) {
                         throw requestWorker.ex;
@@ -593,9 +576,9 @@ public class HttpTask<ResultType> extends AbsTask<ResultType> implements Progres
             try {
                 boolean interrupted = false;
                 if (File.class == loadType) {
-                    while (sCurrFileLoadCount.get() >= MAX_FILE_LOAD_WORKER
-                            && !HttpTask.this.isCancelled()) {
-                        synchronized (sCurrFileLoadCount) {
+                    synchronized (sCurrFileLoadCount) {
+                        while (sCurrFileLoadCount.get() >= MAX_FILE_LOAD_WORKER
+                                && !HttpTask.this.isCancelled()) {
                             try {
                                 sCurrFileLoadCount.wait(10);
                             } catch (InterruptedException iex) {
