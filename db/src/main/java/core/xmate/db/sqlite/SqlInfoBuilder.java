@@ -17,10 +17,10 @@ package core.xmate.db.sqlite;
 
 import android.text.TextUtils;
 
-import core.xmate.common.util.KeyValue;
+import core.xmate.util.KeyValue;
 import core.xmate.db.table.ColumnEntity;
 import core.xmate.db.table.TableEntity;
-import core.xmate.ex.DbException;
+import core.xmate.db.DbException;
 
 import java.util.ArrayList;
 import java.util.Collection;

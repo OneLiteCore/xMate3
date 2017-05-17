@@ -1,4 +1,4 @@
-package core.xmate.common.util;
+package core.xmate.util;
 
 import android.database.Cursor;
 import android.text.TextUtils;

@@ -18,11 +18,10 @@ package core.xmate.db;
 import android.database.Cursor;
 import android.text.TextUtils;
 
-import core.xmate.common.util.IOUtil;
+import core.xmate.util.IOUtil;
 import core.xmate.db.sqlite.WhereBuilder;
 import core.xmate.db.table.DbModel;
 import core.xmate.db.table.TableEntity;
-import core.xmate.ex.DbException;
 
 import java.util.ArrayList;
 import java.util.List;

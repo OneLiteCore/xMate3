@@ -6,10 +6,10 @@ import android.text.TextUtils;
 import java.util.HashMap;
 
 import core.xmate.db.DbManager;
-import core.xmate.common.util.IOUtil;
+import core.xmate.util.IOUtil;
 import core.xmate.db.sqlite.SqlInfo;
 import core.xmate.db.sqlite.SqlInfoBuilder;
-import core.xmate.ex.DbException;
+import core.xmate.db.DbException;
 
 /**
  * DbManager基类, 包含表结构的基本操作.

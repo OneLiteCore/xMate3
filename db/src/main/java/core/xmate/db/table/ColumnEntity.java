@@ -17,13 +17,14 @@ package core.xmate.db.table;
 
 import android.database.Cursor;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+
+import core.xmate.util.LogUtil;
 import core.xmate.db.annotation.Column;
 import core.xmate.db.converter.ColumnConverter;
 import core.xmate.db.converter.ColumnConverterFactory;
 import core.xmate.db.sqlite.ColumnDbType;
-
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 
 public final class ColumnEntity {
 

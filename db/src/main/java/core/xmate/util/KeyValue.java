@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-package core.xmate.common.util;
+package core.xmate.util;
 
 public class KeyValue {
     public final String key;

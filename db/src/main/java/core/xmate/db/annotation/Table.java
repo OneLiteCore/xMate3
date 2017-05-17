@@ -15,8 +15,6 @@
 
 package core.xmate.db.annotation;
 
-import android.support.annotation.StringDef;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -42,7 +40,6 @@ public @interface Table {
      */
     String FTS5 = "fts5";
 
-    @StringDef({FTS3, FTS4, FTS5})
     @Retention(RetentionPolicy.SOURCE)
     @interface FTS {
     }
@@ -70,7 +67,6 @@ public @interface Table {
      */
     String TOKENIZER_ICU = "icu";
 
-    @StringDef({TOKENIZER_SIMPLE, TOKENIZER_PORTER, TOKENIZER_UNICODE61, TOKENIZER_ICU})
     @Retention(RetentionPolicy.SOURCE)
     @interface Tokenizer {
     }

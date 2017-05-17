@@ -15,12 +15,13 @@
 
 package core.xmate.db.table;
 
-import core.xmate.db.converter.ColumnConverter;
-import core.xmate.db.converter.ColumnConverterFactory;
-
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.HashSet;
+
+import core.xmate.util.LogUtil;
+import core.xmate.db.converter.ColumnConverter;
+import core.xmate.db.converter.ColumnConverterFactory;
 
 public final class ColumnUtils {
 

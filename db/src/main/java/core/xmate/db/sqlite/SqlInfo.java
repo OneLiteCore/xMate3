@@ -18,7 +18,7 @@ package core.xmate.db.sqlite;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
 
-import core.xmate.common.util.KeyValue;
+import core.xmate.util.KeyValue;
 import core.xmate.db.converter.ColumnConverter;
 import core.xmate.db.converter.ColumnConverterFactory;
 import core.xmate.db.table.ColumnUtils;

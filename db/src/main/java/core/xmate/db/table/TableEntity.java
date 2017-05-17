@@ -19,9 +19,9 @@ import android.database.Cursor;
 import android.text.TextUtils;
 
 import core.xmate.db.DbManager;
-import core.xmate.common.util.IOUtil;
+import core.xmate.util.IOUtil;
 import core.xmate.db.annotation.Table;
-import core.xmate.ex.DbException;
+import core.xmate.db.DbException;
 
 import java.lang.reflect.Constructor;
 import java.util.LinkedHashMap;

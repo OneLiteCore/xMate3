@@ -1,4 +1,4 @@
-package core.xmate.common.util;
+package core.xmate.util;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.GenericArrayType;

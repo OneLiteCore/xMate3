@@ -9,13 +9,12 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-import core.xmate.common.util.KeyValue;
+import core.xmate.util.KeyValue;
 import core.xmate.db.sqlite.SqlInfo;
 import core.xmate.db.sqlite.WhereBuilder;
 import core.xmate.db.table.DbModel;
 import core.xmate.db.table.ModelEntity;
 import core.xmate.db.table.TableEntity;
-import core.xmate.ex.DbException;
 
 /**
  * 数据库访问接口

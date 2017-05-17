@@ -13,33 +13,29 @@
  * limitations under the License.
  */
 
-package core.xmate.ex;
+package core.xmate.db;
 
 import java.io.IOException;
 
-/**
- * Author: wyouflf
- * Date: 13-7-24
- * Time: 下午3:00
- */
-public class BaseException extends IOException {
+public class DbException extends IOException {
+
     private static final long serialVersionUID = 1L;
 
-    public BaseException() {
+    public DbException() {
         super();
     }
 
-    public BaseException(String detailMessage) {
+    public DbException(String detailMessage) {
         super(detailMessage);
     }
 
-    public BaseException(String detailMessage, Throwable throwable) {
-        super(detailMessage);
+    public DbException(String detailMessage, Throwable throwable) {
+        super(detailMessage, throwable);
         this.initCause(throwable);
     }
 
-    public BaseException(Throwable throwable) {
-        super(throwable.getMessage());
+    public DbException(Throwable throwable) {
+        super(throwable);
         this.initCause(throwable);
     }
 }

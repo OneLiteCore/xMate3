@@ -1,22 +1,14 @@
 package core.xmate.db;
 
-import android.content.Context;
-
-import core.xmate.common.Callback;
-import core.xmate.common.task.AbsTask;
-import core.xmate.db.sqlite.SqlInfo;
-import core.xmate.db.table.DbModel;
-import core.xmate.db.table.TableEntity;
-import core.xmate.ex.DbException;
-import core.xmate.db.dao.ExecNonQuerySqlDao;
-import core.xmate.db.dao.FindFirstDbModelDao;
-
+import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Modifier;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+
+import core.xmate.db.table.TableEntity;
 
 /**
  * 基于xUtils的数据库基类。
@@ -24,17 +16,15 @@ import java.util.concurrent.ConcurrentMap;
  * @author DrkCore
  * @since 2015年11月12日00:33:19
  */
-public abstract class AbsDb extends DbManager.DaoConfig implements DbManager.DbUpgradeListener, DbManager.DbOpenListener, DbManager.TableCreateListener {
+public abstract class AbsDb extends DbManager.DaoConfig implements DbManager.DbUpgradeListener,
+        DbManager.DbOpenListener, DbManager.TableCreateListener, Closeable {
 
-    private final Context context;
-
-    public AbsDb(Context context, String dbName, int dbVersion) {
-        this(context, null, dbName, dbVersion);
+    public AbsDb(String dbName, int dbVersion) {
+        this(null, dbName, dbVersion);
     }
 
-    public AbsDb(Context context, File inDir, String dbName, int dbVersion) {
+    public AbsDb(File inDir, String dbName, int dbVersion) {
         super();
-        this.context = context;
         setDbDir(inDir);
         setDbName(dbName);
         setDbVersion(dbVersion);
@@ -43,283 +33,122 @@ public abstract class AbsDb extends DbManager.DaoConfig implements DbManager.DbU
         setTableCreateListener(this);
     }
 
-	/* 初始化数据库工具 */
-
     private volatile DbManager dbMgr;
 
     /**
-     * 获取该db对应的{@link DbManager}。首次获取后的实例会被缓存到成员变量中。
-     * 该方法中可能执行部分耗时操作，如无必要，请通过{@link AbsDao#access(DbManager)}
-     * 方法来获得实例。
+     * 获取该db对应的{@link DbManager}。
      *
      * @return
      * @throws DbException
      */
-    public DbManager getOrCreateDb() throws DbException {
+    public DbManager get() throws DbException {
         if (dbMgr == null) {
             synchronized (this) {
                 if (dbMgr == null) {
-                    try {//准备数据库
-                        onPrepare();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        if (e instanceof RuntimeException) {
-                            throw (RuntimeException) e;
-                        } else {
-                            throw new DbException("onPrepare抛出异常，无法创建数据库");
-                        }
-                    }
-                    // 避免出现onCreate抛出异常却仍然创建了DbManager实例
-                    DbManager tmpDbManager = DbManagerImpl.getInstance(context, this);
-                    onCreate(tmpDbManager);
-                    dbMgr = tmpDbManager;
+                    dbMgr = onCreate();
                 }
             }
         }
         return dbMgr;
     }
 
-	/* 内部回调 */
-
     /**
-     * 准备数据库的回调，将在创建DbManager之前回调。
-     * 该方法将在异步线程中执行，你可以在这个方法中做耗时的准备操作，
-     * 比如将assets中携带的数据库导出或者清空旧的数据库文件等。
-     * <p>
-     * 如果该方法抛出异常则认定数据库无法创建。
-     * <p>
-     * <b>注意请不要再该方法中通过{@link #access(AbsDao)}等方法访问当前数据库，会造成递归死循环</b>。
-     * 请直接调用{@link AbsDao#access(DbManager)}方法。
-     *
-     * @return
+     * 按照xUtils3的注释（{@link DbManager#close()}），通常不需要关闭数据库。
      */
-    protected void onPrepare() throws Exception {
+    @Override
+    public void close() throws IOException {
+        if (dbMgr != null) {
+            synchronized (this) {
+                if (dbMgr != null) {
+                    try {
+                        dbMgr.close();
+                    } finally {
+                        dbMgr = null;
+                    }
+                }
+            }
+        }
     }
 
-    /**
-     * 第一次从该DaoConfig中创建{@link DbManager}时回调该方法。
-     * 你可以在该方法中创建数据表等操作。
-     * <b>但是一旦操作抛出异常将导致创建{@link DbManager}实例失败。</b>
-     * <p>
-     * <b>注意请不要再该方法中通过{@link #access(AbsDao)}等方法访问当前数据库，会造成递归死循环</b>。
-     * 请直接调用{@link AbsDao#access(DbManager)}方法。
-     *
-     * @param db
-     * @throws DbException
-     */
-    protected void onCreate(DbManager db) throws DbException {
-    }
+	/* LifeCircle */
 
-    /**
-     * <b>注意请不要再该方法中通过{@link #access(AbsDao)}等方法访问当前数据库，会造成递归死循环</b>。
-     * 请直接调用{@link AbsDao#access(DbManager)}方法。
-     *
-     * @param db
-     */
+    protected abstract DbManager onCreate() throws DbException;
+
     @Override
     public void onDbOpened(DbManager db) {
     }
 
-    /**
-     * <b>注意请不要再该方法中通过{@link #access(AbsDao)}等方法访问当前数据库，会造成递归死循环</b>。
-     * 请直接调用{@link AbsDao#access(DbManager)}方法。
-     *
-     * @param db
-     * @param table
-     */
     @Override
     public void onTableCreated(DbManager db, TableEntity<?> table) {
     }
 
-    /**
-     * 从该DaoConfig中创建DbManager时，当已存在的数据库的version和DaoConfig中指定的version<b>不一致</b>
-     * 时回调该方法。<b>该方法将在异步线程之中执行</b>。
-     * <p>
-     * <b>注意请不要再该方法中通过{@link #access(AbsDao)}等方法访问当前数据库，会造成递归死循环</b>。
-     * 请直接调用{@link AbsDao#access(DbManager)}方法。
-     *
-     * @param db
-     * @param oldVersion 已存在的数据的版本号。注意，这个版本号不一定小于newVersion。
-     * @param newVersion 将要创建的数据库的版本号。注意，这个版本号不一定大于oldVersion。
-     */
     @Override
     public void onUpgrade(DbManager db, int oldVersion, int newVersion) {
     }
 
-	/* DAO操作 */
+    /*Dao*/
 
-    private class DaoTask<Result> extends AbsTask<AbsDao<Result>, Result> {
-
-        @Override
-        protected Result doBackground(AbsDao<Result> dao) throws Throwable {
-            return accessSync(dao);
-        }
+    public <Params, Result> Result accessSync(IDao<Params, Result> dao, Params params) throws DbException {
+        return dao.access(get(), params);
     }
 
-    public <Result> Callback.Cancelable access(AbsDao<Result> dao) {
-        return access(dao, null);
+    public <Params, Result> Result accessSync(Class<? extends IDao<Params, Result>> dao
+            , Params params) throws DbException {
+        return accessSync(getCacheOrCreate(dao), params);
     }
 
-    public <Result> Callback.Cancelable access(AbsDao<Result> dao, Callback.CommonCallback<Result> callback) {
-        DaoTask<Result> task = new DaoTask<>();
-        task.setCallback(callback);
-        return task.exec(dao);
-    }
-
-    /**
-     * 同步访问数据库。
-     *
-     * @param dao
-     * @param <Result>
-     * @return
-     * @throws Exception
-     */
-    public <Result> Result accessSync(AbsDao<Result> dao) throws Exception {
-        Result result = dao.access(getOrCreateDb());
-        cacheDao(dao);
-        return result;
-    }
-
-	/*Dao缓存*/
+	/*Cache*/
 
     public static final int DEFAULT_DAO_CACHE_SIZE = 8;
-    private int daoCacheSize;
+    private volatile Map<Class, WeakReference<IDao>> daoCaches;
 
-    private boolean cacheDaoEnable;
-
-    /**
-     * LrcCache是线程安全的
-     */
-    private volatile ConcurrentMap<Class, WeakReference<AbsDao>> daoCache;
-
-    private ConcurrentMap<Class, WeakReference<AbsDao>> getDaoCache() {
-        if (daoCache == null) {
+    private Map<Class, WeakReference<IDao>> getCaches() {
+        if (daoCaches == null) {
             synchronized (this) {
-                if (daoCache == null) {
-                    daoCache = new ConcurrentHashMap<>(daoCacheSize);
+                if (daoCaches == null) {
+                    daoCaches = new ConcurrentHashMap<>(DEFAULT_DAO_CACHE_SIZE);
                 }
             }
         }
-        return daoCache;
+        return daoCaches;
     }
 
-    public boolean isCacheDaoEnable() {
-        return cacheDaoEnable;
-    }
-
-    public AbsDb setCacheDaoEnable() {
-        return setCacheDaoEnable(DEFAULT_DAO_CACHE_SIZE);
-    }
-
-    public AbsDb setCacheDaoEnable(int cacheSize) {
-        if (!cacheDaoEnable) {
-            this.daoCacheSize = cacheSize;
-            this.cacheDaoEnable = true;
-
-            if (cacheSize <= 0) {
-                throw new IllegalArgumentException();
-            }
-        }
-        return this;
-    }
-
-    private final Object daoCacheLock = new Object();
-
-    /**
-     * 缓存dao实例。通过{@link #setCacheDaoEnable()}启用了缓存之后每次访问数据库完成后都会缓存dao对象。
-     * 需要注意的是，为了避免内存泄露<b>匿名类的dao实例会被过滤</b>。
-     *
-     * @param absDao
-     * @return
-     */
-    private boolean cacheDao(AbsDao absDao) {
-        Class clz = cacheDaoEnable && absDao != null ? absDao.getClass() : null;
+    private boolean cache(IDao IDao) {
+        Class clz = IDao != null ? IDao.getClass() : null;
         if (clz != null) {
-            // 不缓存可能会带有外部类的强引用（很多时候都是Activity或者Fragment）的Dao类型
-            if (Modifier.isStatic(clz.getModifiers())/*允许静态的内部类*/
-                    || (!clz.isMemberClass() && !clz.isLocalClass() && !clz.isAnonymousClass())/*非静态非成员非局部非匿名，也就是单独定义在一个java文件的类型*/) {
-                synchronized (daoCacheLock) {
-                    getDaoCache().put(clz, new WeakReference<>(absDao));
-                }
+            //允许静态的内部类
+            boolean isStatistic = Modifier.isStatic(clz.getModifiers());
+            //允许单独定义在一个java文件的类型
+            boolean isCommon = !clz.isMemberClass() && !clz.isLocalClass() && !clz.isAnonymousClass();
+            if (isStatistic || isCommon) {
+                getCaches().put(clz, new WeakReference<>(IDao));
                 return true;
             }
         }
         return false;
     }
 
-    public synchronized <T extends AbsDao> T getCachedDao(Class<T> clazz) {
-        AbsDao dao = null;
-        if (cacheDaoEnable) {
-            synchronized (daoCacheLock) {
-                WeakReference<AbsDao> ref = getDaoCache().get(clazz);
-                if (ref != null) {
-                    dao = ref.get();
-                    if (dao != null) {
-                        dao.clear();
-                    }
-                    //获取引用之后就清空缓存中的引用
-                    ref.clear();
-                    daoCache.remove(clazz);
-                }
-            }
-        }
-        return (T) dao;
+    @SuppressWarnings("unchecked")
+    public <T> T getCache(Class<T> clazz) {
+        return (T) getCaches().get(clazz);
     }
 
-    public <T extends AbsDao> T getCachedDaoOrNewInstance(Class<T> clazz) {
-        T dao = getCachedDao(clazz);
+    public <T extends IDao> T getCacheOrCreate(Class<T> clazz) {
+        T dao = getCache(clazz);
         if (dao == null) {
-            try {
-                dao = clazz.newInstance();
-            } catch (Exception e) {
-                e.printStackTrace();
+            synchronized (this) {
+                dao = getCache(clazz);
+                if (dao == null) {
+                    try {
+                        dao = clazz.newInstance();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    cache(dao);
+                }
             }
         }
         return dao;
     }
 
-	/*SQL语法操作*/
-
-    public void execNonQuery(String sql, Object... args) {
-        execNonQuery(new SqlInfo(sql).addBindArgs(args));
-    }
-
-    public void execNonQuery(SqlInfo sql) {
-        ExecNonQuerySqlDao dao = getCachedDao(ExecNonQuerySqlDao.class);
-        if (dao == null) {
-            dao = new ExecNonQuerySqlDao();
-        }
-        dao.setSql(sql);
-        access(dao);
-    }
-
-    public DbModel execQuerySync(String sql, Object... args) throws Exception {
-        return execQuerySync(new SqlInfo(sql).addBindArgs(args));
-    }
-
-    public DbModel execQuerySync(SqlInfo sql) throws Exception {
-        FindFirstDbModelDao dao = getCachedDao(FindFirstDbModelDao.class);
-        if (dao == null) {
-            dao = new FindFirstDbModelDao();
-        }
-        dao.setSql(sql);
-        return accessSync(dao);
-    }
-
-	/*拓展*/
-
-    /**
-     * 按照xUtils3的注释（{@link DbManager#close()}），通常不需要关闭数据库。
-     */
-    public void close() {
-        if (dbMgr != null) {
-            try {
-                dbMgr.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        //清空缓存的Dao
-        daoCache = null;
-    }
 }

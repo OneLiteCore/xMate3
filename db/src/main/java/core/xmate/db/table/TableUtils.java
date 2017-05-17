@@ -15,13 +15,14 @@
 
 package core.xmate.db.table;
 
-import core.xmate.db.annotation.Column;
-import core.xmate.db.converter.ColumnConverterFactory;
-
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+
+import core.xmate.util.LogUtil;
+import core.xmate.db.annotation.Column;
+import core.xmate.db.converter.ColumnConverterFactory;
 
 /* package */ final class TableUtils {
 
