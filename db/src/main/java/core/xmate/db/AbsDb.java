@@ -88,10 +88,32 @@ public abstract class AbsDb extends DbManager.DaoConfig implements DbManager.DbU
 
     /*Dao*/
 
+    /**
+     * 调用 {@link IDao#access(DbManager, Object)} 方法。
+     *
+     * 该方法不会缓存实例。
+     *
+     * @param dao
+     * @param params
+     * @param <Params>
+     * @param <Result>
+     * @return
+     * @throws DbException
+     */
     public <Params, Result> Result accessSync(IDao<Params, Result> dao, Params params) throws DbException {
         return dao.access(get(), params);
     }
 
+    /**
+     * 获取 dao 的缓存实例，或者反射创建实例再缓存起来，并同步执行其 {@link IDao#access(DbManager, Object)}方法。
+     *
+     * @param dao
+     * @param params
+     * @param <Params>
+     * @param <Result>
+     * @return
+     * @throws DbException
+     */
     public <Params, Result> Result accessSync(Class<? extends IDao<Params, Result>> dao
             , Params params) throws DbException {
         return accessSync(getCacheOrCreate(dao), params);
@@ -99,7 +121,7 @@ public abstract class AbsDb extends DbManager.DaoConfig implements DbManager.DbU
 
 	/*Cache*/
 
-    public static final int DEFAULT_DAO_CACHE_SIZE = 8;
+    private static final int DEFAULT_DAO_CACHE_SIZE = 8;
     private volatile Map<Class, WeakReference<IDao>> daoCaches;
 
     private Map<Class, WeakReference<IDao>> getCaches() {
@@ -113,7 +135,7 @@ public abstract class AbsDb extends DbManager.DaoConfig implements DbManager.DbU
         return daoCaches;
     }
 
-    private boolean cache(IDao IDao) {
+    private void cache(IDao IDao) {
         Class clz = IDao != null ? IDao.getClass() : null;
         if (clz != null) {
             //允许静态的内部类
@@ -122,18 +144,16 @@ public abstract class AbsDb extends DbManager.DaoConfig implements DbManager.DbU
             boolean isCommon = !clz.isMemberClass() && !clz.isLocalClass() && !clz.isAnonymousClass();
             if (isStatistic || isCommon) {
                 getCaches().put(clz, new WeakReference<>(IDao));
-                return true;
             }
         }
-        return false;
     }
 
     @SuppressWarnings("unchecked")
-    public <T> T getCache(Class<T> clazz) {
+    private <T> T getCache(Class<T> clazz) {
         return (T) getCaches().get(clazz);
     }
 
-    public <T extends IDao> T getCacheOrCreate(Class<T> clazz) {
+    private <T extends IDao> T getCacheOrCreate(Class<T> clazz) {
         T dao = getCache(clazz);
         if (dao == null) {
             synchronized (this) {
