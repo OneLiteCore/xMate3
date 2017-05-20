@@ -8,8 +8,9 @@ import java.util.Arrays;
 import java.util.List;
 
 import core.xmate.db.DbException;
+import core.xmate.db.dao.DeleteAllDao;
+import core.xmate.db.dao.FindAllDao;
 import core.xmate.demo.R;
-import core.xmate.demo.db.DeleteDao;
 import core.xmate.demo.db.Person;
 import core.xmate.demo.db.PersonDb;
 
@@ -33,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
 
         findViewById(R.id.button_main_testQuery).setOnClickListener(v -> {
             try {
-                List<Person> persons = PersonDb.getInstance().get().findAll(Person.class);
+                List<Person> persons = PersonDb.getInstance().accessSync(new FindAllDao<>(Person.class));
                 String str = Arrays.toString(persons.toArray());
                 new AlertDialog.Builder(MainActivity.this)
                         .setTitle("Test Query")
@@ -50,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.button_main_testDelete).setOnClickListener(v -> {
 
             try {
-                PersonDb.getInstance().accessSync(DeleteDao.class, Person.class);
+                PersonDb.getInstance().accessSync(new DeleteAllDao<>(Person.class));
             } catch (DbException e) {
                 e.printStackTrace();
             }

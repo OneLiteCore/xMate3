@@ -14,10 +14,16 @@ import core.xmate.db.table.DbModel;
  * @author DrkCore
  * @since 2016年2月17日11:39:23
  */
-public class FindDbModelDao implements IDao<SqlInfo, List<DbModel>> {
+public class FindDbModelDao implements IDao<List<DbModel>> {
+
+    private final SqlInfo sqlInfo;
+
+    public FindDbModelDao(SqlInfo sqlInfo) {
+        this.sqlInfo = sqlInfo;
+    }
 
     @Override
-    public List<DbModel> access(DbManager db, SqlInfo sqlInfo) throws DbException {
+    public List<DbModel> access(DbManager db) throws DbException {
         return db.findDbModelAll(sqlInfo);
     }
 }

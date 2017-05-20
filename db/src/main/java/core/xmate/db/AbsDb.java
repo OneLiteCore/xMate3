@@ -3,9 +3,6 @@ package core.xmate.db;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Modifier;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import core.xmate.db.table.TableEntity;
 
@@ -87,87 +84,8 @@ public abstract class AbsDb extends DbManager.DaoConfig implements DbManager.DbU
 
     /*Dao*/
 
-    /**
-     * 调用 {@link IDao#access(DbManager, Object)} 方法。
-     *
-     * 该方法不会缓存实例。
-     *
-     * @param dao
-     * @param params
-     * @param <Params>
-     * @param <Result>
-     * @return
-     * @throws DbException
-     */
-    public <Params, Result> Result accessSync(IDao<Params, Result> dao, Params params) throws DbException {
-        return dao.access(get(), params);
-    }
-
-    /**
-     * 获取 dao 的缓存实例，或者反射创建实例再缓存起来，并同步执行其 {@link IDao#access(DbManager, Object)}方法。
-     *
-     * @param dao
-     * @param params
-     * @param <Params>
-     * @param <Result>
-     * @return
-     * @throws DbException
-     */
-    public <Params, Result> Result accessSync(Class<? extends IDao<Params, Result>> dao
-            , Params params) throws DbException {
-        return accessSync(getCacheOrCreate(dao), params);
-    }
-
-	/*Cache*/
-
-    private static final int DEFAULT_DAO_CACHE_SIZE = 8;
-    private volatile Map<Class, IDao> daoCaches;
-
-    private Map<Class, IDao> getCaches() {
-        if (daoCaches == null) {
-            synchronized (this) {
-                if (daoCaches == null) {
-                    daoCaches = new ConcurrentHashMap<>(DEFAULT_DAO_CACHE_SIZE);
-                }
-            }
-        }
-        return daoCaches;
-    }
-
-    private void cache(IDao dao) {
-        Class clz = dao != null ? dao.getClass() : null;
-        if (clz != null) {
-            //允许静态的内部类
-            boolean isStatistic = Modifier.isStatic(clz.getModifiers());
-            //允许单独定义在一个java文件的类型
-            boolean isCommon = !clz.isMemberClass() && !clz.isLocalClass() && !clz.isAnonymousClass();
-            if (isStatistic || isCommon) {
-                getCaches().put(clz,dao);
-            }
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    private <T> T getCache(Class<T> clazz) {
-        return (T) getCaches().get(clazz);
-    }
-
-    private <T extends IDao> T getCacheOrCreate(Class<T> clazz) {
-        T dao = getCache(clazz);
-        if (dao == null) {
-            synchronized (this) {
-                dao = getCache(clazz);
-                if (dao == null) {
-                    try {
-                        dao = clazz.newInstance();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    cache(dao);
-                }
-            }
-        }
-        return dao;
+    public <Result> Result accessSync(IDao<Result> dao) throws DbException {
+        return dao.access(get());
     }
 
 }
