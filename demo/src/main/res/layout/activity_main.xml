@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="core.xmate.demo.app.MainActivity">
+
+    <Button
+        android:id="@+id/textView_main_testAdd"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="TestAdd"/>
+
+    <Button
+        android:id="@+id/button_main_testQuery"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="testQuery"/>
+
+    <Button
+        android:id="@+id/button_main_testDelete"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="testDelete"/>
+
+</LinearLayout>

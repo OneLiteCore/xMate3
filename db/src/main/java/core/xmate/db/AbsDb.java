@@ -3,7 +3,6 @@ package core.xmate.db;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
-import java.lang.ref.WeakReference;
 import java.lang.reflect.Modifier;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -122,9 +121,9 @@ public abstract class AbsDb extends DbManager.DaoConfig implements DbManager.DbU
 	/*Cache*/
 
     private static final int DEFAULT_DAO_CACHE_SIZE = 8;
-    private volatile Map<Class, WeakReference<IDao>> daoCaches;
+    private volatile Map<Class, IDao> daoCaches;
 
-    private Map<Class, WeakReference<IDao>> getCaches() {
+    private Map<Class, IDao> getCaches() {
         if (daoCaches == null) {
             synchronized (this) {
                 if (daoCaches == null) {
@@ -135,15 +134,15 @@ public abstract class AbsDb extends DbManager.DaoConfig implements DbManager.DbU
         return daoCaches;
     }
 
-    private void cache(IDao IDao) {
-        Class clz = IDao != null ? IDao.getClass() : null;
+    private void cache(IDao dao) {
+        Class clz = dao != null ? dao.getClass() : null;
         if (clz != null) {
             //允许静态的内部类
             boolean isStatistic = Modifier.isStatic(clz.getModifiers());
             //允许单独定义在一个java文件的类型
             boolean isCommon = !clz.isMemberClass() && !clz.isLocalClass() && !clz.isAnonymousClass();
             if (isStatistic || isCommon) {
-                getCaches().put(clz, new WeakReference<>(IDao));
+                getCaches().put(clz,dao);
             }
         }
     }
