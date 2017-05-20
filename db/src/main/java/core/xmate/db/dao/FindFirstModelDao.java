@@ -11,18 +11,18 @@ import core.xmate.db.sqlite.SqlInfo;
  * @author DrkCore
  * @since 2016年2月17日11:39:23
  */
-public class FindFirstModelDao<Type> implements IDao<Type> {
+public class FindFirstModelDao<T> implements IDao<T> {
 
-    private final Class<Type> type;
+    private final Class<T> type;
     private final SqlInfo sqlInfo;
 
-    public FindFirstModelDao(Class<Type> type, SqlInfo sqlInfo) {
+    public FindFirstModelDao(Class<T> type, SqlInfo sqlInfo) {
         this.type = type;
         this.sqlInfo = sqlInfo;
     }
 
     @Override
-    public Type access(DbManager db) throws DbException {
+    public T access(DbManager db) throws DbException {
         return db.findModelFirst(type, sqlInfo);
     }
 }
