@@ -3,6 +3,7 @@ package core.xmate.demo.app;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
 
 import java.util.Arrays;
 import java.util.List;
@@ -21,39 +22,48 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        findViewById(R.id.textView_main_testAdd).setOnClickListener(v -> {
-            Person person = new Person();
-            person.setName("小明").setAge(123);
+        findViewById(R.id.textView_main_testAdd).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Person person = new Person();
+                person.setName("小明").setAge(123);
 
-            try {
-                PersonDb.getInstance().get().save(person);
-            } catch (DbException e) {
-                e.printStackTrace();
+                try {
+                    PersonDb.getInstance().get().save(person);
+                } catch (DbException e) {
+                    e.printStackTrace();
+                }
             }
         });
 
-        findViewById(R.id.button_main_testQuery).setOnClickListener(v -> {
-            try {
-                List<Person> persons = PersonDb.getInstance().accessSync(new FindDao<>(Person.class));
-                String str = Arrays.toString(persons.toArray());
-                new AlertDialog.Builder(MainActivity.this)
-                        .setTitle("Test Query")
-                        .setMessage(str)
-                        .setPositiveButton("ok", null)
-                        .show();
+        findViewById(R.id.button_main_testQuery).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    List<Person> persons = PersonDb.getInstance().accessSync(new FindDao<>(Person.class));
+                    String str = Arrays.toString(persons.toArray());
+                    new AlertDialog.Builder(MainActivity.this)
+                            .setTitle("Test Query")
+                            .setMessage(str)
+                            .setPositiveButton("ok", null)
+                            .show();
 
-            } catch (DbException e) {
-                e.printStackTrace();
+                } catch (DbException e) {
+                    e.printStackTrace();
+                }
             }
         });
 
 
-        findViewById(R.id.button_main_testDelete).setOnClickListener(v -> {
+        findViewById(R.id.button_main_testDelete).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
 
-            try {
-                PersonDb.getInstance().accessSync(new DeleteAllDao<>(Person.class));
-            } catch (DbException e) {
-                e.printStackTrace();
+                try {
+                    PersonDb.getInstance().accessSync(new DeleteAllDao<>(Person.class));
+                } catch (DbException e) {
+                    e.printStackTrace();
+                }
             }
         });
     }
