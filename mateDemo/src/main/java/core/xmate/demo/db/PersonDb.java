@@ -1,10 +1,10 @@
 package core.xmate.demo.db;
 
+import core.xmate.MateDb;
 import core.xmate.db.AbsDb;
 import core.xmate.db.DbException;
 import core.xmate.db.DbManager;
 import core.xmate.demo.App;
-import core.xmate.x;
 
 /**
  * @author DrkCore
@@ -34,7 +34,7 @@ public class PersonDb extends AbsDb {
 
     @Override
     protected DbManager onCreate() throws DbException {
-        DbManager mgr = x.getDb(App.getInstance(), this);
+        DbManager mgr = MateDb.getDb(App.getInstance(), this);
         ;
         mgr.createTableIfNotExist(Person.class);
         return mgr;

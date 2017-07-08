@@ -7,9 +7,9 @@ import core.xmate.db.DbManagerImpl;
 
 /**
  * @author DrkCore
- * @since 2017-05-15
+ * @since 2017-07-08
  */
-public class x {
+public class MateDb {
 
     public static DbManager getDb(Context context, DbManager.DaoConfig daoConfig) {
         return DbManagerImpl.getInstance(context, daoConfig);
