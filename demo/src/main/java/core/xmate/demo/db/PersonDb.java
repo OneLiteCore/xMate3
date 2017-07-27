@@ -1,10 +1,9 @@
 package core.xmate.demo.db;
 
-import core.xmate.MateDb;
 import core.xmate.db.AbsDb;
+import core.xmate.db.AutoDb;
 import core.xmate.db.DbException;
 import core.xmate.db.DbManager;
-import core.xmate.demo.App;
 
 /**
  * @author DrkCore
@@ -28,15 +27,7 @@ public class PersonDb extends AbsDb {
     private static final String DB_NAME = "test.db";
     private static final int DB_VERSION = 1;
 
-    public PersonDb() {
+    private PersonDb() {
         super(DB_NAME, DB_VERSION);
-    }
-
-    @Override
-    protected DbManager onCreate() throws DbException {
-        DbManager mgr = MateDb.getDb(App.getInstance(), this);
-        ;
-        mgr.createTableIfNotExist(Person.class);
-        return mgr;
     }
 }

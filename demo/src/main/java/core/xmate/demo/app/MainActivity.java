@@ -1,8 +1,8 @@
 package core.xmate.demo.app;
 
+import android.app.Activity;
+import android.app.AlertDialog;
 import android.os.Bundle;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
 import java.util.Arrays;
@@ -11,11 +11,12 @@ import java.util.List;
 import core.xmate.db.DbException;
 import core.xmate.db.dao.DeleteAllDao;
 import core.xmate.db.dao.FindDao;
+import core.xmate.db.dao.SaveDao;
 import core.xmate.demo.R;
 import core.xmate.demo.db.Person;
 import core.xmate.demo.db.PersonDb;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
                 person.setName("小明").setAge(123);
 
                 try {
-                    PersonDb.getInstance().get().save(person);
+                    PersonDb.getInstance().accessSync(new SaveDao(person));
                 } catch (DbException e) {
                     e.printStackTrace();
                 }
