@@ -1,1 +1,1 @@
-include ':xutils', ':sample', ':mateDb', ':mateDemo'
+include ':mateDb', ':demo'
