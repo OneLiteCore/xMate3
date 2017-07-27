@@ -37,6 +37,7 @@ import core.xmate.db.table.ModelEntity;
 import core.xmate.db.table.TableEntity;
 import core.xmate.util.IOUtil;
 import core.xmate.util.KeyValue;
+import core.xmate.util.LogUtil;
 
 public final class DbManagerImpl extends DbBase {
 
@@ -70,35 +71,33 @@ public final class DbManagerImpl extends DbBase {
             daoConfig = new DbManager.DaoConfig();
         }
 
-        DbManagerImpl dao = DAO_MAP.get(daoConfig);
-        if (dao == null) {
-            dao = new DbManagerImpl(context, daoConfig);
-            DAO_MAP.put(daoConfig, dao);
+        DbManagerImpl mgr = DAO_MAP.get(daoConfig);
+        if (mgr == null) {
+            mgr = new DbManagerImpl(context, daoConfig);
+            DAO_MAP.put(daoConfig, mgr);
         } else {
-            dao.daoConfig = daoConfig;
+            mgr.daoConfig = daoConfig;
         }
 
         // update the database if needed
-        SQLiteDatabase database = dao.database;
+        SQLiteDatabase database = mgr.database;
         int oldVersion = database.getVersion();
         int newVersion = daoConfig.getDbVersion();
         if (oldVersion != newVersion) {
-            if (oldVersion != 0) {
-                DbManager.DbUpgradeListener upgradeListener = daoConfig.getDbUpgradeListener();
-                if (upgradeListener != null) {
-                    upgradeListener.onUpgrade(dao, oldVersion, newVersion);
-                } else {
-                    try {
-                        dao.dropDb();
-                    } catch (DbException e) {
-                        e.printStackTrace();
-                    }
+            DbManager.DbUpgradeListener upgradeListener = daoConfig.getDbUpgradeListener();
+            if (upgradeListener != null) {
+                upgradeListener.onUpgrade(mgr, oldVersion, newVersion);
+            } else if (oldVersion != 0) {
+                try {
+                    mgr.dropDb();
+                } catch (DbException e) {
+                    LogUtil.e(e.getMessage(), e);
                 }
             }
             database.setVersion(newVersion);
         }
 
-        return dao;
+        return mgr;
     }
 
     @Override

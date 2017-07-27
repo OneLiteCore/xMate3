@@ -1,4 +1,4 @@
-package core.xmate.demo.db;
+package core.xmate.demo.db.person;
 
 import core.xmate.db.annotation.Column;
 import core.xmate.db.annotation.Table;

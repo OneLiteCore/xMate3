@@ -13,8 +13,10 @@ import core.xmate.db.dao.DeleteAllDao;
 import core.xmate.db.dao.FindDao;
 import core.xmate.db.dao.SaveDao;
 import core.xmate.demo.R;
-import core.xmate.demo.db.Person;
+import core.xmate.demo.db.RankDb;
+import core.xmate.demo.db.person.Person;
 import core.xmate.demo.db.PersonDb;
+import core.xmate.demo.db.rank.Rank;
 
 public class MainActivity extends Activity {
 
@@ -65,6 +67,13 @@ public class MainActivity extends Activity {
                 } catch (DbException e) {
                     e.printStackTrace();
                 }
+            }
+        });
+
+        findViewById(R.id.button_main_testUpdate).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                RankDb.getInstance().get();
             }
         });
     }

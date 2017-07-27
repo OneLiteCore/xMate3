@@ -25,4 +25,10 @@
         android:layout_height="wrap_content"
         android:text="testDelete"/>
 
+    <Button
+        android:id="@+id/button_main_testUpdate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="testUpdate"/>
+
 </LinearLayout>
