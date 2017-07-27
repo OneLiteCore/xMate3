@@ -1,0 +1,12 @@
+ext {
+    userOrg = 'drkcore'
+    name = 'DrkCore'
+    contact = '178456643@qq.com'
+    groupId = 'core.mate'
+    uploadName = 'xMate'
+    publishVersion = '1.0.0'
+    desc = 'Seperated libs from xUtils3'
+    website = 'https://github.com/DrkCore/xMate'
+    gitUrl = 'https://github.com/DrkCore/xMate.git'
+    licences = ['Apache-2.0']
+}
