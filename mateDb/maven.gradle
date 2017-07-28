@@ -1,11 +1,16 @@
 apply plugin: 'bintray-release'
 
+ext{
+    verCode = 1
+    verName = '1.0.0'
+}
+
 publish {
     artifactId = 'xMateDb'
     userOrg = rootProject.userOrg
     groupId = rootProject.groupId
     uploadName = rootProject.uploadName
-    publishVersion = '1.0.0'
+    publishVersion = verName
     desc = rootProject.description
     website = rootProject.website
     licences = rootProject.licences
