@@ -3,6 +3,7 @@ package core.xmate.demo;
 import android.app.Application;
 
 import core.xmate.MateDb;
+import core.xmate.util.LogUtil;
 
 /**
  * @author DrkCore
@@ -23,5 +24,6 @@ public class App extends Application{
 
         //初始化框架
         MateDb.init(this);
+        LogUtil.setDebug(BuildConfig.DEBUG);
     }
 }

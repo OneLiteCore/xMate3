@@ -3,8 +3,7 @@ package core.xmate.db;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-
-import core.xmate.util.LogUtil;
+import java.util.Locale;
 
 /**
  * @author core
@@ -12,44 +11,55 @@ import core.xmate.util.LogUtil;
  */
 public abstract class AutoDb extends AbsDb {
 
-    private static void ensureVersions(Class[] versions) {
-        if (versions == null || versions.length == 0) {
-            throw new IllegalArgumentException("versions must not be null or empty");
+    /**
+     * Class that implements this inter must be statistic, public and
+     * has a zero arguments constructor, so that {@link AutoDb} could
+     * instant it by reflection.
+     */
+    public interface IVersion {
 
-        } else {
-            for (Class ver : versions) {
-                if (!(IDao.class.isAssignableFrom(ver))) {
-                    throw new IllegalArgumentException(ver + " must be impl of IDao");
-                }
-            }
-        }
+        void onUpgrade(DbManager db) throws DbException;
+
     }
 
-    private final Class[] versions;
+    private final List<Class<? extends IVersion>> versions;
 
-    public AutoDb(String dbName, Class[] versions) {
-        super(dbName, versions.length);
-        this.versions = versions.clone();
-        ensureVersions(versions);
+    public AutoDb(String dbName, List<Class<? extends IVersion>> versions) {
+        super(dbName, versions.size());
+        this.versions = new ArrayList<>(versions);
     }
 
-    public AutoDb(File inDir, String dbName, Class[] versions) {
-        super(inDir, dbName, versions.length);
-        this.versions = versions.clone();
-        ensureVersions(versions);
+    public AutoDb(File inDir, String dbName, List<Class<? extends IVersion>> versions) {
+        super(inDir, dbName, versions.size());
+        this.versions = new ArrayList<>(versions);
     }
 
     @Override
     public final void onUpgrade(DbManager db, int oldVersion, int newVersion) {
         super.onUpgrade(db, oldVersion, newVersion);
+        Class<? extends IVersion> verType = null;
         try {
-            for (int i = oldVersion; i < newVersion; i++) {
-                IDao dao = (IDao) versions[i].newInstance();
-                dao.access(db);
-            }
-        } catch (Exception e) {
-            LogUtil.e("Upgrade db " + getDbName() + "fail", e);
+            if (newVersion > oldVersion) {// Upgrade
+                for (int i = oldVersion; i < newVersion; i++) {
+                    verType = versions.get(i);
+                    IVersion version = verType.newInstance();
+                    version.onUpgrade(db);
+                }
 
+            } else if (newVersion < oldVersion) {// Downgrade
+                throw new IllegalStateException("Downgrade not supported.");
+            }
+
+        } catch (Exception e) {
+            String msg;
+            if (verType != null) {
+                msg = String.format(Locale.getDefault(),
+                        "Failed to upgrade db %s %d -> %d fail, due to version: %s", getDbName(), oldVersion, newVersion, verType);
+            } else {
+                msg = e.getMessage();
+            }
+            db.dropDbQuietly();
+            throw new IllegalStateException(msg, e);
         }
     }
 }

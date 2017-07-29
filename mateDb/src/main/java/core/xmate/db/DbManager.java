@@ -139,6 +139,13 @@ public interface DbManager extends Closeable {
 	void dropDb () throws DbException;
 
 	/**
+	 * 删除库
+	 *
+	 * @throws DbException
+	 */
+	void dropDbQuietly ();
+
+	/**
 	 * 关闭数据库,
 	 * xUtils对同一个库的链接是单实例的, 一般不需要关闭它.
 	 *

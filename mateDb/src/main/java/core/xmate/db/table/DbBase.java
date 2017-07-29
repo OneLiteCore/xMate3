@@ -5,11 +5,11 @@ import android.text.TextUtils;
 
 import java.util.HashMap;
 
+import core.xmate.db.DbException;
 import core.xmate.db.DbManager;
-import core.xmate.util.IOUtil;
 import core.xmate.db.sqlite.SqlInfo;
 import core.xmate.db.sqlite.SqlInfoBuilder;
-import core.xmate.db.DbException;
+import core.xmate.util.IOUtil;
 import core.xmate.util.LogUtil;
 
 /**
@@ -90,6 +90,15 @@ public abstract class DbBase implements DbManager {
             } finally {
                 IOUtil.closeQuietly(cursor);
             }
+        }
+    }
+
+    @Override
+    public void dropDbQuietly() {
+        try {
+            dropDb();
+        } catch (DbException e) {
+            LogUtil.e(e.getMessage(), e);
         }
     }
 
