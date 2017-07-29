@@ -16,6 +16,10 @@ static def gitVersionTag() {
         version = version.substring(0, matcher.start())
     }
 
+    if(version.startsWith('v') || version.startsWith('V')){
+        version = version.substring(1)
+    }
+
     return version
 }
 
