@@ -5,27 +5,9 @@ static def gitVersionCode() {
     cmd.execute().text.trim().toInteger()
 }
 
-static def gitVersionTag() {
-    def cmd = 'git describe --tags'
-    def version = cmd.execute().text.trim()
-
-    def pattern = "-(\\d+)-g"
-    def matcher = version =~ pattern
-
-    if (matcher) {
-        version = version.substring(0, matcher.start())
-    }
-
-    if(version.startsWith('v') || version.startsWith('V')){
-        version = version.substring(1)
-    }
-
-    return version
-}
-
 ext {
     verCode = gitVersionCode()
-    verName = gitVersionTag()
+    verName = "2.0.1"
 }
 
 publish {
@@ -37,9 +19,4 @@ publish {
     desc = rootProject.description
     website = rootProject.website
     licences = rootProject.licences
-}
-
-tasks.withType(Javadoc) {
-    options.addStringOption('Xdoclint:none', '-quiet')
-    options.addStringOption('encoding', 'UTF-8')
 }
