@@ -3,9 +3,9 @@ ext {
     name = 'DrkCore'
     contact = '178456643@qq.com'
     groupId = 'core.mate'
-    uploadName = 'xMate'
+    uploadName = 'xMate3'
     desc = 'Seperated libs from xUtils3'
-    website = 'https://github.com/DrkCore/xMate'
-    gitUrl = 'https://github.com/DrkCore/xMate.git'
+    website = 'https://github.com/DrkCore/xMate3'
+    gitUrl = 'https://github.com/DrkCore/xMate3.git'
     licences = ['Apache-2.0']
 }
