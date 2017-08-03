@@ -9,7 +9,7 @@ import java.util.Locale;
  * @author core
  * @since 2017-07-27
  */
-public abstract class AutoDb extends AbsDb {
+public abstract class AutoDb extends MateDb {
 
     /**
      * Class that implements this inter must be statistic, public and

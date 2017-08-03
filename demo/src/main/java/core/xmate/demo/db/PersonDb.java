@@ -1,15 +1,12 @@
 package core.xmate.demo.db;
 
-import core.xmate.db.AbsDb;
-import core.xmate.db.AutoDb;
-import core.xmate.db.DbException;
-import core.xmate.db.DbManager;
+import core.xmate.db.MateDb;
 
 /**
  * @author DrkCore
  * @since 2017-05-20
  */
-public class PersonDb extends AbsDb {
+public class PersonDb extends MateDb {
 
     private static volatile PersonDb instance = null;
 

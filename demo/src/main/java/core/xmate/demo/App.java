@@ -2,7 +2,7 @@ package core.xmate.demo;
 
 import android.app.Application;
 
-import core.xmate.MateDb;
+import core.xmate.db.MateDb;
 import core.xmate.util.LogUtil;
 
 /**
