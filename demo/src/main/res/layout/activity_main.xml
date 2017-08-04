@@ -20,6 +20,12 @@
         android:text="testQuery"/>
 
     <Button
+        android:id="@+id/textView_main_tableExist"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="TableExist"/>
+
+    <Button
         android:id="@+id/button_main_testDelete"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

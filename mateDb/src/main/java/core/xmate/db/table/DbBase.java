@@ -3,7 +3,9 @@ package core.xmate.db.table;
 import android.database.Cursor;
 import android.text.TextUtils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import core.xmate.db.DbException;
 import core.xmate.db.DbManager;
@@ -112,6 +114,54 @@ public abstract class DbBase implements DbManager {
     }
 
     @Override
+    public List<String> getTableNames() throws DbException {
+        List<String> tables = new ArrayList<>();
+        Cursor cursor = execQuery("SELECT name FROM sqlite_master WHERE type='table' AND name<>'sqlite_sequence'");
+        if (cursor != null) {
+            try {
+                while (cursor.moveToNext()) {
+                    try {
+                        tables.add(cursor.getString(0));
+                    } catch (Throwable e) {
+                        LogUtil.e(e.getMessage(), e);
+                    }
+                }
+            } catch (Throwable e) {
+                throw new DbException(e);
+            } finally {
+                IOUtil.closeQuietly(cursor);
+            }
+        }
+
+        return tables;
+    }
+
+    @Override
+    public boolean isTableExists(Class<?> tableEntity) throws DbException {
+        TableEntity<?> table = getTable(tableEntity);
+        return isTableExists(table.getName());
+    }
+
+    @Override
+    public boolean isTableExists(String name) throws DbException {
+        boolean result = false;
+
+        SqlInfo sqlInfo = new SqlInfo("SELECT name FROM sqlite_master WHERE type='table' AND name=?").addBindArgs(name);
+        Cursor cursor = execQuery(sqlInfo);
+        if (cursor != null) {
+            try {
+                result = cursor.moveToNext();
+            } catch (Throwable e) {
+                throw new DbException(e);
+            } finally {
+                IOUtil.closeQuietly(cursor);
+            }
+        }
+
+        return result;
+    }
+
+    @Override
     public void addColumn(Class<?> entityType, String column) throws DbException {
         TableEntity<?> table = this.getTable(entityType);
         ColumnEntity col = table.getColumnMap().get(column);
@@ -158,6 +208,5 @@ public abstract class DbBase implements DbManager {
             tableMap.remove(entityType);
         }
     }
-
 
 }

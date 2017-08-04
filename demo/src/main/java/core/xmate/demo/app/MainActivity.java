@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Toast;
 
 import java.util.Arrays;
 import java.util.List;
@@ -13,10 +14,9 @@ import core.xmate.db.dao.DeleteAllDao;
 import core.xmate.db.dao.FindDao;
 import core.xmate.db.dao.SaveDao;
 import core.xmate.demo.R;
+import core.xmate.demo.db.PersonDb;
 import core.xmate.demo.db.RankDb;
 import core.xmate.demo.db.person.Person;
-import core.xmate.demo.db.PersonDb;
-import core.xmate.demo.db.rank.Rank;
 
 public class MainActivity extends Activity {
 
@@ -57,6 +57,17 @@ public class MainActivity extends Activity {
             }
         });
 
+        findViewById(R.id.textView_main_tableExist).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    boolean result = PersonDb.getInstance().get().isTableExists(Person.class);
+                    Toast.makeText(MainActivity.this, "" + result, Toast.LENGTH_SHORT).show();
+                } catch (DbException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
 
         findViewById(R.id.button_main_testDelete).setOnClickListener(new View.OnClickListener() {
             @Override
