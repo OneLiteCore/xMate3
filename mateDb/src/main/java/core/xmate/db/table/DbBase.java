@@ -66,6 +66,15 @@ public abstract class DbBase implements DbManager {
     }
 
     @Override
+    public void dropTableQuietly(Class<?> entityType) {
+        try {
+            dropTable(entityType);
+        } catch (DbException e) {
+            LogUtil.e("dropTableQuietly", e);
+        }
+    }
+
+    @Override
     public void dropDb() throws DbException {
         Cursor cursor = execQuery("SELECT name FROM sqlite_master WHERE type='table' AND name<>'sqlite_sequence'");
         if (cursor != null) {

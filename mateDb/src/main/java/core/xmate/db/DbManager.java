@@ -113,6 +113,14 @@ public interface DbManager extends Closeable {
 	void dropTable (Class<?> entityType) throws DbException;
 
 	/**
+	 * 删除表
+	 *
+	 * @param entityType
+	 * @throws DbException
+	 */
+	void dropTableQuietly (Class<?> entityType);
+
+	/**
 	 * 创建表
 	 *
 	 * @param tableEntity
