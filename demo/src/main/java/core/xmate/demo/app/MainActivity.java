@@ -44,7 +44,10 @@ public class MainActivity extends Activity {
             public void onClick(View v) {
                 try {
                     List<Person> persons = PersonDb.getInstance().accessSync(new FindDao<>(Person.class));
-                    String str = Arrays.toString(persons.toArray());
+                    String str = "";
+                    if (persons != null) {
+                        str = Arrays.toString(persons.toArray());
+                    }
                     new AlertDialog.Builder(MainActivity.this)
                             .setTitle("Test Query")
                             .setMessage(str)
