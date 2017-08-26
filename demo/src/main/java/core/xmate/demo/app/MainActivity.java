@@ -10,9 +10,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import core.xmate.db.DbException;
-import core.xmate.db.dao.DeleteAllDao;
-import core.xmate.db.dao.FindDao;
-import core.xmate.db.dao.SaveDao;
 import core.xmate.demo.R;
 import core.xmate.demo.db.PersonDb;
 import core.xmate.demo.db.RankDb;
@@ -32,7 +29,7 @@ public class MainActivity extends Activity {
                 person.setName("小明").setAge(123);
 
                 try {
-                    PersonDb.getInstance().accessSync(new SaveDao(person));
+                    PersonDb.getInstance().get().save(person);
                 } catch (DbException e) {
                     e.printStackTrace();
                 }
@@ -43,7 +40,7 @@ public class MainActivity extends Activity {
             @Override
             public void onClick(View v) {
                 try {
-                    List<Person> persons = PersonDb.getInstance().accessSync(new FindDao<>(Person.class));
+                    List<Person> persons = PersonDb.getInstance().get().findAll(Person.class);
                     String str = "";
                     if (persons != null) {
                         str = Arrays.toString(persons.toArray());
@@ -77,7 +74,7 @@ public class MainActivity extends Activity {
             public void onClick(View v) {
 
                 try {
-                    PersonDb.getInstance().accessSync(new DeleteAllDao<>(Person.class));
+                    PersonDb.getInstance().get().delete(Person.class);
                 } catch (DbException e) {
                     e.printStackTrace();
                 }

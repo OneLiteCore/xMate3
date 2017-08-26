@@ -27,4 +27,5 @@ public class PersonDb extends MateDb {
     private PersonDb() {
         super(DB_NAME, DB_VERSION);
     }
+
 }

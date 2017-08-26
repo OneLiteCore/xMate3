@@ -135,10 +135,4 @@ public abstract class MateDb extends DbManager.DaoConfig implements DbManager.Db
     public void onUpgrade(DbManager db, int oldVersion, int newVersion) {
     }
 
-    /*Dao*/
-
-    public <Result> Result accessSync(IDao<Result> dao) throws DbException {
-        return dao.access(get());
-    }
-
 }
