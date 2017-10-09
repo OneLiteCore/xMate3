@@ -1,7 +1,7 @@
 apply plugin: 'bintray-release'
 
 static def gitVersionCode() {
-    def cmd = 'git rev-list HEAD --first-parent --count'
+    def cmd = 'git rev-list HEAD --count'
     cmd.execute().text.trim().toInteger()
 }
 
