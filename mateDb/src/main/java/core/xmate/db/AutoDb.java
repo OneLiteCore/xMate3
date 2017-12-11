@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import core.xmate.util.LogUtil;
+
 /**
  * @author core
  * @since 2017-07-27
@@ -37,29 +39,33 @@ public abstract class AutoDb extends MateDb {
     @Override
     public final void onUpgrade(DbManager db, int oldVersion, int newVersion) {
         super.onUpgrade(db, oldVersion, newVersion);
-        Class<? extends IVersion> verType = null;
-        try {
-            if (newVersion > oldVersion) {// Upgrade
+        if (newVersion > oldVersion) {// Upgrade
+            Class<? extends IVersion> ver = null;
+            try {
+                db.beginTransaction();
+
                 for (int i = oldVersion; i < newVersion; i++) {
-                    verType = versions.get(i);
-                    IVersion version = verType.newInstance();
+                    ver = versions.get(i);
+                    IVersion version = ver.newInstance();
                     version.onUpgrade(db);
                 }
 
-            } else if (newVersion < oldVersion) {// Downgrade
-                throw new IllegalStateException("Downgrade not supported.");
+                db.setTransactionSuccessful();
+            } catch (Exception e) {
+                String msg;
+                if (ver != null) {
+                    msg = String.format(Locale.getDefault(), "Failed to upgrade db %s %d -> %d fail, due to version: %s", getDbName(), oldVersion, newVersion, ver.getCanonicalName());
+                } else {
+                    msg = e.getMessage();
+                }
+                LogUtil.e(msg, e);
+
+            } finally {
+                db.endTransaction();
             }
 
-        } catch (Exception e) {
-            String msg;
-            if (verType != null) {
-                msg = String.format(Locale.getDefault(),
-                        "Failed to upgrade db %s %d -> %d fail, due to version: %s", getDbName(), oldVersion, newVersion, verType);
-            } else {
-                msg = e.getMessage();
-            }
-            db.dropDbQuietly();
-            throw new IllegalStateException(msg, e);
+        } else if (newVersion < oldVersion) {// Downgrade
+            LogUtil.e(getDbName() + ": Downgrade not supported.");
         }
     }
 }

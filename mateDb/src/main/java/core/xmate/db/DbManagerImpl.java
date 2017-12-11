@@ -508,7 +508,8 @@ public final class DbManagerImpl extends DbBase {
 
     ///////////////////////////////////// exec sql /////////////////////////////////////////////////////
 
-    private void beginTransaction() {
+    @Override
+    public void beginTransaction() {
         if (allowTransaction) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN && database.isWriteAheadLoggingEnabled()) {
                 database.beginTransactionNonExclusive();
@@ -518,13 +519,15 @@ public final class DbManagerImpl extends DbBase {
         }
     }
 
-    private void setTransactionSuccessful() {
+    @Override
+    public void setTransactionSuccessful() {
         if (allowTransaction) {
             database.setTransactionSuccessful();
         }
     }
 
-    private void endTransaction() {
+    @Override
+    public void endTransaction() {
         if (allowTransaction) {
             database.endTransaction();
         }

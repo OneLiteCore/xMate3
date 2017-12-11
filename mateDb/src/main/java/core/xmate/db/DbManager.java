@@ -292,4 +292,12 @@ public interface DbManager extends Closeable {
             return String.valueOf(dbDir) + "/" + dbName;
         }
     }
+
+    /////////// Transaction
+
+    void beginTransaction();
+
+    void setTransactionSuccessful();
+
+    void endTransaction();
 }
