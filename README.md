@@ -11,7 +11,7 @@ As in my plan, I decide to seperate xUtils3 into 4 divisonal modules. But so far
 To setup orm part you need to add this in your module build.gradle:
 
 ```groovy
-compile 'core.mate:xmateDb:2.0.2'
+compile 'core.mate:xmateDb:2.2.1'
 ```
 
 Then Init before you use it:
