@@ -12,6 +12,19 @@ android {
         versionCode 1
         versionName "1.0"
     }
+    buildTypes {
+        debug {
+        }
+        release {
+            minifyEnabled true
+            // zipAlign优化
+            zipAlignEnabled true
+            // 移除无用的资源文件文件
+            shrinkResources true
+
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
 }
 
 dependencies {
