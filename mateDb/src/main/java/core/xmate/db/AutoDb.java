@@ -26,14 +26,18 @@ public abstract class AutoDb extends MateDb {
 
     private final List<Class<? extends IVersion>> versions;
 
-    public AutoDb(String dbName, List<Class<? extends IVersion>> versions) {
+    private final boolean crashIfUpdateFailed;
+
+    public AutoDb(String dbName, List<Class<? extends IVersion>> versions, boolean crashIfUpdateFailed) {
         super(dbName, versions.size());
         this.versions = new ArrayList<>(versions);
+        this.crashIfUpdateFailed = crashIfUpdateFailed;
     }
 
-    public AutoDb(File inDir, String dbName, List<Class<? extends IVersion>> versions) {
+    public AutoDb(File inDir, String dbName, List<Class<? extends IVersion>> versions, boolean crashIfUpdateFailed) {
         super(inDir, dbName, versions.size());
         this.versions = new ArrayList<>(versions);
+        this.crashIfUpdateFailed = crashIfUpdateFailed;
     }
 
     @Override
@@ -58,7 +62,12 @@ public abstract class AutoDb extends MateDb {
                 } else {
                     msg = e.getMessage();
                 }
+
                 LogUtil.e(msg, e);
+
+                if (crashIfUpdateFailed) {
+                    throw new Error(e);
+                }
 
             } finally {
                 db.endTransaction();
