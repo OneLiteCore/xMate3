@@ -31,7 +31,7 @@ public class RankDb extends AutoDb {
     private static final String DB_NAME = "rank.db";
 
     private RankDb() {
-        super(DB_NAME, DB_VERSIONS);
+        super(DB_NAME, DB_VERSIONS, true);
     }
 
     private static final List<Class<? extends IVersion>> DB_VERSIONS = new ArrayList<>();
