@@ -52,11 +52,11 @@ public final class ColumnEntity {
         this.columnConverter = ColumnConverterFactory.getColumnConverter(fieldType);
 
 
-        this.getMethod = ColumnUtils.findGetMethod(entityType, field);
+        this.getMethod = ColumnUtils.findGetMethod(entityType, field, column.name());
         if (this.getMethod != null && !this.getMethod.isAccessible()) {
             this.getMethod.setAccessible(true);
         }
-        this.setMethod = ColumnUtils.findSetMethod(entityType, field);
+        this.setMethod = ColumnUtils.findSetMethod(entityType, field, column.name());
         if (this.setMethod != null && !this.setMethod.isAccessible()) {
             this.setMethod.setAccessible(true);
         }
