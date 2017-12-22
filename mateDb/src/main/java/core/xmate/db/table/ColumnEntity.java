@@ -16,6 +16,7 @@
 package core.xmate.db.table;
 
 import android.database.Cursor;
+import android.text.TextUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -42,6 +43,10 @@ public final class ColumnEntity {
     /* package */ ColumnEntity(Class<?> entityType, Field field, Column column) {
         field.setAccessible(true);
 
+        if(TextUtils.isEmpty(column.name())){
+            throw new IllegalArgumentException("Column name must not be null or empty!");
+        }
+
         this.columnField = field;
         this.name = column.name();
         this.property = column.property();
@@ -50,7 +55,6 @@ public final class ColumnEntity {
         Class<?> fieldType = field.getType();
         this.isAutoId = this.isId && column.autoGen() && ColumnUtils.isAutoIdType(fieldType);
         this.columnConverter = ColumnConverterFactory.getColumnConverter(fieldType);
-
 
         this.getMethod = ColumnUtils.findGetMethod(entityType, field, column.name());
         if (this.getMethod != null && !this.getMethod.isAccessible()) {
