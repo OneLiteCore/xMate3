@@ -171,8 +171,7 @@ public final class ColumnUtils {
         Method setMethod = null;
         String methodName;
 
-        if (colName.startsWith("is")) {
-            //FIXME 修正越界
+        if (colName.startsWith("is") && colName.length() > 2) {
             methodName = "set" + colName.substring(2, 3).toUpperCase() + colName.substring(3);
         } else {
             methodName = "set" + colName.substring(0, 1).toUpperCase() + colName.substring(1);
@@ -184,8 +183,7 @@ public final class ColumnUtils {
         }
 
         if (setMethod == null) {
-            if (fieldName.startsWith("is")) {
-                //FIXME 修正越界
+            if (fieldName.startsWith("is") && colName.length() > 2) {
                 methodName = "set" + fieldName.substring(2, 3).toUpperCase() + fieldName.substring(3);
             } else {
                 methodName = "set" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
