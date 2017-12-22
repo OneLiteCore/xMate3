@@ -8,6 +8,8 @@ import core.xmate.db.DbException;
 import core.xmate.db.DbManager;
 import core.xmate.demo.db.rank.Level;
 import core.xmate.demo.db.rank.Rank;
+import core.xmate.demo.db.rank.RankV2;
+import core.xmate.demo.db.rank.RankV3;
 
 /**
  * @author DrkCore
@@ -39,12 +41,18 @@ public class RankDb extends AutoDb {
     static {
         DB_VERSIONS.add(VERSION_1.class);
         DB_VERSIONS.add(VERSION_2.class);
+        DB_VERSIONS.add(VERSION_3.class);
+        DB_VERSIONS.add(VERSION_4.class);
     }
 
     public static class VERSION_1 implements IVersion {
         @Override
         public void onUpgrade(DbManager db) throws DbException {
             db.createTableIfNotExist(Rank.class);
+
+            Rank rank = new Rank();
+            rank.setName("王小明");
+            db.save(rank);
         }
     }
 
@@ -53,6 +61,53 @@ public class RankDb extends AutoDb {
         @Override
         public void onUpgrade(DbManager db) throws DbException {
             db.createTableIfNotExist(Level.class);
+        }
+    }
+
+    public static class VERSION_3 implements IVersion {
+
+        @Override
+        public void onUpgrade(DbManager db) throws DbException {
+            db.createTableIfNotExist(RankV2.class);
+
+            List<Rank> ranks = db.findAll(Rank.class);
+            int size = ranks != null ? ranks.size() : 0;
+            List<RankV2> rankV2s = new ArrayList<>(size);
+            for (int i = 0; i < size; i++) {
+                Rank rank = ranks.get(i);
+                RankV2 rankV2 = new RankV2();
+
+                rankV2.setId(rank.getId());
+                rankV2.setName(rank.getName());
+                rankV2.setAge(123);
+
+                rankV2s.add(rankV2);
+            }
+            db.save(rankV2s);
+        }
+    }
+
+    public static class VERSION_4 implements IVersion {
+
+        @Override
+        public void onUpgrade(DbManager db) throws DbException {
+            db.createTableIfNotExist(RankV3.class);
+
+            List<RankV2> ranks = db.findAll(RankV2.class);
+            int size = ranks != null ? ranks.size() : 0;
+            List<RankV3> rankV3s = new ArrayList<>(size);
+            for (int i = 0; i < size; i++) {
+                RankV2 rankV2 = ranks.get(i);
+                RankV3 rankV3 = new RankV3();
+
+                rankV3.setId(rankV2.getId());
+                rankV3.setName(rankV2.getName());
+                rankV3.setAge(rankV2.getAge());
+                rankV3.setSex(true);
+
+                rankV3s.add(rankV3);
+            }
+            db.save(rankV3s);
         }
     }
 

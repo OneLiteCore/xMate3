@@ -15,4 +15,21 @@ public class Level {
     @Column(name = "score")
     private int score;
 
+    public int getId() {
+        return id;
+    }
+
+    public Level setId(int id) {
+        this.id = id;
+        return this;
+    }
+
+    public int getScore() {
+        return score;
+    }
+
+    public Level setScore(int score) {
+        this.score = score;
+        return this;
+    }
 }
