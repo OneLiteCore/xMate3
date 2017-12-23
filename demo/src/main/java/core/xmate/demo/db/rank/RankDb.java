@@ -1,4 +1,4 @@
-package core.xmate.demo.db;
+package core.xmate.demo.db.rank;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,10 +6,6 @@ import java.util.List;
 import core.xmate.db.AutoDb;
 import core.xmate.db.DbException;
 import core.xmate.db.DbManager;
-import core.xmate.demo.db.rank.Level;
-import core.xmate.demo.db.rank.Rank;
-import core.xmate.demo.db.rank.RankV2;
-import core.xmate.demo.db.rank.RankV3;
 
 /**
  * @author DrkCore

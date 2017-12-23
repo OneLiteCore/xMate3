@@ -1,29 +1,230 @@
 # xMate3
 
-If you  are using  [xUtils3](https://github.com/wyouflf/xUtils3) you may know that it is a gengeral lib contains orm, bitmap, http, view. But sometime you only need part of it and using some other libs like ButterKnife to deal with the rest. That is why I make this.
+If you  are using  [xUtils3](https://github.com/wyouflf/xUtils3) you may know that it is a set of libs contains sqlite orm, bitmap loader, http requestor and view binder. But sometime you only need part of it and using some other lib like ButterKnife and Retrofit to deal with the rest. That is why I make this.
 
-As in my plan, I decide to seperate xUtils3 into 4 divisonal modules. But so far only orm part is available.
+Maybe in the future I can seperate xUtils3 into 4 individual modules. For now, only sqlite orm part is available.
 
-# ORM
+If you want to check some more documents about how to use it, please check the origin repository I forked from by click [here](https://github.com/wyouflf/xUtils3).
 
-[ ![Download](https://api.bintray.com/packages/drkcore/maven/xMate3/images/download.svg?version=2.0.2) ](https://bintray.com/drkcore/maven/xMate3/2.0.2/link)
+# Sqlite ORM
 
-To setup orm part you need to add this in your module build.gradle:
+[ ![Download](https://api.bintray.com/packages/drkcore/maven/xMate3/images/download.svg) ](https://bintray.com/drkcore/maven/xMate3/_latestVersion)
+
+To setup sqlite orm part you need to add this in your module build.gradle:
 
 ```groovy
 compile 'core.mate:xmateDb:2.2.4'
 ```
 
-Then Init before you use it:
+Then Init in `Application.onCreate()` before you use it:
 
 ```java
+import core.xmate.db.MateDb;
+import core.xmate.util.LogUtil;
+
+//Use application context to init the lib.
 MateDb.init(this);
+// Turn this debug switch on if you want to check some log output during dev.
+LogUtil.setDebug(false);
 ```
 
-There is two ways to go.
+## Declare Annotation in your table class
 
-## Extend AbsDb
+```java
+import core.xmate.db.annotation.Column;
+import core.xmate.db.annotation.Table;
 
-### Extend AutoDb
+@Table(name = "Person")
+public class Person {
 
-## Use DbManager Directly
+    @Column(name = "id", isId = true)
+    private int id;
+    @Column(name = "name")
+    private String name;
+    @Column(name = "age")
+    private int age;
+
+    //There must be a public non-parameterize constructor method to let reflection create a new instance
+    public Person() {}
+
+    //Some set/get methods
+}
+```
+
+## Extends MateDb and make it a singleton
+
+```java
+import core.xmate.db.MateDb;
+
+/**
+ * @author DrkCore
+ * @since 2017-05-20
+ */
+public class PersonDb extends MateDb {
+
+    private static volatile PersonDb instance = null;
+
+    public static PersonDb getInstance() {
+        if (instance == null) {
+            synchronized (PersonDb.class) {
+                if (instance == null) {
+                    instance = new PersonDb();
+                }
+            }
+        }
+        return instance;
+    }
+
+    private static final String DB_NAME = "test.db";
+    private static final int DB_VERSION = 1;
+
+    private PersonDb() {
+        super(DB_NAME, DB_VERSION);
+    }
+
+//    Use this constructor method to load a file as db
+//    private static final File DB_DIR = Environment.getExternalStorageDirectory();
+//    private static final String DB_FILE_NAME = "out_file.db";
+//
+//    private PersonDb() {
+//        super(DB_DIR, DB_FILE_NAME, 1);
+//    }
+
+    //CRUD
+    //Use get() method to get DbManager for db operations
+
+    public void save(Person person) {
+        try {
+            get().save(person);
+        } catch (DbException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public List<Person> findAll() {
+        try {
+            return get().findAll(Person.class);
+        } catch (DbException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+}
+
+```
+
+## Upgrade
+
+Best practice for upgrading database is to extend AutoDb.
+
+```java
+import java.util.ArrayList;
+import java.util.List;
+
+import core.xmate.db.AutoDb;
+import core.xmate.db.DbException;
+import core.xmate.db.DbManager;
+
+/**
+ * @author DrkCore
+ * @since 2017-05-20
+ */
+public class RankDb extends AutoDb {
+
+    private static volatile RankDb instance = null;
+
+    public static RankDb getInstance() {
+        if (instance == null) {
+            synchronized (RankDb.class) {
+                if (instance == null) {
+                    instance = new RankDb();
+                }
+            }
+        }
+        return instance;
+    }
+
+    private static final String DB_NAME = "rank.db";
+
+    private RankDb() {
+        super(DB_NAME, DB_VERSIONS, true);
+    }
+
+    private static final List<Class<? extends IVersion>> DB_VERSIONS = new ArrayList<>();
+
+    static {
+        DB_VERSIONS.add(VERSION_1.class);
+        DB_VERSIONS.add(VERSION_2.class);
+        DB_VERSIONS.add(VERSION_3.class);
+        DB_VERSIONS.add(VERSION_4.class);
+    }
+
+    public static class VERSION_1 implements IVersion {
+        @Override
+        public void onUpgrade(DbManager db) throws DbException {
+            db.createTableIfNotExist(Rank.class);
+
+            Rank rank = new Rank();
+            rank.setName("王小明");
+            db.save(rank);
+        }
+    }
+
+    public static class VERSION_2 implements IVersion {
+
+        @Override
+        public void onUpgrade(DbManager db) throws DbException {
+            db.createTableIfNotExist(Level.class);
+        }
+    }
+
+    public static class VERSION_3 implements IVersion {
+
+        @Override
+        public void onUpgrade(DbManager db) throws DbException {
+            db.createTableIfNotExist(RankV2.class);
+
+            List<Rank> ranks = db.findAll(Rank.class);
+            int size = ranks != null ? ranks.size() : 0;
+            List<RankV2> rankV2s = new ArrayList<>(size);
+            for (int i = 0; i < size; i++) {
+                Rank rank = ranks.get(i);
+                RankV2 rankV2 = new RankV2();
+
+                rankV2.setId(rank.getId());
+                rankV2.setName(rank.getName());
+                rankV2.setAge(123);
+
+                rankV2s.add(rankV2);
+            }
+            db.save(rankV2s);
+        }
+    }
+
+    public static class VERSION_4 implements IVersion {
+
+        @Override
+        public void onUpgrade(DbManager db) throws DbException {
+            db.createTableIfNotExist(RankV3.class);
+
+            List<RankV2> ranks = db.findAll(RankV2.class);
+            int size = ranks != null ? ranks.size() : 0;
+            List<RankV3> rankV3s = new ArrayList<>(size);
+            for (int i = 0; i < size; i++) {
+                RankV2 rankV2 = ranks.get(i);
+                RankV3 rankV3 = new RankV3();
+
+                rankV3.setId(rankV2.getId());
+                rankV3.setName(rankV2.getName());
+                rankV3.setAge(rankV2.getAge());
+                rankV3.setSex(true);
+
+                rankV3s.add(rankV3);
+            }
+            db.save(rankV3s);
+        }
+    }
+
+}
+
+```

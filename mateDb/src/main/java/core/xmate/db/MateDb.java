@@ -92,6 +92,14 @@ public abstract class MateDb extends DbManager.DaoConfig implements DbManager.Db
 
 	/* LifeCircle */
 
+    /**
+     * This method will be called when create {@link DbManager#}.
+     *
+     * If you have db file in assets or raw, you may export it here
+     * before super method is called.
+     *
+     * @return
+     */
     protected DbManager createDb() {
         return getDb(this);
     }

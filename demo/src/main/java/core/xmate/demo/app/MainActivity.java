@@ -11,8 +11,8 @@ import java.util.List;
 
 import core.xmate.db.DbException;
 import core.xmate.demo.R;
-import core.xmate.demo.db.PersonDb;
-import core.xmate.demo.db.RankDb;
+import core.xmate.demo.db.person.PersonDb;
+import core.xmate.demo.db.rank.RankDb;
 import core.xmate.demo.db.person.Person;
 
 public class MainActivity extends Activity {
