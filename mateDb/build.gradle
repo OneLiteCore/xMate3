@@ -12,3 +12,7 @@ android {
         versionName verName
     }
 }
+
+dependencies {
+    provided 'com.android.support:support-v4:25.4.0'
+}

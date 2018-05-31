@@ -24,10 +24,15 @@ import core.xmate.db.table.TableEntity;
 
 import java.util.HashMap;
 
-/*package*/ final class CursorUtils {
+public final class CursorUtils {
 
     public static <T> T getEntity(TableEntity<T> table, final Cursor cursor) throws Throwable {
         T entity = table.createEntity();
+        setEntity(table, cursor, entity);
+        return entity;
+    }
+
+    public static <T> void setEntity(TableEntity<T> table, final Cursor cursor, T entity) throws Throwable {
         HashMap<String, ColumnEntity> columnMap = table.getColumnMap();
         int columnCount = cursor.getColumnCount();
         for (int i = 0; i < columnCount; i++) {
@@ -37,7 +42,6 @@ import java.util.HashMap;
                 column.setValueFromCursor(entity, cursor, i);
             }
         }
-        return entity;
     }
 
     public static DbModel getDbModel(final Cursor cursor) {

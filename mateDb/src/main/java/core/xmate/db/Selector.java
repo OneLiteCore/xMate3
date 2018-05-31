@@ -16,7 +16,9 @@
 package core.xmate.db;
 
 import android.database.Cursor;
+import android.support.annotation.Nullable;
 
+import core.xmate.db.sqlite.CursorIterator;
 import core.xmate.util.IOUtil;
 import core.xmate.db.sqlite.WhereBuilder;
 import core.xmate.db.table.DbModel;
@@ -140,6 +142,7 @@ public final class Selector<T> {
         return offset;
     }
 
+    @Nullable
     public T findFirst() throws DbException {
         if (!table.tableIsExist()) return null;
 
@@ -159,6 +162,7 @@ public final class Selector<T> {
         return null;
     }
 
+    @Nullable
     public List<T> findAll() throws DbException {
         if (!table.tableIsExist()) return null;
 
@@ -178,6 +182,27 @@ public final class Selector<T> {
             }
         }
         return result;
+    }
+
+    @Nullable
+    public Cursor query() throws DbException {
+        if (!table.tableIsExist()) return null;
+        return table.getDb().execQuery(this.toString());
+    }
+
+    @Nullable
+    public CursorIterator<T> queryIterator() throws DbException {
+        Cursor cursor = query();
+        if (cursor != null) {
+            try {
+                return new CursorIterator<>(table, cursor);
+            } catch (Throwable e) {
+                throw new DbException(e);
+            } finally {
+                IOUtil.closeQuietly(cursor);
+            }
+        }
+        return null;
     }
 
     public long count() throws DbException {
