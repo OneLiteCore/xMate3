@@ -1,17 +1,22 @@
 package core.xmate.demo.db.rank;
 
+import android.util.Log;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import core.xmate.db.AutoDb;
 import core.xmate.db.DbException;
 import core.xmate.db.DbManager;
+import core.xmate.db.sqlite.CursorIterator;
 
 /**
  * @author DrkCore
  * @since 2017-05-20
  */
 public class RankDb extends AutoDb {
+
+    public static final String TAG = "RankDb";
 
     private static volatile RankDb instance = null;
 
@@ -39,6 +44,7 @@ public class RankDb extends AutoDb {
         DB_VERSIONS.add(VERSION_2.class);
         DB_VERSIONS.add(VERSION_3.class);
         DB_VERSIONS.add(VERSION_4.class);
+        DB_VERSIONS.add(VERSION_5.class);
     }
 
     public static class VERSION_1 implements IVersion {
@@ -104,6 +110,31 @@ public class RankDb extends AutoDb {
                 rankV3s.add(rankV3);
             }
             db.save(rankV3s);
+        }
+    }
+
+    public static class VERSION_5 implements IVersion {
+
+        @Override
+        public void onUpgrade(DbManager db) throws DbException {
+            db.createTableIfNotExist(RankV4.class);
+
+            CursorIterator<RankV3> iterator = db.selector(RankV3.class).queryIterator();
+            RankV3 rankV3;
+            while ((rankV3 = iterator.moveToNext()) != null) {
+                RankV4 rankV4 = new RankV4();
+
+                rankV4.setId(rankV3.getId());
+                rankV4.setName(rankV3.getName());
+                rankV4.setAge(rankV3.getAge());
+                rankV4.setSex(rankV3.isSex());
+                rankV4.setMajor("unknown");
+
+                Log.d(TAG, rankV4.toString());
+
+                db.save(rankV4);
+            }
+            iterator.close();
         }
     }
 

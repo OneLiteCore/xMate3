@@ -16,16 +16,17 @@
 package core.xmate.db;
 
 import android.database.Cursor;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-
-import core.xmate.db.sqlite.CursorIterator;
-import core.xmate.util.IOUtil;
-import core.xmate.db.sqlite.WhereBuilder;
-import core.xmate.db.table.DbModel;
-import core.xmate.db.table.TableEntity;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import core.xmate.db.sqlite.CursorIterator;
+import core.xmate.db.sqlite.WhereBuilder;
+import core.xmate.db.table.DbModel;
+import core.xmate.db.table.TableEntity;
+import core.xmate.util.IOUtil;
 
 /**
  * Author: wyouflf
@@ -190,7 +191,7 @@ public final class Selector<T> {
         return table.getDb().execQuery(this.toString());
     }
 
-    @Nullable
+    @NonNull
     public CursorIterator<T> queryIterator() throws DbException {
         Cursor cursor = query();
         if (cursor != null) {
@@ -198,11 +199,10 @@ public final class Selector<T> {
                 return new CursorIterator<>(table, cursor);
             } catch (Throwable e) {
                 throw new DbException(e);
-            } finally {
-                IOUtil.closeQuietly(cursor);
             }
         }
-        return null;
+        //noinspection unchecked
+        return (CursorIterator<T>) CursorIterator.EMPTY_INSTANCE;
     }
 
     public long count() throws DbException {

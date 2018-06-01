@@ -3,6 +3,8 @@ package core.xmate.db.sqlite;
 import android.database.Cursor;
 import android.support.annotation.Nullable;
 
+import java.util.Iterator;
+
 import core.xmate.db.CursorUtils;
 import core.xmate.db.table.TableEntity;
 import core.xmate.util.IOUtil;
@@ -14,10 +16,20 @@ import core.xmate.util.LogUtil;
  */
 public class CursorIterator<T> {
 
+    public static final String TAG = "CursorIterator";
+
+    public static final CursorIterator EMPTY_INSTANCE = new CursorIterator();
+
     private final TableEntity<T> table;
     private Cursor cursor;
 
     private final T entity;
+
+    private CursorIterator() {
+        this.table = null;
+        this.cursor = null;
+        entity = null;
+    }
 
     public CursorIterator(TableEntity<T> table, Cursor cursor) throws Throwable {
         this.table = table;
@@ -47,6 +59,8 @@ public class CursorIterator<T> {
     public boolean isClosed() {
         return cursor == null || cursor.isClosed();
     }
+
+    /*Delegate*/
 
     public int getCount() {
         return !isClosed() ? cursor.getCount() : 0;
