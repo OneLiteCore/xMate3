@@ -3,7 +3,7 @@ package core.xmate.db.sqlite;
 import android.database.Cursor;
 import android.support.annotation.Nullable;
 
-import java.util.Iterator;
+import java.io.Closeable;
 
 import core.xmate.db.CursorUtils;
 import core.xmate.db.table.TableEntity;
@@ -14,7 +14,7 @@ import core.xmate.util.LogUtil;
  * @author DrkCore
  * @since 5/31/18
  */
-public class CursorIterator<T> {
+public class CursorIterator<T> implements Closeable {
 
     public static final String TAG = "CursorIterator";
 
@@ -49,6 +49,7 @@ public class CursorIterator<T> {
         return null;
     }
 
+    @Override
     public void close() {
         if (cursor != null) {
             IOUtil.closeQuietly(cursor);
