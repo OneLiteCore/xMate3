@@ -1,5 +1,7 @@
 package core.xmate.db;
 
+import android.content.Context;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,22 +30,22 @@ public abstract class AutoDb extends MateDb {
 
     private final boolean crashIfUpdateFailed;
 
-    public AutoDb(String dbName, List<Class<? extends IVersion>> versions) {
-        this(dbName, versions, false);
+    public AutoDb(Context context, String dbName, List<Class<? extends IVersion>> versions) {
+        this(context, dbName, versions, false);
     }
 
-    public AutoDb(String dbName, List<Class<? extends IVersion>> versions, boolean crashIfUpdateFailed) {
-        super(dbName, versions.size());
+    public AutoDb(Context context, String dbName, List<Class<? extends IVersion>> versions, boolean crashIfUpdateFailed) {
+        super(context, dbName, versions.size());
         this.versions = new ArrayList<>(versions);
         this.crashIfUpdateFailed = crashIfUpdateFailed;
     }
 
-    public AutoDb(File inDir, String dbName, List<Class<? extends IVersion>> versions) {
-        this(inDir, dbName, versions, false);
+    public AutoDb(Context context, File inDir, String dbName, List<Class<? extends IVersion>> versions) {
+        this(context, inDir, dbName, versions, false);
     }
 
-    public AutoDb(File inDir, String dbName, List<Class<? extends IVersion>> versions, boolean crashIfUpdateFailed) {
-        super(inDir, dbName, versions.size());
+    public AutoDb(Context context, File inDir, String dbName, List<Class<? extends IVersion>> versions, boolean crashIfUpdateFailed) {
+        super(context, inDir, dbName, versions.size());
         this.versions = new ArrayList<>(versions);
         this.crashIfUpdateFailed = crashIfUpdateFailed;
     }

@@ -2,14 +2,13 @@ package core.xmate.demo;
 
 import android.app.Application;
 
-import core.xmate.db.MateDb;
 import core.xmate.util.LogUtil;
 
 /**
  * @author DrkCore
  * @since 2017-05-20
  */
-public class App extends Application{
+public class App extends Application {
 
     private static App instance;
 
@@ -20,10 +19,9 @@ public class App extends Application{
     @Override
     public void onCreate() {
         super.onCreate();
-        instance=this;
+        instance = this;
 
-        //初始化框架
-        MateDb.init(this);
+        //开启日志
         LogUtil.setDebug(BuildConfig.DEBUG);
     }
 }

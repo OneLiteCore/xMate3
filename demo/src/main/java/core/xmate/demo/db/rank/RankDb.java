@@ -1,5 +1,6 @@
 package core.xmate.demo.db.rank;
 
+import android.content.Context;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -20,11 +21,11 @@ public class RankDb extends AutoDb {
 
     private static volatile RankDb instance = null;
 
-    public static RankDb getInstance() {
+    public static RankDb getInstance(Context context) {
         if (instance == null) {
             synchronized (RankDb.class) {
                 if (instance == null) {
-                    instance = new RankDb();
+                    instance = new RankDb(context);
                 }
             }
         }
@@ -33,8 +34,8 @@ public class RankDb extends AutoDb {
 
     private static final String DB_NAME = "rank.db";
 
-    private RankDb() {
-        super(DB_NAME, DB_VERSIONS, true);
+    private RankDb(Context context) {
+        super(context, DB_NAME, DB_VERSIONS, true);
     }
 
     private static final List<Class<? extends IVersion>> DB_VERSIONS = new ArrayList<>();

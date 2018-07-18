@@ -1,6 +1,5 @@
 package core.xmate.db;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 
 import java.io.Closeable;
@@ -18,39 +17,21 @@ import core.xmate.db.table.TableEntity;
 public abstract class MateDb extends DbManager.DaoConfig implements DbManager.DbUpgradeListener,
         DbManager.DbOpenListener, DbManager.TableCreateListener, Closeable {
 
-    /*Init*/
-
-    /**
-     * Using static field holding {@link android.app.Application} context will not lead to leaking problem.
-     * <p>
-     * 使用静态变量持有{@link android.app.Application}不会触发内存泄露。
-     */
-    @SuppressLint("StaticFieldLeak")
-    private static Context appContext;
-
-    public static void init(Context context) {
-        appContext = context.getApplicationContext();
-    }
-
-    public static DbManager getDb(DbManager.DaoConfig daoConfig) {
-        if (appContext == null) {
-            throw new IllegalStateException("MateDb数据库框架还未初始化");
-        }
-        return getDb(appContext, daoConfig);
-    }
-
     public static DbManager getDb(Context context, DbManager.DaoConfig daoConfig) {
         return DbManagerImpl.getInstance(context, daoConfig);
     }
 
     /*Db*/
 
-    public MateDb(String dbName, int dbVersion) {
-        this(null, dbName, dbVersion);
+    protected final Context context;
+
+    public MateDb(Context context, String dbName, int dbVersion) {
+        this(context, null, dbName, dbVersion);
     }
 
-    public MateDb(File inDir, String dbName, int dbVersion) {
+    public MateDb(Context context, File inDir, String dbName, int dbVersion) {
         super();
+        this.context = context.getApplicationContext();
         setDbDir(inDir);
         setDbName(dbName);
         setDbVersion(dbVersion);
@@ -65,7 +46,7 @@ public abstract class MateDb extends DbManager.DaoConfig implements DbManager.Db
         if (dbMgr == null) {
             synchronized (this) {
                 if (dbMgr == null) {
-                    dbMgr = createDb();
+                    dbMgr = createDb(context);
                 }
             }
         }
@@ -90,18 +71,19 @@ public abstract class MateDb extends DbManager.DaoConfig implements DbManager.Db
         }
     }
 
-	/* LifeCircle */
+    /* LifeCircle */
 
     /**
      * This method will be called when create {@link DbManager#}.
-     *
+     * <p>
      * If you have db file in assets or raw, you may export it here
      * before super method is called.
      *
+     * @param context
      * @return
      */
-    protected DbManager createDb() {
-        return getDb(this);
+    protected DbManager createDb(Context context) {
+        return getDb(context, this);
     }
 
     /**

@@ -29,7 +29,7 @@ public class MainActivity extends Activity {
                 person.setName("小明").setAge(123);
 
                 try {
-                    PersonDb.getInstance().get().save(person);
+                    PersonDb.getInstance(MainActivity.this).get().save(person);
                 } catch (DbException e) {
                     e.printStackTrace();
                 }
@@ -40,7 +40,7 @@ public class MainActivity extends Activity {
             @Override
             public void onClick(View v) {
                 try {
-                    List<Person> persons = PersonDb.getInstance().get().findAll(Person.class);
+                    List<Person> persons = PersonDb.getInstance(MainActivity.this).get().findAll(Person.class);
                     String str = "";
                     if (persons != null) {
                         str = Arrays.toString(persons.toArray());
@@ -61,7 +61,7 @@ public class MainActivity extends Activity {
             @Override
             public void onClick(View v) {
                 try {
-                    boolean result = PersonDb.getInstance().get().isTableExists(Person.class);
+                    boolean result = PersonDb.getInstance(MainActivity.this).get().isTableExists(Person.class);
                     Toast.makeText(MainActivity.this, "" + result, Toast.LENGTH_SHORT).show();
                 } catch (DbException e) {
                     e.printStackTrace();
@@ -74,7 +74,7 @@ public class MainActivity extends Activity {
             public void onClick(View v) {
 
                 try {
-                    PersonDb.getInstance().get().delete(Person.class);
+                    PersonDb.getInstance(MainActivity.this).get().delete(Person.class);
                 } catch (DbException e) {
                     e.printStackTrace();
                 }
@@ -84,7 +84,7 @@ public class MainActivity extends Activity {
         findViewById(R.id.button_main_testUpdate).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                RankDb.getInstance().get();
+                RankDb.getInstance(MainActivity.this).get();
             }
         });
     }
