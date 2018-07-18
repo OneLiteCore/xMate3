@@ -7,7 +7,7 @@ static def gitVersionCode() {
 
 ext {
     verCode = gitVersionCode()
-    verName = "2.3.0"
+    verName = "2.4.0"
 }
 
 publish {
