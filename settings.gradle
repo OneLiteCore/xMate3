@@ -1,1 +1,2 @@
-include ':mateDb', ':demo'
+include ':mateDb'
+include ':app'

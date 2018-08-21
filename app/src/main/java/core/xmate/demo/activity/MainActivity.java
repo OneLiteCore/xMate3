@@ -1,4 +1,4 @@
-package core.xmate.demo.app;
+package core.xmate.demo.activity;
 
 import android.app.Activity;
 import android.app.AlertDialog;
