@@ -29,6 +29,3 @@
 
 -keepattributes Exceptions,LineNumberTable
 -keepattributes Signature
-
-# Add this line to your project's proguard rules file
--keep @core.xmate.db.annotation.Table class *{*;}

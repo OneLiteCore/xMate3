@@ -2,17 +2,20 @@ apply plugin: 'com.android.library'
 apply from: './maven.gradle'
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion "25.0.3"
+    compileSdkVersion rootProject.compileSdkVersion
+    buildToolsVersion rootProject.buildToolsVersion
 
     defaultConfig {
-        minSdkVersion 14
-        targetSdkVersion 25
+        minSdkVersion rootProject.minSdkVersion
+        targetSdkVersion rootProject.targetSdkVersion
+
         versionCode verCode
         versionName verName
+
+        consumerProguardFiles 'proguard-rules.pro'
     }
 }
 
 dependencies {
-    provided 'com.android.support:support-v4:25.4.0'
+    provided "com.android.support:support-v4:$rootProject.supportLibVersion"
 }
