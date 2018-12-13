@@ -20,6 +20,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import core.xmate.db.table.IValueTransformer;
+
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Column {
@@ -31,4 +33,8 @@ public @interface Column {
     boolean isId() default false;
 
     boolean autoGen() default true;
+
+    boolean directReflectField() default false;
+
+    Class<? extends IValueTransformer> hook() default IValueTransformer.SIMPLE.class;
 }

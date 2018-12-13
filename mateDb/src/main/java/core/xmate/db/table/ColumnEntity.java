@@ -21,11 +21,11 @@ import android.text.TextUtils;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
-import core.xmate.util.LogUtil;
 import core.xmate.db.annotation.Column;
 import core.xmate.db.converter.ColumnConverter;
 import core.xmate.db.converter.ColumnConverterFactory;
 import core.xmate.db.sqlite.ColumnDbType;
+import core.xmate.util.LogUtil;
 
 public final class ColumnEntity {
 
@@ -33,6 +33,9 @@ public final class ColumnEntity {
     private final String property;
     private final boolean isId;
     private final boolean isAutoId;
+    private final boolean directReflectField;
+
+    protected final IValueTransformer transformer;
 
     protected final Method getMethod;
     protected final Method setMethod;
@@ -43,7 +46,7 @@ public final class ColumnEntity {
     /* package */ ColumnEntity(Class<?> entityType, Field field, Column column) {
         field.setAccessible(true);
 
-        if(TextUtils.isEmpty(column.name())){
+        if (TextUtils.isEmpty(column.name())) {
             throw new IllegalArgumentException("Column name must not be null or empty!");
         }
 
@@ -51,24 +54,47 @@ public final class ColumnEntity {
         this.name = column.name();
         this.property = column.property();
         this.isId = column.isId();
+        this.directReflectField = column.directReflectField();
 
         Class<?> fieldType = field.getType();
         this.isAutoId = this.isId && column.autoGen() && ColumnUtils.isAutoIdType(fieldType);
         this.columnConverter = ColumnConverterFactory.getColumnConverter(fieldType);
 
-        this.getMethod = ColumnUtils.findGetMethod(entityType, field, column.name());
+        this.getMethod = !directReflectField ? ColumnUtils.findGetMethod(entityType, field, column.name()) : null;
         if (this.getMethod != null && !this.getMethod.isAccessible()) {
             this.getMethod.setAccessible(true);
         }
-        this.setMethod = ColumnUtils.findSetMethod(entityType, field, column.name());
+        this.setMethod = !directReflectField ? ColumnUtils.findSetMethod(entityType, field, column.name()) : null;
         if (this.setMethod != null && !this.setMethod.isAccessible()) {
             this.setMethod.setAccessible(true);
+        }
+
+        Class transClz = column.hook();
+        if (transClz != IValueTransformer.SIMPLE.class) {
+            if (field.getType() != String.class) {
+                throw new IllegalStateException("Only String column could be set a ValueTransformer");
+            } else if (isId) {
+                throw new IllegalStateException("Id column must not be set a ValueTransformer");
+            }
+
+            try {
+                transformer = (IValueTransformer) transClz.newInstance();
+            } catch (Throwable e) {
+                throw new IllegalStateException("Unable to instance IValueTransformer " + transClz);
+            }
+
+        } else {
+            transformer = null;
         }
     }
 
     public void setValueFromCursor(Object entity, Cursor cursor, int index) {
         Object value = columnConverter.getFieldValue(cursor, index);
         if (value == null) return;
+
+        if (transformer != null) {
+            value = transformer.toVal(value.toString());
+        }
 
         if (setMethod != null) {
             try {

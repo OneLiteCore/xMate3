@@ -30,6 +30,8 @@ public @interface Table {
 
     boolean virtual() default false;
 
+    /*Full text search*/
+
     String FTS3 = "fts3";
     /**
      * fts3的改进版本，API 11之后可用
@@ -73,7 +75,7 @@ public @interface Table {
 
     /**
      * 当启用{@link #using()}属性时用于fts3/4的tokenizer，默认为{@link #TOKENIZER_SIMPLE}。
-     *可用属性请参加{@link Tokenizer#}
+     * 可用属性请参加{@link Tokenizer#}
      *
      * @return
      */
