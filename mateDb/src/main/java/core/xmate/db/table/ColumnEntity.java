@@ -43,7 +43,7 @@ public final class ColumnEntity {
     /* package */ ColumnEntity(Class<?> entityType, Field field, Column column) {
         field.setAccessible(true);
 
-        if(TextUtils.isEmpty(column.name())){
+        if (TextUtils.isEmpty(column.name())) {
             throw new IllegalArgumentException("Column name must not be null or empty!");
         }
 
@@ -68,7 +68,9 @@ public final class ColumnEntity {
 
     public void setValueFromCursor(Object entity, Cursor cursor, int index) {
         Object value = columnConverter.getFieldValue(cursor, index);
-        if (value == null) return;
+        if (value == null) {
+            value = getDefaultValue(this.columnField.getType());
+        }
 
         if (setMethod != null) {
             try {
@@ -83,6 +85,30 @@ public final class ColumnEntity {
                 LogUtil.e(e.getMessage(), e);
             }
         }
+    }
+
+    private Object getDefaultValue(Class type) {
+        Object result = null;
+        if (type.isPrimitive()) {
+            if (type == Boolean.class || type == boolean.class) {
+                result = false;
+            } else if (type == Character.class || type == char.class) {
+                result = (char) 0;
+            } else if (type == Byte.class || type == byte.class) {
+                result = (byte) 0;
+            } else if (type == Short.class || type == short.class) {
+                result = (short) 0;
+            } else if (type == Integer.class || type == int.class) {
+                result = 0;
+            } else if (type == Long.class || type == long.class) {
+                result = 0L;
+            } else if (type == Float.class || type == float.class) {
+                result = 0F;
+            } else if (type == Double.class || type == double.class) {
+                result = 0D;
+            }
+        }
+        return result;
     }
 
     @SuppressWarnings("unchecked")
