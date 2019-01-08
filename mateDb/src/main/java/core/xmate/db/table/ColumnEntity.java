@@ -94,7 +94,7 @@ public final class ColumnEntity {
             value = getDefaultValue(this.columnField.getType());
         }
 
-        if (transformer != null) {
+        if (transformer != null && value != null) {
             value = transformer.toVal(value.toString());
         }
 
