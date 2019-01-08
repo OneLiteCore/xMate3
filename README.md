@@ -13,7 +13,7 @@ If you want to check some more documents about how to use it, please check the o
 To setup sqlite orm part you need to add this in your module build.gradle:
 
 ```groovy
-compile 'core.mate:xmateDb:2.2.4'
+compile 'core.mate:xmateDb:2.4.1'
 ```
 
 Then Init in `Application.onCreate()` before you use it:
