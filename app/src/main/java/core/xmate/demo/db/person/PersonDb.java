@@ -36,8 +36,8 @@ public class PersonDb extends MateDb {
 //    private static final File DB_DIR = Environment.getExternalStorageDirectory();
 //    private static final String DB_FILE_NAME = "out_file.db";
 //
-//    private PersonDb() {
-//        super(DB_DIR, DB_FILE_NAME, 1);
+//    private PersonDb(Context context) {
+//        super(context, DB_DIR, DB_FILE_NAME, 1);
 //    }
 
     //CRUD

@@ -13,19 +13,7 @@ If you want to check some more documents about how to use it, please check the o
 To setup sqlite orm part you need to add this in your module build.gradle:
 
 ```groovy
-compile 'core.mate:xmateDb:2.4.1'
-```
-
-Then Init in `Application.onCreate()` before you use it:
-
-```java
-import core.xmate.db.MateDb;
-import core.xmate.util.LogUtil;
-
-//Use application context to init the lib.
-MateDb.init(this);
-// Turn this debug switch on if you want to check some log output during dev.
-LogUtil.setDebug(false);
+implementation 'core.mate:xmateDb:2.4.2'
 ```
 
 ## Declare Annotation in your table class
@@ -33,6 +21,7 @@ LogUtil.setDebug(false);
 ```java
 import core.xmate.db.annotation.Column;
 import core.xmate.db.annotation.Table;
+import core.xmate.util.LogUtil;
 
 @Table(name = "Person")
 public class Person {
@@ -64,11 +53,11 @@ public class PersonDb extends MateDb {
 
     private static volatile PersonDb instance = null;
 
-    public static PersonDb getInstance() {
+    public static PersonDb getInstance(Context context) {
         if (instance == null) {
             synchronized (PersonDb.class) {
                 if (instance == null) {
-                    instance = new PersonDb();
+                    instance = new PersonDb(context);
                 }
             }
         }
@@ -78,16 +67,17 @@ public class PersonDb extends MateDb {
     private static final String DB_NAME = "test.db";
     private static final int DB_VERSION = 1;
 
-    private PersonDb() {
-        super(DB_NAME, DB_VERSION);
+    private PersonDb(Context context) {
+        super(context, DB_NAME, DB_VERSION);
+        // Enable log or not
+        LogUtil.setDebug(true);
     }
 
-//    Use this constructor method to load a file as db
 //    private static final File DB_DIR = Environment.getExternalStorageDirectory();
 //    private static final String DB_FILE_NAME = "out_file.db";
 //
-//    private PersonDb() {
-//        super(DB_DIR, DB_FILE_NAME, 1);
+//    private PersonDb(Context context) {
+//        super(context, DB_DIR, DB_FILE_NAME, 1);
 //    }
 
     //CRUD
@@ -133,11 +123,11 @@ public class RankDb extends AutoDb {
 
     private static volatile RankDb instance = null;
 
-    public static RankDb getInstance() {
+    public static RankDb getInstance(Context context) {
         if (instance == null) {
             synchronized (RankDb.class) {
                 if (instance == null) {
-                    instance = new RankDb();
+                    instance = new RankDb(context);
                 }
             }
         }
@@ -146,8 +136,8 @@ public class RankDb extends AutoDb {
 
     private static final String DB_NAME = "rank.db";
 
-    private RankDb() {
-        super(DB_NAME, DB_VERSIONS, true);
+    private RankDb(Context context) {
+        super(context, DB_NAME, DB_VERSIONS, true);
     }
 
     private static final List<Class<? extends IVersion>> DB_VERSIONS = new ArrayList<>();
