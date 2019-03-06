@@ -28,6 +28,6 @@ android {
 }
 
 dependencies {
-    compile project(':mateDb')
-    compile "com.android.support:support-v4:$rootProject.supportLibVersion"
+    implementation project(':mateDb')
+    implementation "com.android.support:support-v4:$rootProject.supportLibVersion"
 }

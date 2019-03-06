@@ -16,7 +16,7 @@ publish {
     groupId = rootProject.groupId
     uploadName = rootProject.uploadName
     publishVersion = verName
-    desc = rootProject.description
+    desc = "Db tools extracted from xUtils3"
     website = rootProject.website
     licences = rootProject.licences
 }
