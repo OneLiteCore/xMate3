@@ -29,5 +29,5 @@ android {
 
 dependencies {
     implementation project(':mateDb')
-    implementation "com.android.support:support-v4:$rootProject.supportLibVersion"
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
 }

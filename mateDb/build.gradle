@@ -17,5 +17,5 @@ android {
 }
 
 dependencies {
-    compileOnly "com.android.support:support-v4:$rootProject.supportLibVersion"
+    compileOnly 'androidx.legacy:legacy-support-v4:1.0.0'
 }
