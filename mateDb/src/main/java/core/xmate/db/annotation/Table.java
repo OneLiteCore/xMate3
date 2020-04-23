@@ -26,7 +26,7 @@ public @interface Table {
 
     String name();
 
-    String[] onCreated() default "";
+    String onCreated() default "";
 
     boolean virtual() default false;
 

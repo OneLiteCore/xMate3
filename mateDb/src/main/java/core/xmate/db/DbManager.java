@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+import androidx.annotation.Nullable;
 import core.xmate.db.sqlite.SqlInfo;
 import core.xmate.db.sqlite.WhereBuilder;
 import core.xmate.db.table.DbModel;
@@ -28,34 +29,21 @@ public interface DbManager extends Closeable {
     /**
      * 保存实体类或实体类的List到数据库,
      * 如果该类型的id是自动生成的, 则保存完后会给id赋值.
-     *
-     * @param entity
-     * @return
-     * @throws DbException
      */
     boolean saveBindingId(Object entity) throws DbException;
 
     /**
      * 保存或更新实体类或实体类的List到数据库, 根据id对应的数据是否存在.
-     *
-     * @param entity
-     * @throws DbException
      */
     void saveOrUpdate(Object entity) throws DbException;
 
     /**
      * 保存实体类或实体类的List到数据库
-     *
-     * @param entity
-     * @throws DbException
      */
     void save(Object entity) throws DbException;
 
     /**
      * 保存或更新实体类或实体类的List到数据库, 根据id和其他唯一索引判断数据是否存在.
-     *
-     * @param entity
-     * @throws DbException
      */
     void replace(Object entity) throws DbException;
 
@@ -89,81 +77,56 @@ public interface DbManager extends Closeable {
     <T> T findModelFirst(Class<T> clz, SqlInfo sqlInfo) throws DbException;
 
     <T> List<T> findModelAll(Class<T> clz, SqlInfo sqlInfo) throws DbException;
-
     ///////////// table
 
     /**
      * 获取表信息
-     *
-     * @param entityType
-     * @param <T>
-     * @return
-     * @throws DbException
      */
     <T> TableEntity<T> getTable(Class<T> entityType) throws DbException;
 
+    /**
+     * 获取临时对象信息
+     */
     <T> ModelEntity<T> getModel(Class<T> entityType) throws DbException;
 
     /**
      * 删除表
-     *
-     * @param entityType
-     * @throws DbException
      */
     void dropTable(Class<?> entityType) throws DbException;
 
     /**
-     * 删除表
-     *
-     * @param entityType
-     * @throws DbException
+     * 静默删除表
      */
-    void dropTableQuietly(Class<?> entityType);
-
-    /**
-     * 创建表
-     *
-     * @param tableEntity
-     */
-    void createTableIfNotExist(Class<?> tableEntity) throws DbException;
+    @Nullable
+    DbException dropTableQuietly(Class<?> entityType);
 
     /**
      * 添加一列,
      * 新的entityType中必须定义了这个列的属性.
-     *
-     * @param entityType
-     * @param column
-     * @throws DbException
      */
     void addColumn(Class<?> entityType, String column) throws DbException;
 
-    List<String> getTableNames() throws DbException;
-
-    boolean isTableExists(Class<?> tableEntity) throws DbException;
-
-    boolean isTableExists(String name) throws DbException;
+    /**
+     * 获取所有表名
+     */
+    List<String> getTables() throws DbException;
 
     ///////////// db
 
     /**
      * 删除库
-     *
-     * @throws DbException
      */
     void dropDb() throws DbException;
 
     /**
-     * 删除库
-     *
-     * @throws DbException
+     * 静默删除库
      */
-    void dropDbQuietly();
+    @Nullable
+    DbException dropDbQuietly();
 
     /**
-     * 关闭数据库,
-     * xUtils对同一个库的链接是单实例的, 一般不需要关闭它.
-     *
-     * @throws IOException
+     * 关闭数据库.
+     * 同一个库是单实例的, 尽量不要调用这个方法, 会自动释放.
      */
     void close() throws IOException;
 
@@ -181,11 +144,11 @@ public interface DbManager extends Closeable {
     Cursor execQuery(String sql) throws DbException;
 
     public interface DbOpenListener {
-        void onDbOpened(DbManager db);
+        void onDbOpened(DbManager db) throws DbException;
     }
 
     public interface DbUpgradeListener {
-        void onUpgrade(DbManager db, int oldVersion, int newVersion);
+        void onUpgrade(DbManager db, int oldVersion, int newVersion) throws DbException;
     }
 
     public interface TableCreateListener {
@@ -292,12 +255,4 @@ public interface DbManager extends Closeable {
             return String.valueOf(dbDir) + "/" + dbName;
         }
     }
-
-    /////////// Transaction
-
-    void beginTransaction();
-
-    void setTransactionSuccessful();
-
-    void endTransaction();
 }

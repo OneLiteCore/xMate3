@@ -18,28 +18,31 @@ package core.xmate.db.table;
 import android.database.Cursor;
 import android.text.TextUtils;
 
-import core.xmate.db.DbManager;
-import core.xmate.util.IOUtil;
-import core.xmate.db.annotation.Table;
-import core.xmate.db.DbException;
-
 import java.lang.reflect.Constructor;
 import java.util.LinkedHashMap;
+
+import core.xmate.db.DbException;
+import core.xmate.db.DbManager;
+import core.xmate.db.annotation.Table;
+import core.xmate.db.sqlite.SqlInfo;
+import core.xmate.db.sqlite.SqlInfoBuilder;
+import core.xmate.util.IOUtil;
+import core.xmate.util.LogUtil;
 
 
 public final class TableEntity<T> {
 
     private final DbManager db;
     private final String name;
-    private final String[] onCreated;
+    private final String onCreated;
+    private final Class<T> entityType;
+    private final Constructor<T> constructor;
+    private ColumnEntity id;
+    private volatile Boolean tableCheckedStatus;
+
     private final boolean virtual;
     private final String using;
     private final String tokenizer;
-
-    private ColumnEntity id;
-    private Class<T> entityType;
-    private Constructor<T> constructor;
-    private volatile boolean checkedDatabase;
 
     /**
      * key: columnName
@@ -49,17 +52,25 @@ public final class TableEntity<T> {
     /*package*/ TableEntity(DbManager db, Class<T> entityType) throws Throwable {
         this.db = db;
         this.entityType = entityType;
-        this.constructor = entityType.getConstructor();
-        this.constructor.setAccessible(true);
+
         Table table = entityType.getAnnotation(Table.class);
+        if (table == null) {
+            throw new DbException("missing @Table on " + entityType.getName());
+        }
         this.name = table.name();
         this.onCreated = table.onCreated();
         this.using = table.using();
         this.virtual = !TextUtils.isEmpty(using) || table.virtual();
         this.tokenizer = table.tokenizer();
 
-        this.columnMap = TableUtils.findColumnMap(entityType);
+        try {
+            this.constructor = entityType.getConstructor();
+            this.constructor.setAccessible(true);
+        } catch (Throwable ex) {
+            throw new DbException("missing no-argument constructor for the table: " + this.name);
+        }
 
+        this.columnMap = TableUtils.findColumnMap(entityType);
         for (ColumnEntity column : columnMap.values()) {
             if (column.isId()) {
                 this.id = column;
@@ -72,9 +83,13 @@ public final class TableEntity<T> {
         return this.constructor.newInstance();
     }
 
-    public boolean tableIsExist() throws DbException {
-        if (this.isCheckedDatabase()) {
-            return true;
+    public boolean tableIsExists() throws DbException {
+        return tableIsExists(false);
+    }
+
+    public boolean tableIsExists(boolean forceCheckFromDb) throws DbException {
+        if (tableCheckedStatus != null && (tableCheckedStatus || !forceCheckFromDb)) {
+            return tableCheckedStatus;
         }
 
         Cursor cursor = db.execQuery("SELECT COUNT(*) AS c FROM sqlite_master WHERE type='table' AND name='" + name + "'");
@@ -83,8 +98,8 @@ public final class TableEntity<T> {
                 if (cursor.moveToNext()) {
                     int count = cursor.getInt(0);
                     if (count > 0) {
-                        this.setCheckedDatabase(true);
-                        return true;
+                        tableCheckedStatus = true;
+                        return tableCheckedStatus;
                     }
                 }
             } catch (Throwable e) {
@@ -94,7 +109,32 @@ public final class TableEntity<T> {
             }
         }
 
-        return false;
+        tableCheckedStatus = false;
+        return tableCheckedStatus;
+    }
+
+    public void createTableIfNotExists() throws DbException {
+        if (tableCheckedStatus != null && tableCheckedStatus) return;
+        synchronized (entityType) {
+            if (!this.tableIsExists(true)) {
+                SqlInfo sqlInfo = SqlInfoBuilder.buildCreateTableSqlInfo(this);
+                db.execNonQuery(sqlInfo);
+                tableCheckedStatus = true;
+
+                if (!TextUtils.isEmpty(onCreated)) {
+                    db.execNonQuery(onCreated);
+                }
+
+                DbManager.TableCreateListener listener = db.getDaoConfig().getTableCreateListener();
+                if (listener != null) {
+                    try {
+                        listener.onTableCreated(db, this);
+                    } catch (Throwable ex) {
+                        LogUtil.e(ex.getMessage(), ex);
+                    }
+                }
+            }
+        }
     }
 
     public DbManager getDb() {
@@ -109,7 +149,7 @@ public final class TableEntity<T> {
         return entityType;
     }
 
-    public String[] getOnCreated() {
+    public String getOnCreated() {
         return onCreated;
     }
 
@@ -133,12 +173,8 @@ public final class TableEntity<T> {
         return columnMap;
     }
 
-    /*package*/ boolean isCheckedDatabase() {
-        return checkedDatabase;
-    }
-
-    /*package*/ void setCheckedDatabase(boolean checkedDatabase) {
-        this.checkedDatabase = checkedDatabase;
+    /*package*/ void setTableCheckedStatus(boolean tableCheckedStatus) {
+        this.tableCheckedStatus = tableCheckedStatus;
     }
 
     @Override

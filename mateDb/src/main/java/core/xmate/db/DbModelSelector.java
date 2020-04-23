@@ -18,13 +18,13 @@ package core.xmate.db;
 import android.database.Cursor;
 import android.text.TextUtils;
 
-import core.xmate.util.IOUtil;
+import java.util.ArrayList;
+import java.util.List;
+
 import core.xmate.db.sqlite.WhereBuilder;
 import core.xmate.db.table.DbModel;
 import core.xmate.db.table.TableEntity;
-
-import java.util.ArrayList;
-import java.util.List;
+import core.xmate.util.IOUtil;
 
 /**
  * Author: wyouflf
@@ -108,11 +108,17 @@ public final class DbModelSelector {
         return this;
     }
 
+    /**
+     * 排序条件, 默认ASC
+     */
     public DbModelSelector orderBy(String columnName) {
         selector.orderBy(columnName);
         return this;
     }
 
+    /**
+     * 排序条件, 默认ASC
+     */
     public DbModelSelector orderBy(String columnName, boolean desc) {
         selector.orderBy(columnName, desc);
         return this;
@@ -134,7 +140,7 @@ public final class DbModelSelector {
 
     public DbModel findFirst() throws DbException {
         TableEntity<?> table = selector.getTable();
-        if (!table.tableIsExist()) return null;
+        if (!table.tableIsExists()) return null;
 
         this.limit(1);
         Cursor cursor = table.getDb().execQuery(this.toString());
@@ -154,7 +160,7 @@ public final class DbModelSelector {
 
     public List<DbModel> findAll() throws DbException {
         TableEntity<?> table = selector.getTable();
-        if (!table.tableIsExist()) return null;
+        if (!table.tableIsExists()) return null;
 
         List<DbModel> result = null;
 
@@ -205,8 +211,9 @@ public final class DbModelSelector {
         }
         List<Selector.OrderBy> orderByList = selector.getOrderByList();
         if (orderByList != null && orderByList.size() > 0) {
-            for (int i = 0; i < orderByList.size(); i++) {
-                result.append(" ORDER BY ").append(orderByList.get(i).toString()).append(',');
+            result.append(" ORDER BY ");
+            for (Selector.OrderBy orderBy : orderByList) {
+                result.append(orderBy.toString()).append(',');
             }
             result.deleteCharAt(result.length() - 1);
         }

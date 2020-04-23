@@ -4,7 +4,6 @@ import java.util.Date;
 import java.util.concurrent.ConcurrentHashMap;
 
 import core.xmate.util.LogUtil;
-import core.xmate.db.sqlite.ColumnDbType;
 
 /**
  * Author: wyouflf
@@ -23,9 +22,7 @@ public final class ColumnConverterFactory {
         } else if (ColumnConverter.class.isAssignableFrom(columnType)) {
             try {
                 ColumnConverter columnConverter = (ColumnConverter) columnType.newInstance();
-                if (columnConverter != null) {
-                    columnType_columnConverter_map.put(columnType.getName(), columnConverter);
-                }
+                columnType_columnConverter_map.put(columnType.getName(), columnConverter);
                 result = columnConverter;
             } catch (Throwable ex) {
                 LogUtil.e(ex.getMessage(), ex);
@@ -40,11 +37,6 @@ public final class ColumnConverterFactory {
         return result;
     }
 
-    public static ColumnDbType getDbColumnType(Class columnType) {
-        ColumnConverter converter = getColumnConverter(columnType);
-        return converter.getColumnDbType();
-    }
-
     public static void registerColumnConverter(Class columnType, ColumnConverter columnConverter) {
         columnType_columnConverter_map.put(columnType.getName(), columnConverter);
     }
@@ -55,11 +47,10 @@ public final class ColumnConverterFactory {
         } else if (ColumnConverter.class.isAssignableFrom(columnType)) {
             try {
                 ColumnConverter columnConverter = (ColumnConverter) columnType.newInstance();
-                if (columnConverter != null) {
-                    columnType_columnConverter_map.put(columnType.getName(), columnConverter);
-                }
-                return columnConverter == null;
-            } catch (Throwable e) {
+                columnType_columnConverter_map.put(columnType.getName(), columnConverter);
+                return true;
+            } catch (Throwable ex) {
+                LogUtil.e(ex.getMessage(), ex);
             }
         }
         return false;

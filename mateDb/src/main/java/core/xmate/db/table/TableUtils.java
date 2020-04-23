@@ -15,14 +15,15 @@
 
 package core.xmate.db.table;
 
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
-import core.xmate.util.LogUtil;
 import core.xmate.db.annotation.Column;
 import core.xmate.db.converter.ColumnConverterFactory;
+import core.xmate.util.LogUtil;
 
 /* package */ final class TableUtils {
 
@@ -30,7 +31,7 @@ import core.xmate.db.converter.ColumnConverterFactory;
     }
 
     /* package */
-    static synchronized LinkedHashMap<String, ColumnEntity> findColumnMap(Class<?> entityType) {
+    static LinkedHashMap<String, ColumnEntity> findColumnMap(Class<?> entityType) {
         LinkedHashMap<String, ColumnEntity> columnMap = new LinkedHashMap<String, ColumnEntity>();
         addColumns2Map(entityType, columnMap);
         return columnMap;

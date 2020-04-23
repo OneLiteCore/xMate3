@@ -16,12 +16,12 @@
 package core.xmate.db;
 
 import android.database.Cursor;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import core.xmate.db.sqlite.CursorIterator;
 import core.xmate.db.sqlite.WhereBuilder;
 import core.xmate.db.table.DbModel;
@@ -76,7 +76,7 @@ public final class Selector<T> {
         return this;
     }
 
-    public Selector or(WhereBuilder where) {
+    public Selector<T> or(WhereBuilder where) {
         this.whereBuilder.or(where);
         return this;
     }
@@ -97,6 +97,9 @@ public final class Selector<T> {
         return new DbModelSelector(this, columnExpressions);
     }
 
+    /**
+     * 排序条件, 默认ASC
+     */
     public Selector<T> orderBy(String columnName) {
         if (orderByList == null) {
             orderByList = new ArrayList<OrderBy>(5);
@@ -105,6 +108,9 @@ public final class Selector<T> {
         return this;
     }
 
+    /**
+     * 排序条件, 默认ASC
+     */
     public Selector<T> orderBy(String columnName, boolean desc) {
         if (orderByList == null) {
             orderByList = new ArrayList<OrderBy>(5);
@@ -143,9 +149,8 @@ public final class Selector<T> {
         return offset;
     }
 
-    @Nullable
     public T findFirst() throws DbException {
-        if (!table.tableIsExist()) return null;
+        if (!table.tableIsExists()) return null;
 
         this.limit(1);
         Cursor cursor = table.getDb().execQuery(this.toString());
@@ -163,9 +168,8 @@ public final class Selector<T> {
         return null;
     }
 
-    @Nullable
     public List<T> findAll() throws DbException {
-        if (!table.tableIsExist()) return null;
+        if (!table.tableIsExists()) return null;
 
         List<T> result = null;
         Cursor cursor = table.getDb().execQuery(this.toString());
@@ -187,7 +191,7 @@ public final class Selector<T> {
 
     @Nullable
     public Cursor query() throws DbException {
-        if (!table.tableIsExist()) return null;
+        if (!table.tableIsExists()) return null;
         return table.getDb().execQuery(this.toString());
     }
 
@@ -206,12 +210,12 @@ public final class Selector<T> {
     }
 
     public long count() throws DbException {
-        if (!table.tableIsExist()) return 0;
+        if (!table.tableIsExists()) return 0;
 
         DbModelSelector dmSelector = this.select("count(\"" + table.getId().getName() + "\") as count");
         DbModel firstModel = dmSelector.findFirst();
         if (firstModel != null) {
-            return firstModel.getLong("count");
+            return firstModel.getLong("count", 0);
         }
         return 0;
     }
@@ -243,10 +247,16 @@ public final class Selector<T> {
         private String columnName;
         private boolean desc;
 
+        /**
+         * 排序条件, 默认ASC
+         */
         public OrderBy(String columnName) {
             this.columnName = columnName;
         }
 
+        /**
+         * 排序条件, 默认ASC
+         */
         public OrderBy(String columnName, boolean desc) {
             this.columnName = columnName;
             this.desc = desc;

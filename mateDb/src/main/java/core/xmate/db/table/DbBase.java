@@ -1,16 +1,14 @@
 package core.xmate.db.table;
 
 import android.database.Cursor;
-import android.text.TextUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import androidx.annotation.Nullable;
 import core.xmate.db.DbException;
 import core.xmate.db.DbManager;
-import core.xmate.db.sqlite.SqlInfo;
-import core.xmate.db.sqlite.SqlInfoBuilder;
 import core.xmate.util.IOUtil;
 import core.xmate.util.LogUtil;
 
@@ -31,6 +29,8 @@ public abstract class DbBase implements DbManager {
             if (table == null) {
                 try {
                     table = new TableEntity<T>(this, entityType);
+                } catch (DbException ex) {
+                    throw ex;
                 } catch (Throwable ex) {
                     throw new DbException(ex);
                 }
@@ -61,19 +61,23 @@ public abstract class DbBase implements DbManager {
     @Override
     public void dropTable(Class<?> entityType) throws DbException {
         TableEntity<?> table = this.getTable(entityType);
-        if (!table.tableIsExist()) return;
+        if (!table.tableIsExists()) return;
         execNonQuery("DROP TABLE \"" + table.getName() + "\"");
-        table.setCheckedDatabase(false);
+        table.setTableCheckedStatus(false);
         this.removeTable(entityType);
     }
 
     @Override
-    public void dropTableQuietly(Class<?> entityType) {
+    @Nullable
+    public DbException dropTableQuietly(Class<?> entityType) {
+        DbException exception = null;
         try {
             dropTable(entityType);
         } catch (DbException e) {
+            exception = e;
             LogUtil.e("dropTableQuietly", e);
         }
+        return exception;
     }
 
     @Override
@@ -92,7 +96,7 @@ public abstract class DbBase implements DbManager {
 
                 synchronized (tableMap) {
                     for (TableEntity<?> table : tableMap.values()) {
-                        table.setCheckedDatabase(false);
+                        table.setTableCheckedStatus(false);
                     }
                     tableMap.clear();
                 }
@@ -105,16 +109,19 @@ public abstract class DbBase implements DbManager {
     }
 
     @Override
-    public void dropDbQuietly() {
+    public DbException dropDbQuietly() {
+        DbException exception = null;
         try {
             dropDb();
         } catch (DbException e) {
+            exception = e;
             LogUtil.e(e.getMessage(), e);
         }
+        return exception;
     }
 
     @Override
-    public List<String> getTableNames() throws DbException {
+    public List<String> getTables() throws DbException {
         List<String> tables = new ArrayList<>();
         Cursor cursor = execQuery("SELECT name FROM sqlite_master WHERE type='table' AND name<>'sqlite_sequence'");
         if (cursor != null) {
@@ -137,69 +144,19 @@ public abstract class DbBase implements DbManager {
     }
 
     @Override
-    public boolean isTableExists(Class<?> tableEntity) throws DbException {
-        TableEntity<?> table = getTable(tableEntity);
-        return isTableExists(table.getName());
-    }
-
-    @Override
-    public boolean isTableExists(String name) throws DbException {
-        boolean result = false;
-
-        SqlInfo sqlInfo = new SqlInfo("SELECT name FROM sqlite_master WHERE type='table' AND name=?").addBindArgs(name);
-        Cursor cursor = execQuery(sqlInfo);
-        if (cursor != null) {
-            try {
-                result = cursor.moveToNext();
-            } catch (Throwable e) {
-                throw new DbException(e);
-            } finally {
-                IOUtil.closeQuietly(cursor);
-            }
-        }
-
-        return result;
-    }
-
-    @Override
     public void addColumn(Class<?> entityType, String column) throws DbException {
         TableEntity<?> table = this.getTable(entityType);
         ColumnEntity col = table.getColumnMap().get(column);
         if (col != null) {
+            if (!table.tableIsExists()) return; // 不需要添加, 表创建时会自动添加
             StringBuilder builder = new StringBuilder();
             builder.append("ALTER TABLE ").append("\"").append(table.getName()).append("\"").
                     append(" ADD COLUMN ").append("\"").append(col.getName()).append("\"").
                     append(" ").append(col.getColumnDbType()).
                     append(" ").append(col.getProperty());
             execNonQuery(builder.toString());
-        }
-    }
-
-    @Override
-    public void createTableIfNotExist(Class<?> entityType) throws DbException {
-        TableEntity<?> tableEntity = getTable(entityType);
-        createTableIfNotExist(tableEntity);
-    }
-
-    protected void createTableIfNotExist(TableEntity<?> table) throws DbException {
-        if (!table.tableIsExist()) {
-            synchronized (table.getClass()) {
-                if (!table.tableIsExist()) {
-                    SqlInfo sqlInfo = SqlInfoBuilder.buildCreateTableSqlInfo(table);
-                    execNonQuery(sqlInfo);
-                    String[] execAfterTableCreated = table.getOnCreated();
-                    for (String sql : execAfterTableCreated) {
-                        if (!TextUtils.isEmpty(sql)) {
-                            execNonQuery(sql);
-                        }
-                    }
-                    table.setCheckedDatabase(true);
-                    TableCreateListener listener = this.getDaoConfig().getTableCreateListener();
-                    if (listener != null) {
-                        listener.onTableCreated(this, table);
-                    }
-                }
-            }
+        } else {
+            throw new DbException("the column(" + column + ") is not defined in table: " + table.getName());
         }
     }
 
@@ -208,5 +165,4 @@ public abstract class DbBase implements DbManager {
             tableMap.remove(entityType);
         }
     }
-
 }
