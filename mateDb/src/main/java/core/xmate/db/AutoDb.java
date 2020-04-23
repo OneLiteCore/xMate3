@@ -28,64 +28,59 @@ public abstract class AutoDb extends MateDb {
 
     private final List<Class<? extends IVersion>> versions;
 
-    private final boolean crashIfUpdateFailed;
-
     public AutoDb(Context context, String dbName, List<Class<? extends IVersion>> versions) {
-        this(context, dbName, versions, false);
-    }
-
-    public AutoDb(Context context, String dbName, List<Class<? extends IVersion>> versions, boolean crashIfUpdateFailed) {
         super(context, dbName, versions.size());
         this.versions = new ArrayList<>(versions);
-        this.crashIfUpdateFailed = crashIfUpdateFailed;
     }
 
     public AutoDb(Context context, File inDir, String dbName, List<Class<? extends IVersion>> versions) {
-        this(context, inDir, dbName, versions, false);
-    }
-
-    public AutoDb(Context context, File inDir, String dbName, List<Class<? extends IVersion>> versions, boolean crashIfUpdateFailed) {
         super(context, inDir, dbName, versions.size());
         this.versions = new ArrayList<>(versions);
-        this.crashIfUpdateFailed = crashIfUpdateFailed;
     }
 
     @Override
     public final void onUpgrade(DbManager db, int oldVersion, int newVersion) {
         super.onUpgrade(db, oldVersion, newVersion);
         if (newVersion > oldVersion) {// Upgrade
-            Class<? extends IVersion> ver = null;
+            Class<? extends IVersion> verClz = null;
+            IVersion version = null;
             try {
-                db.beginTransaction();
-
                 for (int i = oldVersion; i < newVersion; i++) {
-                    ver = versions.get(i);
-                    IVersion version = ver.newInstance();
+                    verClz = versions.get(i);
+                    version = verClz.newInstance();
                     LogUtil.d("Now execute version:" + version);
                     version.onUpgrade(db);
                 }
-
-                db.setTransactionSuccessful();
-            } catch (Exception e) {
+            } catch (DbException e) {
                 String msg;
-                if (ver != null) {
-                    msg = String.format(Locale.getDefault(), "Failed to upgrade db %s %d -> %d fail, due to version: %s", getDbName(), oldVersion, newVersion, ver.getCanonicalName());
+                if (verClz != null) {
+                    msg = String.format(Locale.getDefault(), "Failed to upgrade db %s %d -> %d fail, due to version: %s", getDbName(), oldVersion, newVersion, verClz.getCanonicalName());
                 } else {
                     msg = e.getMessage();
                 }
 
                 LogUtil.e(msg, e);
-
-                if (crashIfUpdateFailed) {
-                    throw new Error(e);
-                }
-
-            } finally {
-                db.endTransaction();
+                onUpgradeException(db, e, oldVersion, newVersion, version);
+            } catch (IllegalAccessException e) {
+                throw new IllegalStateException("Unable to instance version strategy", e);
+            } catch (InstantiationException e) {
+                throw new IllegalStateException("Unable to instance version strategy", e);
             }
 
         } else if (newVersion < oldVersion) {// Downgrade
             LogUtil.e(getDbName() + ": Downgrade not supported.");
         }
+    }
+
+    /**
+     * Handle upgrade failure here.
+     * <p>
+     * Default behavior of this method is call {@link DbManager#dropDbQuietly()} to drop and clean up
+     * legacy data and table struct.
+     * <p>
+     * Override this to implement your own logic to deal with upgrade failure.
+     */
+    protected void onUpgradeException(DbManager db, DbException exception, int oldVersion, int newVersion, IVersion errorVersion) {
+        db.dropDbQuietly();
     }
 }

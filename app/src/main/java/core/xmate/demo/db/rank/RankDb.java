@@ -35,7 +35,7 @@ public class RankDb extends AutoDb {
     private static final String DB_NAME = "rank.db";
 
     private RankDb(Context context) {
-        super(context, DB_NAME, DB_VERSIONS, true);
+        super(context, DB_NAME, DB_VERSIONS);
     }
 
     private static final List<Class<? extends IVersion>> DB_VERSIONS = new ArrayList<>();
@@ -51,7 +51,7 @@ public class RankDb extends AutoDb {
     public static class VERSION_1 implements IVersion {
         @Override
         public void onUpgrade(DbManager db) throws DbException {
-            db.createTableIfNotExist(Rank.class);
+            db.getTable(Rank.class).createTableIfNotExists();
 
             Rank rank = new Rank();
             rank.setName("王小明");
@@ -63,7 +63,7 @@ public class RankDb extends AutoDb {
 
         @Override
         public void onUpgrade(DbManager db) throws DbException {
-            db.createTableIfNotExist(Level.class);
+            db.getTable(Level.class).createTableIfNotExists();
         }
     }
 
@@ -71,7 +71,7 @@ public class RankDb extends AutoDb {
 
         @Override
         public void onUpgrade(DbManager db) throws DbException {
-            db.createTableIfNotExist(RankV2.class);
+            db.getTable(RankV2.class).createTableIfNotExists();
 
             List<Rank> ranks = db.findAll(Rank.class);
             int size = ranks != null ? ranks.size() : 0;
@@ -94,7 +94,7 @@ public class RankDb extends AutoDb {
 
         @Override
         public void onUpgrade(DbManager db) throws DbException {
-            db.createTableIfNotExist(RankV3.class);
+            db.getTable(RankV3.class).createTableIfNotExists();
 
             List<RankV2> ranks = db.findAll(RankV2.class);
             int size = ranks != null ? ranks.size() : 0;
@@ -118,7 +118,7 @@ public class RankDb extends AutoDb {
 
         @Override
         public void onUpgrade(DbManager db) throws DbException {
-            db.createTableIfNotExist(RankV4.class);
+            db.getTable(RankV4.class).createTableIfNotExists();
 
             CursorIterator<RankV3> iterator = db.selector(RankV3.class).queryIterator();
             RankV3 rankV3;

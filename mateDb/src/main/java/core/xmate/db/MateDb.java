@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.IOException;
 
 import core.xmate.db.table.TableEntity;
+import core.xmate.util.LogUtil;
 
 /**
  * 基于xUtils的数据库基类。
@@ -17,7 +18,7 @@ import core.xmate.db.table.TableEntity;
 public abstract class MateDb extends DbManager.DaoConfig implements DbManager.DbUpgradeListener,
         DbManager.DbOpenListener, DbManager.TableCreateListener, Closeable {
 
-    public static DbManager getDb(Context context, DbManager.DaoConfig daoConfig) {
+    public static DbManager getDb(Context context, DbManager.DaoConfig daoConfig) throws DbException {
         return DbManagerImpl.getInstance(context, daoConfig);
     }
 
@@ -46,7 +47,11 @@ public abstract class MateDb extends DbManager.DaoConfig implements DbManager.Db
         if (dbMgr == null) {
             synchronized (this) {
                 if (dbMgr == null) {
-                    dbMgr = createDb(context);
+                    try {
+                        dbMgr = createDb(context);
+                    } catch (DbException e) {
+                        LogUtil.e("get: Failed to create database for " + getClass());
+                    }
                 }
             }
         }
@@ -78,11 +83,8 @@ public abstract class MateDb extends DbManager.DaoConfig implements DbManager.Db
      * <p>
      * If you have db file in assets or raw, you may export it here
      * before super method is called.
-     *
-     * @param context
-     * @return
      */
-    protected DbManager createDb(Context context) {
+    protected DbManager createDb(Context context) throws DbException {
         return getDb(context, this);
     }
 

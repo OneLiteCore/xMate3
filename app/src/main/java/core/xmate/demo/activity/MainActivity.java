@@ -11,9 +11,9 @@ import java.util.List;
 
 import core.xmate.db.DbException;
 import core.xmate.demo.R;
+import core.xmate.demo.db.person.Person;
 import core.xmate.demo.db.person.PersonDb;
 import core.xmate.demo.db.rank.RankDb;
-import core.xmate.demo.db.person.Person;
 
 public class MainActivity extends Activity {
 
@@ -61,7 +61,7 @@ public class MainActivity extends Activity {
             @Override
             public void onClick(View v) {
                 try {
-                    boolean result = PersonDb.getInstance(MainActivity.this).get().isTableExists(Person.class);
+                    boolean result = PersonDb.getInstance(MainActivity.this).get().getTable(Person.class).tableIsExists();
                     Toast.makeText(MainActivity.this, "" + result, Toast.LENGTH_SHORT).show();
                 } catch (DbException e) {
                     e.printStackTrace();

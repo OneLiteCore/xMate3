@@ -35,8 +35,6 @@ public final class ColumnEntity {
     private final boolean isAutoId;
     private final boolean directReflectField;
 
-    protected final IValueTransformer transformer;
-
     protected final Method getMethod;
     protected final Method setMethod;
 
@@ -49,7 +47,6 @@ public final class ColumnEntity {
         if (TextUtils.isEmpty(column.name())) {
             throw new IllegalArgumentException("Column name must not be null or empty!");
         }
-
         this.columnField = field;
         this.name = column.name();
         this.property = column.property();
@@ -60,42 +57,27 @@ public final class ColumnEntity {
         this.isAutoId = this.isId && column.autoGen() && ColumnUtils.isAutoIdType(fieldType);
         this.columnConverter = ColumnConverterFactory.getColumnConverter(fieldType);
 
-        this.getMethod = !directReflectField ? ColumnUtils.findGetMethod(entityType, field, column.name()) : null;
+        this.getMethod = !directReflectField ? ColumnUtils.findGetMethod(entityType, field) : null;
         if (this.getMethod != null && !this.getMethod.isAccessible()) {
             this.getMethod.setAccessible(true);
         }
-        this.setMethod = !directReflectField ? ColumnUtils.findSetMethod(entityType, field, column.name()) : null;
+        this.setMethod = !directReflectField ? ColumnUtils.findSetMethod(entityType, field) : null;
         if (this.setMethod != null && !this.setMethod.isAccessible()) {
             this.setMethod.setAccessible(true);
-        }
-
-        Class transClz = column.hook();
-        if (transClz != IValueTransformer.SIMPLE.class) {
-            if (field.getType() != String.class) {
-                throw new IllegalStateException("Only String column could be set a ValueTransformer");
-            } else if (isId) {
-                throw new IllegalStateException("Id column must not be set a ValueTransformer");
-            }
-
-            try {
-                transformer = (IValueTransformer) transClz.newInstance();
-            } catch (Throwable e) {
-                throw new IllegalStateException("Unable to instance IValueTransformer " + transClz);
-            }
-
-        } else {
-            transformer = null;
         }
     }
 
     public void setValueFromCursor(Object entity, Cursor cursor, int index) {
+        setValueFromCursor(entity, cursor, index, false);
+    }
+
+    public void setValueFromCursor(Object entity, Cursor cursor, int index, boolean resetIfNull) {
         Object value = columnConverter.getFieldValue(cursor, index);
         if (value == null) {
+            if (!resetIfNull) {
+                return;
+            }
             value = getDefaultValue(this.columnField.getType());
-        }
-
-        if (transformer != null && value != null) {
-            value = transformer.toVal(value.toString());
         }
 
         if (setMethod != null) {

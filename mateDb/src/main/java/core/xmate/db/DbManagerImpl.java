@@ -75,7 +75,6 @@ public final class DbManagerImpl extends DbBase {
     }
 
     public synchronized static DbManager getInstance(Context context, DaoConfig daoConfig) throws DbException {
-
         if (daoConfig == null) {//使用默认配置
             daoConfig = new DaoConfig();
         }

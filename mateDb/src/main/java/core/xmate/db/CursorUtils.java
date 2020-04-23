@@ -17,12 +17,12 @@ package core.xmate.db;
 
 import android.database.Cursor;
 
+import java.util.HashMap;
+
 import core.xmate.db.table.ColumnEntity;
 import core.xmate.db.table.DbModel;
 import core.xmate.db.table.ModelEntity;
 import core.xmate.db.table.TableEntity;
-
-import java.util.HashMap;
 
 public final class CursorUtils {
 
@@ -33,13 +33,17 @@ public final class CursorUtils {
     }
 
     public static <T> void setEntity(TableEntity<T> table, final Cursor cursor, T entity) throws Throwable {
+        setEntity(table, cursor, entity, false);
+    }
+
+    public static <T> void setEntity(TableEntity<T> table, final Cursor cursor, T entity, boolean resetIfNull) throws Throwable {
         HashMap<String, ColumnEntity> columnMap = table.getColumnMap();
         int columnCount = cursor.getColumnCount();
         for (int i = 0; i < columnCount; i++) {
             String columnName = cursor.getColumnName(i);
             ColumnEntity column = columnMap.get(columnName);
             if (column != null) {
-                column.setValueFromCursor(entity, cursor, i);
+                column.setValueFromCursor(entity, cursor, i, resetIfNull);
             }
         }
     }

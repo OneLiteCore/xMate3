@@ -12,7 +12,7 @@ public class Person {
 
     @Column(name = "id", isId = true)
     private int id;
-    @Column(name = "name", hook = TestHook.class)
+    @Column(name = "name")
     private String name;
     @Column(name = "age")
     private int age;

@@ -1,10 +1,10 @@
 package core.xmate.db.sqlite;
 
 import android.database.Cursor;
-import android.support.annotation.Nullable;
 
 import java.io.Closeable;
 
+import androidx.annotation.Nullable;
 import core.xmate.db.CursorUtils;
 import core.xmate.db.table.TableEntity;
 import core.xmate.util.IOUtil;
@@ -40,7 +40,7 @@ public class CursorIterator<T> implements Closeable {
 
     private T mapEntity() {
         try {
-            CursorUtils.setEntity(table, cursor, entity);
+            CursorUtils.setEntity(table, cursor, entity, true);
             return entity;
         } catch (Throwable throwable) {
             LogUtil.e("Something went wrong while calling CursorUtils.setEntity", throwable);
