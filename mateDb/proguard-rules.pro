@@ -22,27 +22,17 @@
 
 # BASE
 ####################################################################################################
--keep class * implements Android.os.Parcelable {
-    public static final Android.os.Parcelable$Creator *;
-}
--keepclassmembers class * implements java.io.Serializable {
-    static final long serialVersionUID;
-    private static final java.io.ObjectStreamField[] serialPersistentFields;
-    private void writeObject(java.io.ObjectOutputStream);
-    private void readObject(java.io.ObjectInputStream);
-    java.lang.Object writeReplace();
-    java.lang.Object readResolve();
-    public <fields>;
-}
--keepclasseswithmembernames class * {
-    native <methods>;
-}
--keepclassmembers enum  * {
-    public static **[] values();
-    public static ** valueOf(java.lang.String);
-}
+-keepattributes Signature,*Annotation*
 
 # MateDb
 ####################################################################################################
--keep class core.xmate.**{*;}
--keep @core.xmate.db.annotation.* class *{*;}
+-keep public class core.xmate.**{
+    public protected *;
+}
+-keep public interface core.xmate.** {
+    public protected *;
+}
+-keepclassmembers class * extends core.xmate.** {
+    public protected *;
+}
+-keepclassmembers @core.xmate.db.annotation.* class *{*;}
