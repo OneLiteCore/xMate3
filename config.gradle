@@ -1,24 +1,16 @@
-apply plugin: 'bintray-release'
-
 static def gitVersionCode() {
     def cmd = 'git rev-list HEAD --count'
     cmd.execute().text.trim().toInteger()
 }
 
 ext {
+    compileSdkVersion = 31
+    buildToolsVersion = '29.0.3'
+    minSdkVersion = 14
+    targetSdkVersion = 31
+
     verCode = gitVersionCode()
     verName = "2.4.3"
-}
-
-publish {
-    artifactId = 'xmateDb'
-    userOrg = rootProject.userOrg
-    groupId = rootProject.groupId
-    uploadName = rootProject.uploadName
-    publishVersion = verName
-    desc = rootProject.desc
-    website = rootProject.website
-    licences = rootProject.licences
 }
 
 tasks.withType(Javadoc) {

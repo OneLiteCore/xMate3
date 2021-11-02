@@ -10,6 +10,7 @@ import core.xmate.db.AutoDb;
 import core.xmate.db.DbException;
 import core.xmate.db.DbManager;
 import core.xmate.db.sqlite.CursorIterator;
+import core.xmate.util.LogUtil;
 
 /**
  * @author DrkCore
@@ -131,7 +132,7 @@ public class RankDb extends AutoDb {
                 rankV4.setSex(rankV3.isSex());
                 rankV4.setMajor("unknown");
 
-                Log.d(TAG, rankV4.toString());
+                LogUtil.d(rankV4.toString());
 
                 db.save(rankV4);
             }

@@ -1,5 +1,4 @@
 apply plugin: 'com.android.library'
-apply from: './maven.gradle'
 
 android {
     compileSdkVersion rootProject.compileSdkVersion
@@ -9,8 +8,8 @@ android {
         minSdkVersion rootProject.minSdkVersion
         targetSdkVersion rootProject.targetSdkVersion
 
-        versionCode verCode
-        versionName verName
+        versionCode rootProject.verCode
+        versionName rootProject.verName
 
         consumerProguardFiles 'proguard-rules.pro'
     }
@@ -23,5 +22,5 @@ android {
 }
 
 dependencies {
-    compileOnly 'androidx.legacy:legacy-support-v4:1.0.0'
+    compileOnly('androidx.annotation:annotation:1.2.0')
 }

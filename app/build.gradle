@@ -9,17 +9,15 @@ android {
         targetSdkVersion rootProject.targetSdkVersion
 
         applicationId "core.xmate.demo"
-        versionCode 1
-        versionName "1.0"
+        versionCode rootProject.verCode
+        versionName rootProject.verName
     }
     buildTypes {
         debug {
         }
         release {
             minifyEnabled true
-            // zipAlign优化
             zipAlignEnabled true
-            // 移除无用的资源文件文件
             shrinkResources true
 
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
@@ -29,5 +27,4 @@ android {
 
 dependencies {
     implementation project(':mateDb')
-    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
 }
