@@ -10,7 +10,7 @@ ext {
     targetSdkVersion = 28
 
     verCode = gitVersionCode()
-    verName = "2.4.4"
+    verName = "v2.4.4"
 }
 
 tasks.withType(Javadoc) {
