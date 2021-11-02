@@ -7,10 +7,10 @@ ext {
     compileSdkVersion = 31
     buildToolsVersion = '29.0.3'
     minSdkVersion = 14
-    targetSdkVersion = 31
+    targetSdkVersion = 28
 
     verCode = gitVersionCode()
-    verName = "2.4.3"
+    verName = "2.4.4"
 }
 
 tasks.withType(Javadoc) {
