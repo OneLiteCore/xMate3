@@ -24,7 +24,8 @@ import androidx.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-import core.xmate.db.sqlite.CursorIterator;
+import core.xmate.db.sqlite.DbModelCursorIterator;
+import core.xmate.db.sqlite.ObjectCursorIterator;
 import core.xmate.db.sqlite.WhereBuilder;
 import core.xmate.db.table.DbModel;
 import core.xmate.db.table.TableEntity;
@@ -35,79 +36,79 @@ import core.xmate.util.IOUtil;
  * Date: 13-8-10
  * Time: 下午2:15
  */
-public final class DbModelSelector<T> {
+public final class DbModelSelector {
 
     private String[] columnExpressions;
     private String groupByColumnName;
     private WhereBuilder having;
 
-    private Selector<T> selector;
+    private Selector<?> selector;
 
-    private DbModelSelector(TableEntity<T> table) {
+    private DbModelSelector(TableEntity<?> table) {
         selector = Selector.from(table);
     }
 
-    protected DbModelSelector(Selector<T> selector, String groupByColumnName) {
+    protected DbModelSelector(Selector<?> selector, String groupByColumnName) {
         this.selector = selector;
         this.groupByColumnName = groupByColumnName;
     }
 
-    protected DbModelSelector(Selector<T> selector, String[] columnExpressions) {
+    protected DbModelSelector(Selector<?> selector, String[] columnExpressions) {
         this.selector = selector;
         this.columnExpressions = columnExpressions;
     }
 
     /*package*/
-    static <T> DbModelSelector<T> from(TableEntity<T> table) {
-        return new DbModelSelector<>(table);
+    static DbModelSelector from(TableEntity<?> table) {
+        return new DbModelSelector(table);
     }
 
-    public DbModelSelector<T> where(WhereBuilder whereBuilder) {
+    public DbModelSelector where(WhereBuilder whereBuilder) {
         selector.where(whereBuilder);
         return this;
     }
 
-    public DbModelSelector<T> where(String columnName, String op, Object value) {
+    public DbModelSelector where(String columnName, String op, Object value) {
         selector.where(columnName, op, value);
         return this;
     }
 
-    public DbModelSelector<T> and(String columnName, String op, Object value) {
+    public DbModelSelector and(String columnName, String op, Object value) {
         selector.and(columnName, op, value);
         return this;
     }
 
-    public DbModelSelector<T> and(WhereBuilder where) {
+    public DbModelSelector and(WhereBuilder where) {
         selector.and(where);
         return this;
     }
 
-    public DbModelSelector<T> or(String columnName, String op, Object value) {
+    public DbModelSelector or(String columnName, String op, Object value) {
         selector.or(columnName, op, value);
         return this;
     }
 
-    public DbModelSelector<T> or(WhereBuilder where) {
+    public DbModelSelector or(WhereBuilder where) {
         selector.or(where);
         return this;
     }
 
-    public DbModelSelector<T> expr(String expr) {
+    public DbModelSelector expr(String expr) {
         selector.expr(expr);
         return this;
     }
 
-    public DbModelSelector<T> groupBy(String columnName) {
+    public DbModelSelector groupBy(String columnName) {
         this.groupByColumnName = columnName;
         return this;
     }
 
-    public DbModelSelector<T> having(WhereBuilder whereBuilder) {
+    public DbModelSelector having(WhereBuilder whereBuilder) {
         this.having = whereBuilder;
         return this;
     }
 
-    public DbModelSelector<T> select(String... columnExpressions) {
+    public DbModelSelector select(String... columnExpressions) {
         this.columnExpressions = columnExpressions;
         return this;
     }
@@ -115,7 +116,7 @@ public final class DbModelSelector<T> {
     /**
      * 排序条件, 默认ASC
      */
-    public DbModelSelector<T> orderBy(String columnName) {
+    public DbModelSelector orderBy(String columnName) {
         selector.orderBy(columnName);
         return this;
     }
@@ -123,22 +124,22 @@ public final class DbModelSelector<T> {
     /**
      * 排序条件, 默认ASC
      */
-    public DbModelSelector<T> orderBy(String columnName, boolean desc) {
+    public DbModelSelector orderBy(String columnName, boolean desc) {
         selector.orderBy(columnName, desc);
         return this;
     }
 
-    public DbModelSelector<T> limit(int limit) {
+    public DbModelSelector limit(int limit) {
         selector.limit(limit);
         return this;
     }
 
-    public DbModelSelector<T> offset(int offset) {
+    public DbModelSelector offset(int offset) {
         selector.offset(offset);
         return this;
     }
 
-    public TableEntity<T> getTable() {
+    public TableEntity<?> getTable() {
         return selector.getTable();
     }
 
@@ -171,7 +172,7 @@ public final class DbModelSelector<T> {
         Cursor cursor = table.getDb().execQuery(this.toString());
         if (cursor != null) {
             try {
-                result = new ArrayList<>();
+                result = new ArrayList<DbModel>();
                 while (cursor.moveToNext()) {
                     DbModel entity = CursorUtils.getDbModel(cursor);
                     result.add(entity);
@@ -183,6 +184,26 @@ public final class DbModelSelector<T> {
             }
         }
         return result;
+    }
+
+    @Nullable
+    public Cursor query() throws DbException {
+        TableEntity<?> table = selector.getTable();
+        if (!table.tableIsExists()) return null;
+        return table.getDb().execQuery(this.toString());
+    }
+
+    @NonNull
+    public DbModelCursorIterator iterator() throws DbException {
+        Cursor cursor = query();
+        if (cursor != null) {
+            try {
+                return new DbModelCursorIterator(cursor);
+            } catch (Throwable e) {
+                throw new DbException(e);
+            }
+        }
+        return DbModelCursorIterator.EMPTY_INSTANCE;
     }
 
     @Override
@@ -227,29 +248,4 @@ public final class DbModelSelector<T> {
         }
         return result.toString();
     }
-
-    /*Query*/
-
-    @Nullable
-    public Cursor query() throws DbException {
-        TableEntity<?> table = selector.getTable();
-        if (!table.tableIsExists()) return null;
-        return table.getDb().execQuery(this.toString());
-    }
-
-    @NonNull
-    public CursorIterator<T> queryIterator() throws DbException {
-        TableEntity<T> table = selector.getTable();
-        Cursor cursor = query();
-        if (cursor != null) {
-            try {
-                return new CursorIterator<>(table, cursor);
-            } catch (Throwable e) {
-                throw new DbException(e);
-            }
-        }
-        //noinspection unchecked
-        return (CursorIterator<T>) CursorIterator.EMPTY_INSTANCE;
-    }
-
 }

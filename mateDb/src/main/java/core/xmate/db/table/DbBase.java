@@ -2,11 +2,12 @@ package core.xmate.db.table;
 
 import android.database.Cursor;
 
+import androidx.annotation.Nullable;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import androidx.annotation.Nullable;
 import core.xmate.db.DbException;
 import core.xmate.db.DbManager;
 import core.xmate.util.IOUtil;
@@ -19,7 +20,6 @@ import core.xmate.util.LogUtil;
 public abstract class DbBase implements DbManager {
 
     private final HashMap<Class<?>, TableEntity<?>> tableMap = new HashMap<>();
-    private final HashMap<Class<?>, ModelEntity<?>> modelsMap = new HashMap<>();
 
     @Override
     @SuppressWarnings("unchecked")
@@ -38,23 +38,6 @@ public abstract class DbBase implements DbManager {
             }
 
             return table;
-        }
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public <T> ModelEntity<T> getModel(Class<T> entityType) throws DbException {
-        synchronized (modelsMap) {
-            ModelEntity<T> modelEntity = (ModelEntity<T>) modelsMap.get(entityType);
-            if (modelEntity == null) {
-                try {
-                    modelEntity = new ModelEntity<>(entityType);
-                } catch (Throwable ex) {
-                    throw new DbException(ex);
-                }
-                modelsMap.put(entityType, modelEntity);
-            }
-            return modelEntity;
         }
     }
 

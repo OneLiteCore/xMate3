@@ -21,7 +21,6 @@ import java.util.HashMap;
 
 import core.xmate.db.table.ColumnEntity;
 import core.xmate.db.table.DbModel;
-import core.xmate.db.table.ModelEntity;
 import core.xmate.db.table.TableEntity;
 
 public final class CursorUtils {
@@ -57,17 +56,11 @@ public final class CursorUtils {
         return result;
     }
 
-    public static <T> T getModel(ModelEntity<T> modelEntity, final Cursor cursor) throws Throwable {
-        T entity = modelEntity.createEntity();
-        HashMap<String, ColumnEntity> columnMap = modelEntity.getColumnMap();
+    public static void setDbModel(final Cursor cursor, DbModel model) {
         int columnCount = cursor.getColumnCount();
         for (int i = 0; i < columnCount; i++) {
-            String columnName = cursor.getColumnName(i);
-            ColumnEntity column = columnMap.get(columnName);
-            if (column != null) {
-                column.setValueFromCursor(entity, cursor, i);
-            }
+            model.add(cursor.getColumnName(i), cursor.getString(i));
         }
-        return entity;
     }
+
 }

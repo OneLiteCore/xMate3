@@ -4,16 +4,16 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.text.TextUtils;
 
+import androidx.annotation.Nullable;
+
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-import androidx.annotation.Nullable;
 import core.xmate.db.sqlite.SqlInfo;
 import core.xmate.db.sqlite.WhereBuilder;
 import core.xmate.db.table.DbModel;
-import core.xmate.db.table.ModelEntity;
 import core.xmate.db.table.TableEntity;
 import core.xmate.util.KeyValue;
 
@@ -74,20 +74,12 @@ public interface DbManager extends Closeable {
 
     List<DbModel> findDbModelAll(SqlInfo sqlInfo) throws DbException;
 
-    <T> T findModelFirst(Class<T> clz, SqlInfo sqlInfo) throws DbException;
-
-    <T> List<T> findModelAll(Class<T> clz, SqlInfo sqlInfo) throws DbException;
     ///////////// table
 
     /**
      * 获取表信息
      */
     <T> TableEntity<T> getTable(Class<T> entityType) throws DbException;
-
-    /**
-     * 获取临时对象信息
-     */
-    <T> ModelEntity<T> getModel(Class<T> entityType) throws DbException;
 
     /**
      * 删除表

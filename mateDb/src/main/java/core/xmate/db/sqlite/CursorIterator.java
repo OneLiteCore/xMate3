@@ -2,63 +2,86 @@ package core.xmate.db.sqlite;
 
 import android.database.Cursor;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import java.io.Closeable;
 
-import androidx.annotation.Nullable;
-import core.xmate.db.CursorUtils;
-import core.xmate.db.table.TableEntity;
+import core.xmate.db.DbException;
 import core.xmate.util.IOUtil;
-import core.xmate.util.LogUtil;
 
 /**
  * @author DrkCore
  * @since 5/31/18
  */
-public class CursorIterator<T> implements Closeable {
+public abstract class CursorIterator<T> implements Closeable {
 
     public static final String TAG = "CursorIterator";
 
-    public static final CursorIterator EMPTY_INSTANCE = new CursorIterator();
-
-    private final TableEntity<T> table;
     private Cursor cursor;
 
-    private final T entity;
-
-    private CursorIterator() {
-        this.table = null;
-        this.cursor = null;
-        entity = null;
-    }
-
-    public CursorIterator(TableEntity<T> table, Cursor cursor) throws Throwable {
-        this.table = table;
+    public CursorIterator(Cursor cursor) {
         this.cursor = cursor;
-
-        entity = table.createEntity();
-    }
-
-    private T mapEntity() {
-        try {
-            CursorUtils.setEntity(table, cursor, entity, true);
-            return entity;
-        } catch (Throwable throwable) {
-            LogUtil.e("Something went wrong while calling CursorUtils.setEntity", throwable);
-            close();
-        }
-        return null;
     }
 
     @Override
     public void close() {
-        if (cursor != null) {
-            IOUtil.closeQuietly(cursor);
-            cursor = null;
-        }
+        IOUtil.closeQuietly(cursor);
+        cursor = null;
     }
 
     public boolean isClosed() {
         return cursor == null || cursor.isClosed();
+    }
+
+    /*Map*/
+
+    protected abstract T createItem() throws Throwable;
+
+    protected abstract void clearItem(T item);
+
+    protected abstract void setItem(@NonNull Cursor cursor, @NonNull T cache) throws Throwable;
+
+    private boolean cacheEnable = false;
+
+    public boolean isCacheEnable() {
+        return cacheEnable;
+    }
+
+    public CursorIterator<T> enableCache() {
+        this.cacheEnable = true;
+        return this;
+    }
+
+    private T cached;
+
+    private T mapItem() throws DbException {
+        try {
+            T item;
+            if (cacheEnable) {
+                item = cached;
+                if (item == null) {
+                    item = createItem();
+                    cached = item;
+                } else {
+                    clearItem(item);
+                }
+            } else {
+                item = createItem();
+            }
+
+            if (item == null) {
+                throw new DbException("Failed to create item with createItem() method");
+            }
+            setItem(cursor, item);
+            return item;
+        } catch (Throwable throwable) {
+            if (throwable instanceof DbException) {
+                DbException dbException = (DbException) throwable;
+                throw dbException;
+            }
+            throw new DbException(throwable);
+        }
     }
 
     /*Delegate*/
@@ -72,43 +95,43 @@ public class CursorIterator<T> implements Closeable {
     }
 
     @Nullable
-    public T moveToNext() {
+    public T moveToNext() throws DbException {
         if (isClosed() || !cursor.moveToNext()) {
             return null;
         }
-        return mapEntity();
+        return mapItem();
     }
 
     @Nullable
-    public T moveToPrevious() {
+    public T moveToPrevious() throws DbException {
         if (isClosed() || !cursor.moveToPrevious()) {
             return null;
         }
-        return mapEntity();
+        return mapItem();
     }
 
     @Nullable
-    public T moveToFirst() {
+    public T moveToFirst() throws DbException {
         if (isClosed() || !cursor.moveToFirst()) {
             return null;
         }
-        return mapEntity();
+        return mapItem();
     }
 
     @Nullable
-    public T moveToLast() {
+    public T moveToLast() throws DbException {
         if (isClosed() || !cursor.moveToLast()) {
             return null;
         }
-        return mapEntity();
+        return mapItem();
     }
 
     @Nullable
-    public T moveToPosition(int position) {
+    public T moveToPosition(int position) throws DbException {
         if (isClosed() || !cursor.moveToPosition(position)) {
             return null;
         }
-        return mapEntity();
+        return mapItem();
     }
 
 }

@@ -1,7 +1,6 @@
 package core.xmate.demo.db.rank;
 
 import android.content.Context;
-import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,7 +8,7 @@ import java.util.List;
 import core.xmate.db.AutoDb;
 import core.xmate.db.DbException;
 import core.xmate.db.DbManager;
-import core.xmate.db.sqlite.CursorIterator;
+import core.xmate.db.sqlite.ObjectCursorIterator;
 import core.xmate.util.LogUtil;
 
 /**
@@ -121,7 +120,7 @@ public class RankDb extends AutoDb {
         public void onUpgrade(DbManager db) throws DbException {
             db.getTable(RankV4.class).createTableIfNotExists();
 
-            CursorIterator<RankV3> iterator = db.selector(RankV3.class).queryIterator();
+            ObjectCursorIterator<RankV3> iterator = db.selector(RankV3.class).iterator();
             RankV3 rankV3;
             while ((rankV3 = iterator.moveToNext()) != null) {
                 RankV4 rankV4 = new RankV4();

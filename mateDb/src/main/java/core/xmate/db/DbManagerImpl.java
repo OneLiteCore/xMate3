@@ -33,7 +33,6 @@ import core.xmate.db.sqlite.WhereBuilder;
 import core.xmate.db.table.ColumnEntity;
 import core.xmate.db.table.DbBase;
 import core.xmate.db.table.DbModel;
-import core.xmate.db.table.ModelEntity;
 import core.xmate.db.table.TableEntity;
 import core.xmate.util.IOUtil;
 import core.xmate.util.KeyValue;
@@ -403,42 +402,6 @@ public final class DbManagerImpl extends DbBase {
         return dbModelList;
     }
 
-    @Override
-    public <T> T findModelFirst(Class<T> clz, SqlInfo sqlInfo) throws DbException {
-        Cursor cursor = execQuery(sqlInfo);
-        ModelEntity<T> modelEntity = getModel(clz);
-        if (cursor != null) {
-            try {
-                if (cursor.moveToNext()) {
-                    return CursorUtils.getModel(modelEntity, cursor);
-                }
-            } catch (Throwable e) {
-                throw new DbException(e);
-            } finally {
-                IOUtil.closeQuietly(cursor);
-            }
-        }
-        return null;
-    }
-
-    @Override
-    public <T> List<T> findModelAll(Class<T> clz, SqlInfo sqlInfo) throws DbException {
-        List<T> models = new ArrayList<>();
-        ModelEntity<T> modelEntity = getModel(clz);
-        Cursor cursor = execQuery(sqlInfo);
-        if (cursor != null) {
-            try {
-                while (cursor.moveToNext()) {
-                    models.add(CursorUtils.getModel(modelEntity, cursor));
-                }
-            } catch (Throwable e) {
-                throw new DbException(e);
-            } finally {
-                IOUtil.closeQuietly(cursor);
-            }
-        }
-        return models;
-    }
     //******************************************** config ******************************************************
 
     private SQLiteDatabase openOrCreateDatabase(Context context, DbManager.DaoConfig config) {
