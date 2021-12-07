@@ -11,6 +11,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+import core.xmate.db.sqlite.CursorIterator;
+import core.xmate.db.sqlite.DbModelCursorIterator;
 import core.xmate.db.sqlite.SqlInfo;
 import core.xmate.db.sqlite.WhereBuilder;
 import core.xmate.db.table.DbModel;
@@ -134,6 +136,10 @@ public interface DbManager extends Closeable {
     Cursor execQuery(SqlInfo sqlInfo) throws DbException;
 
     Cursor execQuery(String sql) throws DbException;
+
+    CursorIterator<DbModel> iterator(SqlInfo sqlInfo) throws DbException;
+
+    CursorIterator<DbModel> iterator(String sql) throws DbException;
 
     public interface DbOpenListener {
         void onDbOpened(DbManager db) throws DbException;

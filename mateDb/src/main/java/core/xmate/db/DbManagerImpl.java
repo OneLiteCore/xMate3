@@ -27,6 +27,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import core.xmate.db.sqlite.CursorIterator;
+import core.xmate.db.sqlite.DbModelCursorIterator;
 import core.xmate.db.sqlite.SqlInfo;
 import core.xmate.db.sqlite.SqlInfoBuilder;
 import core.xmate.db.sqlite.WhereBuilder;
@@ -587,4 +589,31 @@ public final class DbManagerImpl extends DbBase {
         }
     }
 
+    @Override
+    public CursorIterator<DbModel> iterator(SqlInfo sqlInfo) throws DbException {
+        Cursor cursor = null;
+        try {
+            cursor = execQuery(sqlInfo);
+            if (cursor != null) {
+                return new DbModelCursorIterator(cursor);
+            }
+            return DbModelCursorIterator.EMPTY_INSTANCE;
+        } finally {
+            IOUtil.closeQuietly(cursor);
+        }
+    }
+
+    @Override
+    public CursorIterator<DbModel> iterator(String sql) throws DbException {
+        Cursor cursor = null;
+        try {
+            cursor = execQuery(sql);
+            if (cursor != null) {
+                return new DbModelCursorIterator(cursor);
+            }
+            return DbModelCursorIterator.EMPTY_INSTANCE;
+        } finally {
+            IOUtil.closeQuietly(cursor);
+        }
+    }
 }

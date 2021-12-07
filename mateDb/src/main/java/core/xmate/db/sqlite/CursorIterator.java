@@ -38,6 +38,17 @@ public abstract class CursorIterator<T> implements Closeable {
 
     protected abstract T createItem() throws Throwable;
 
+    public interface ClearCallback<T> {
+        void clear(T t);
+    }
+
+    private ClearCallback<T> clearCallback;
+
+    public CursorIterator<T> setClearCallback(ClearCallback<T> clearCallback) {
+        this.clearCallback = clearCallback;
+        return this;
+    }
+
     protected abstract void clearItem(T item);
 
     protected abstract void setItem(@NonNull Cursor cursor, @NonNull T cache) throws Throwable;
@@ -64,6 +75,9 @@ public abstract class CursorIterator<T> implements Closeable {
                     item = createItem();
                     cached = item;
                 } else {
+                    if (clearCallback != null) {
+                        clearCallback.clear(item);
+                    }
                     clearItem(item);
                 }
             } else {

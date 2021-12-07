@@ -23,6 +23,7 @@ import androidx.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
+import core.xmate.db.sqlite.CursorIterator;
 import core.xmate.db.sqlite.ObjectCursorIterator;
 import core.xmate.db.sqlite.WhereBuilder;
 import core.xmate.db.table.DbModel;
@@ -197,17 +198,18 @@ public final class Selector<T> {
     }
 
     @NonNull
-    public ObjectCursorIterator<T> iterator() throws DbException {
-        Cursor cursor = query();
-        if (cursor != null) {
-            try {
+    public CursorIterator<T> iterator() throws DbException {
+        Cursor cursor = null;
+        try {
+            cursor = query();
+            if (cursor != null) {
                 return new ObjectCursorIterator<>(cursor, table);
-            } catch (Throwable e) {
-                throw new DbException(e);
             }
+            //noinspection unchecked
+            return (CursorIterator<T>) ObjectCursorIterator.EMPTY_INSTANCE;
+        } finally {
+            IOUtil.closeQuietly(cursor);
         }
-        //noinspection unchecked
-        return (ObjectCursorIterator<T>) ObjectCursorIterator.EMPTY_INSTANCE;
     }
 
     public long count() throws DbException {

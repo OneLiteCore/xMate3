@@ -24,8 +24,8 @@ import androidx.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
+import core.xmate.db.sqlite.CursorIterator;
 import core.xmate.db.sqlite.DbModelCursorIterator;
-import core.xmate.db.sqlite.ObjectCursorIterator;
 import core.xmate.db.sqlite.WhereBuilder;
 import core.xmate.db.table.DbModel;
 import core.xmate.db.table.TableEntity;
@@ -194,16 +194,17 @@ public final class DbModelSelector {
     }
 
     @NonNull
-    public DbModelCursorIterator iterator() throws DbException {
-        Cursor cursor = query();
-        if (cursor != null) {
-            try {
+    public CursorIterator<DbModel> iterator() throws DbException {
+        Cursor cursor = null;
+        try {
+            cursor = query();
+            if (cursor != null) {
                 return new DbModelCursorIterator(cursor);
-            } catch (Throwable e) {
-                throw new DbException(e);
             }
+            return DbModelCursorIterator.EMPTY_INSTANCE;
+        } finally {
+            IOUtil.closeQuietly(cursor);
         }
-        return DbModelCursorIterator.EMPTY_INSTANCE;
     }
 
     @Override
