@@ -8,12 +8,23 @@ If you want to check some more documents about how to use it, please check the o
 
 # Sqlite ORM
 
-[ ![Download](https://api.bintray.com/packages/drkcore/maven/xMate3/images/download.svg) ](https://bintray.com/drkcore/maven/xMate3/_latestVersion)
-
-To setup sqlite orm part you need to add this in your module build.gradle:
+To setup sqlite orm part you need to add this in your project build.gradle:
 
 ```groovy
-implementation 'core.mate:xmateDb:2.4.2'
+allprojects {
+    repositories {
+        ...
+        maven { url 'https://jitpack.io' }
+    }
+}
+```
+
+then add this to your module build.gradle:
+
+```groovy
+dependencies {
+        implementation 'com.github.OneLiteCore:xMate3:v2.4.7'
+}
 ```
 
 ## Declare Annotation in your table class
