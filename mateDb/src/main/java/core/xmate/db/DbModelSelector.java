@@ -202,8 +202,12 @@ public final class DbModelSelector {
                 return new DbModelCursorIterator(cursor);
             }
             return DbModelCursorIterator.EMPTY_INSTANCE;
-        } finally {
+        } catch (Throwable e) {
             IOUtil.closeQuietly(cursor);
+            if (e instanceof DbException) {
+                throw e;
+            }
+            throw new DbException(e);
         }
     }
 

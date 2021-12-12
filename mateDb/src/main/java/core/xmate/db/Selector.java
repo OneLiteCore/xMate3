@@ -207,8 +207,12 @@ public final class Selector<T> {
             }
             //noinspection unchecked
             return (CursorIterator<T>) ObjectCursorIterator.EMPTY_INSTANCE;
-        } finally {
+        } catch (Throwable e) {
             IOUtil.closeQuietly(cursor);
+            if (e instanceof DbException) {
+                throw e;
+            }
+            throw new DbException(e);
         }
     }
 
