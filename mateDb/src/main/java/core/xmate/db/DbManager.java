@@ -40,14 +40,30 @@ public interface DbManager extends Closeable {
     void saveOrUpdate(Object entity) throws DbException;
 
     /**
+     * 保存或更新实体类或实体类的List到数据库, 根据id对应的数据是否存在.
+     */
+    void saveOrUpdate(Object entity, boolean withTransaction) throws DbException;
+
+    /**
      * 保存实体类或实体类的List到数据库
      */
     void save(Object entity) throws DbException;
 
     /**
+     * 保存实体类或实体类的List到数据库
+     */
+    void save(Object entity, boolean withTransaction) throws DbException;
+
+    /**
      * 保存或更新实体类或实体类的List到数据库, 根据id和其他唯一索引判断数据是否存在.
      */
     void replace(Object entity) throws DbException;
+
+    void beginTransaction();
+
+    void setTransactionSuccessful();
+
+    void endTransaction();
 
     ///////////// delete
     void deleteById(Class<?> entityType, Object idValue) throws DbException;

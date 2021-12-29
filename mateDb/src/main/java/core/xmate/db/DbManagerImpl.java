@@ -51,7 +51,7 @@ public final class DbManagerImpl extends DbBase {
 
     private SQLiteDatabase database;
     private DaoConfig daoConfig;
-    private boolean allowTransaction;
+    private final boolean allowTransaction;
 
     private DbManagerImpl(Context context, DaoConfig config) throws DbException {
         if (config == null) {
@@ -121,10 +121,18 @@ public final class DbManagerImpl extends DbBase {
 
     //*********************************************** operations ********************************************************
 
+
     @Override
     public void saveOrUpdate(Object entity) throws DbException {
+        saveOrUpdate(entity, true);
+    }
+
+    @Override
+    public void saveOrUpdate(Object entity, final boolean withTransaction) throws DbException {
         try {
-            beginTransaction();
+            if (withTransaction) {
+                beginTransaction();
+            }
 
             if (entity instanceof List) {
                 List<?> entities = (List<?>) entity;
@@ -140,9 +148,13 @@ public final class DbManagerImpl extends DbBase {
                 saveOrUpdateWithoutTransaction(table, entity);
             }
 
-            setTransactionSuccessful();
+            if (withTransaction) {
+                setTransactionSuccessful();
+            }
         } finally {
-            endTransaction();
+            if (withTransaction) {
+                endTransaction();
+            }
         }
     }
 
@@ -173,8 +185,15 @@ public final class DbManagerImpl extends DbBase {
 
     @Override
     public void save(Object entity) throws DbException {
+        save(entity, true);
+    }
+
+    @Override
+    public void save(Object entity, final boolean withTransaction) throws DbException {
         try {
-            beginTransaction();
+            if (withTransaction) {
+                beginTransaction();
+            }
 
             if (entity instanceof List) {
                 List<?> entities = (List<?>) entity;
@@ -190,9 +209,13 @@ public final class DbManagerImpl extends DbBase {
                 execNonQuery(SqlInfoBuilder.buildInsertSqlInfo(table, entity));
             }
 
-            setTransactionSuccessful();
+            if (withTransaction) {
+                setTransactionSuccessful();
+            }
         } finally {
-            endTransaction();
+            if (withTransaction) {
+                endTransaction();
+            }
         }
     }
 
@@ -482,7 +505,8 @@ public final class DbManagerImpl extends DbBase {
 
     ///////////////////////////////////// exec sql /////////////////////////////////////////////////////
 
-    private void beginTransaction() {
+    @Override
+    public void beginTransaction() {
         if (allowTransaction) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN && database.isWriteAheadLoggingEnabled()) {
                 database.beginTransactionNonExclusive();
@@ -492,18 +516,19 @@ public final class DbManagerImpl extends DbBase {
         }
     }
 
-    private void setTransactionSuccessful() {
+    @Override
+    public void setTransactionSuccessful() {
         if (allowTransaction) {
             database.setTransactionSuccessful();
         }
     }
 
-    private void endTransaction() {
+    @Override
+    public void endTransaction() {
         if (allowTransaction) {
             database.endTransaction();
         }
     }
-
 
     @Override
     public int executeUpdateDelete(SqlInfo sqlInfo) throws DbException {
