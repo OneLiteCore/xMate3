@@ -1,3 +1,13 @@
+# DEPRECATED
+
+This project is no longer under maintainment.
+
+xMate3 is based on xUtils3. It bought us a lot of fun before but is way too old for nowadays Android development.
+
+In the very beginning there aren't many frameworks supporting Android development, no ViewBinding, no ROOM, no OkHttp3 and no Glide. Then xUtils3 came, it provided all the stuff we need and save the day.
+
+After many years passed, even a frameworks built with code will be old. All the modules xUtils3 do now have more and better choice to go. So maybe it is the time to put it to a good rest.
+
 # xMate3
 
 If you  are using  [xUtils3](https://github.com/wyouflf/xUtils3) you may know that it is a set of libs contains sqlite orm, bitmap loader, http requestor and view binder. But sometime you only need part of it and using some other lib like ButterKnife and Retrofit to deal with the rest. That is why I make this.
